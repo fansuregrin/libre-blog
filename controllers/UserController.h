@@ -68,4 +68,3 @@ inline drogon_model::dg_test::User fromRequest(const HttpRequest &req) {
 bool checkEmail(const std::string &email);
 bool checkUsername(const std::string &username);
 bool checkPassword(const std::string &password);
-bool verifyUserToken(const std::string &token, int &userId);

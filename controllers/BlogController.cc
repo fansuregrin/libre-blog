@@ -4,10 +4,12 @@
 #include "Utils.h"
 
 using orm::Mapper;
+using orm::Criteria;
+using orm::CompareOperator;
 using drogon_model::dg_test::Article;
 using drogon_model::dg_test::User;
 using drogon_model::dg_test::Category;
-using json_traits = jwt::traits::nlohmann_json;
+
 
 void BlogController::articleList(
     const HttpRequestPtr& req,
@@ -52,28 +54,17 @@ void BlogController::getArticle(
     int id
 ) const {
     std::string token;
+    int userId = -1;
     auto tmp = req->getHeader("Authorization");
     if (!tmp.empty() && tmp.compare(0, 7, "Bearer ") == 0) {
         token = tmp.substr(7);
-    }
-    int userId = -1;
-    if (!token.empty()) {
-        try {
-            auto decoded = jwt::decode<json_traits>(token);
-            jwt::verify<json_traits>()
-                .allow_algorithm(jwt::algorithm::es256k(es256k_pub_key, es256k_priv_key))
-                .with_issuer("drogon")
-                .verify(decoded);
-            userId = decoded.get_payload_claim("uid").as_integer();
-        } catch (const std::exception &ex) {
-            LOG_INFO << ex.what();
-        }
+        verifyUserToken(token, userId);
     }
 
+    Json::Value json;
     auto db = app().getDbClient();
     Mapper<Article> mp(db);
     
-    Json::Value json;
     try {
         auto art = mp.findOne({Article::Cols::_id, id});
         int author_id = *art.getAuthor();
@@ -116,17 +107,12 @@ void BlogController::updateArticle(
         token = tmp.substr(7);
     }
     int userId = -1;
-    if (!token.empty()) {
-        try {
-            auto decoded = jwt::decode<json_traits>(token);
-            jwt::verify<json_traits>()
-                .allow_algorithm(jwt::algorithm::es256k(es256k_pub_key, es256k_priv_key))
-                .with_issuer("drogon")
-                .verify(decoded);
-            userId = decoded.get_payload_claim("uid").as_integer();
-        } catch (const std::exception &ex) {
-            LOG_INFO << ex.what();
-        }
+    if (!verifyUserToken(token, userId)) {
+        json["status"] = 3;
+        json["error"] = "登录已失效";
+        auto resp = HttpResponse::newHttpJsonResponse(json);
+        callback(resp);
+        return;
     }
 
     Mapper<Article> mp(app().getDbClient());
@@ -153,6 +139,62 @@ void BlogController::updateArticle(
         json["status"] = 2;
     }
 
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+void BlogController::deleteArticles(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback
+) const {
+    Json::Value json;
+
+    std::string token;
+    auto tmp = req->getHeader("Authorization");
+    if (!tmp.empty() && tmp.compare(0, 7, "Bearer ") == 0) {
+        token = tmp.substr(7);
+    }
+    int userId = -1;
+    if (!verifyUserToken(token, userId)) {
+        json["status"] = 3;
+        json["error"] = "登录已失效";
+        auto resp = HttpResponse::newHttpJsonResponse(json);
+        callback(resp);
+        return;
+    }
+
+    auto pJson = req->getJsonObject();
+    if (!pJson) {
+        throw std::invalid_argument("请求体格式错误, 请使用json");
+    }
+    const auto &reqJson = *pJson;
+    if (!reqJson.isMember("ids") || reqJson["ids"].type() != Json::arrayValue) {
+        throw std::invalid_argument("缺少必备字段: ids, 或者类型错误");
+    }
+
+    int count = reqJson["ids"].size();
+    if (count <= 0) {
+        json["status"] = 2;
+        auto resp = HttpResponse::newHttpJsonResponse(json);
+        callback(resp);
+        return;
+    }
+
+    Json::Value ids = reqJson["ids"];
+    std::vector<int> idList(count);
+    for (int i=0; i<count; ++i) {
+        idList[i] = ids[i].asUInt();
+    }
+    Mapper<Article> mp(app().getDbClient());
+    try {
+        mp.deleteBy(
+            Criteria(Article::Cols::_id, CompareOperator::In, idList)
+        );
+        json["status"] = 0;
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
     auto resp = HttpResponse::newHttpJsonResponse(json);
     callback(resp);
 }
