@@ -136,7 +136,8 @@ void BlogController::updateArticle(
             json["status"] = 2;
         }
     } else {
-        json["status"] = 2;
+        json["status"] = 4;
+        json["error"] = "没有权限";
     }
 
     auto resp = HttpResponse::newHttpJsonResponse(json);
