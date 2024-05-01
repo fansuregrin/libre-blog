@@ -211,8 +211,9 @@ void BlogController::getCategories(
         auto categoires = mp.findAll();
         for (const auto &cat : categoires) {
             Json::Value item;
-            item["label"] = cat.getValueOfName();
-            item["value"] = cat.getValueOfId();
+            item["name"] = cat.getValueOfName();
+            item["id"] = cat.getValueOfId();
+            item["slug"] = cat.getValueOfSlug();
             json["categories"].append(item);
         }
         json["status"] = 0;
