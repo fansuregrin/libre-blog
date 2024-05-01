@@ -126,10 +126,11 @@ void BlogController::updateArticle(
     if (hasPermission) {
         try {
             mp.updateBy(
-                {Article::Cols::_title, Article::Cols::_excerpt, Article::Cols::_content},
+                {Article::Cols::_title, Article::Cols::_category,
+                 Article::Cols::_excerpt,Article::Cols::_content},
                 {Article::Cols::_id, article.getValueOfId()},
-                article.getValueOfTitle(), article.getValueOfExcerpt(),
-                article.getValueOfContent()
+                article.getValueOfTitle(), article.getValueOfCategory(),
+                article.getValueOfExcerpt(), article.getValueOfContent()
             );
             json["status"] = 0;
         } catch (const std::exception &ex) {
@@ -194,6 +195,28 @@ void BlogController::deleteArticles(
         json["status"] = 0;
     } catch (const orm::DrogonDbException &ex) {
         LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+void BlogController::getCategories(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback
+) const {
+    Json::Value json;
+    Mapper<Category> mp(app().getDbClient());
+    try {
+        auto categoires = mp.findAll();
+        for (const auto &cat : categoires) {
+            Json::Value item;
+            item["label"] = cat.getValueOfName();
+            item["value"] = cat.getValueOfId();
+            json["categories"].append(item);
+        }
+        json["status"] = 0;
+    } catch (const orm::DrogonDbException &ex) {
         json["status"] = 2;
     }
     auto resp = HttpResponse::newHttpJsonResponse(json);
