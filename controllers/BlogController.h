@@ -4,6 +4,8 @@
 #include "../models/User.h"
 #include "../models/Category.h"
 #include "../models/Article.h"
+#include "../models/Tag.h"
+#include "../models/ArticleTag.h"
 
 using namespace drogon;
 using orm::Mapper;

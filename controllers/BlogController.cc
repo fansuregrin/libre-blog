@@ -10,6 +10,8 @@ using orm::SortOrder;
 using drogon_model::dg_test::Article;
 using drogon_model::dg_test::User;
 using drogon_model::dg_test::Category;
+using drogon_model::dg_test::Tag;
+using drogon_model::dg_test::ArticleTag;
 
 
 void BlogController::articleList(
@@ -36,6 +38,10 @@ void BlogController::articleList(
             article["author_name"] = art.getUser(db).getValueOfRealname();
             article["category"] = *art.getCategory();
             article["category_name"] = art.getCategory(db).getValueOfName();
+            auto tags = art.getTags(db);
+            for (const auto &tag : tags) {
+                article["tags"].append(tag.first.getValueOfName());
+            }
             article["create_time"] = art.getValueOfCreateTime()
                 .toCustomedFormattedString("%Y-%m-%d");
             article["excerpt"] = art.getValueOfExcerpt();
@@ -77,6 +83,10 @@ void BlogController::getArticle(
         article["author_name"] = art.getUser(db).getValueOfRealname();
         article["category"] = *art.getCategory();
         article["category_name"] = art.getCategory(db).getValueOfName();
+        auto tags = art.getTags(db);
+        for (const auto &tag : tags) {
+            article["tags"].append(tag.first.getValueOfName());
+        }
         article["create_time"] = art.getValueOfCreateTime()
             .toCustomedFormattedString("%Y-%m-%d");
         article["content"] = art.getValueOfContent();
@@ -128,7 +138,7 @@ void BlogController::updateArticle(
         try {
             mp.updateBy(
                 {Article::Cols::_title, Article::Cols::_category,
-                 Article::Cols::_excerpt,Article::Cols::_content},
+                 Article::Cols::_excerpt, Article::Cols::_content},
                 {Article::Cols::_id, article.getValueOfId()},
                 article.getValueOfTitle(), article.getValueOfCategory(),
                 article.getValueOfExcerpt(), article.getValueOfContent()
@@ -254,6 +264,10 @@ void BlogController::articleListByCategory(
             article["author"] = *art.getAuthor();
             article["author_name"] = art.getUser(db).getValueOfRealname();
             article["category"] = *art.getCategory();
+            auto tags = art.getTags(db);
+            for (const auto &tag : tags) {
+                article["tags"].append(tag.first.getValueOfName());
+            }
             article["category_name"] = cat_name;
             article["create_time"] = art.getValueOfCreateTime()
                 .toCustomedFormattedString("%Y-%m-%d");
