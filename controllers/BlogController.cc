@@ -6,6 +6,7 @@
 using orm::Mapper;
 using orm::Criteria;
 using orm::CompareOperator;
+using orm::SortOrder;
 using drogon_model::dg_test::Article;
 using drogon_model::dg_test::User;
 using drogon_model::dg_test::Category;
@@ -215,6 +216,49 @@ void BlogController::getCategories(
             item["id"] = cat.getValueOfId();
             item["slug"] = cat.getValueOfSlug();
             json["categories"].append(item);
+        }
+        json["status"] = 0;
+    } catch (const orm::DrogonDbException &ex) {
+        json["status"] = 2;
+    }
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+void BlogController::articleListByCategory(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    std::string slug,
+    int page
+) const {
+    Json::Value json;
+    size_t per_page = 10;
+    auto db = app().getDbClient();
+    Mapper<Category> mpCategory(db);
+    Mapper<Article> mpArticle(db);
+    try {
+        auto cat = mpCategory.findOne(Criteria(Category::Cols::_slug, CompareOperator::EQ, slug));
+        auto cat_name = cat.getValueOfName();
+        json["name"] = cat_name;
+        auto num_articles = mpArticle.count(
+            Criteria(Article::Cols::_category, CompareOperator::EQ, cat.getValueOfId()));
+        auto num_pages = num_articles / per_page + (num_articles%per_page?1:0);
+        json["num_pages"] = num_pages;
+        auto articles = mpArticle.orderBy(Article::Cols::_create_time, SortOrder::DESC)
+            .paginate(page, per_page)
+            .findBy(Criteria(Article::Cols::_category, CompareOperator::EQ, cat.getValueOfId()));
+        for (const auto &art : articles) {
+            Json::Value article;
+            article["id"] = art.getValueOfId();
+            article["title"] = art.getValueOfTitle();
+            article["author"] = *art.getAuthor();
+            article["author_name"] = art.getUser(db).getValueOfRealname();
+            article["category"] = *art.getCategory();
+            article["category_name"] = cat_name;
+            article["create_time"] = art.getValueOfCreateTime()
+                .toCustomedFormattedString("%Y-%m-%d");
+            article["excerpt"] = art.getValueOfExcerpt();
+            json["articles"].append(article);
         }
         json["status"] = 0;
     } catch (const orm::DrogonDbException &ex) {
