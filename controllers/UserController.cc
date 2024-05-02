@@ -68,7 +68,7 @@ void UserController::userCenter(
     int userId = -1;
     if (!verifyUserToken(token, userId)) {
         Json::Value json;
-        json["status"] = 2;
+        json["status"] = 3;
         json["error"] = "登录已失效";
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
