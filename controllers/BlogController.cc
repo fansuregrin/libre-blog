@@ -107,7 +107,8 @@ void BlogController::getArticle(
 void BlogController::updateArticle(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
-    const drogon_model::dg_test::Article &article
+    const drogon_model::dg_test::Article &article,
+    const std::vector<std::string> &tags
 ) const {
     bool hasPermission = false;
     Json::Value json;
@@ -126,9 +127,12 @@ void BlogController::updateArticle(
         return;
     }
 
-    Mapper<Article> mp(app().getDbClient());
+    auto db = app().getDbClient();
+    Mapper<Article> mpArticle(db);
+    Mapper<Tag> mpTag(db);
+    Mapper<ArticleTag> mpArticleTag(db);
     try {
-        auto artInDb = mp.findOne({Article::Cols::_id, article.getValueOfId()});
+        auto artInDb = mpArticle.findOne({Article::Cols::_id, article.getValueOfId()});
         hasPermission = (userId == *artInDb.getAuthor());
     } catch (const orm::DrogonDbException &ex) {
         LOG_DEBUG << ex.base().what();
@@ -136,13 +140,48 @@ void BlogController::updateArticle(
 
     if (hasPermission) {
         try {
-            mp.updateBy(
+            mpArticle.updateBy(
                 {Article::Cols::_title, Article::Cols::_category,
                  Article::Cols::_excerpt, Article::Cols::_content},
                 {Article::Cols::_id, article.getValueOfId()},
                 article.getValueOfTitle(), article.getValueOfCategory(),
                 article.getValueOfExcerpt(), article.getValueOfContent()
             );
+            // 清除article对应的所有旧的tag
+            mpArticleTag.deleteBy(
+                Criteria(ArticleTag::Cols::_article, CompareOperator::EQ, article.getValueOfId()));
+            // 依次处理前端传过来的每一个tag
+            for (const auto &tagName : tags) {
+                // 查询表Tag中有没有指定name字段的tag
+                auto cnt = mpTag.count(Criteria(Tag::Cols::_name, CompareOperator::EQ, tagName));
+                if (cnt <= 0) {
+                    // 如果没有，则需要向表Tag中插入新的tag
+                    Tag tag;
+                    tag.setName(tagName);
+                    tag.setSlug(tagName);
+                    mpTag.insert(tag);
+                    // 然后，向表ArticleTag中插入此tag和article的对应关系
+                    ArticleTag artTag;
+                    artTag.setArticle(article.getValueOfId());
+                    artTag.setTag(tag.getValueOfId());
+                    mpArticleTag.insert(artTag);
+                } else {
+                    // 如果有，则需要从表Tag中获取这个tag的id
+                    auto tagInDb = mpTag.findOne(Criteria(Tag::Cols::_name, CompareOperator::EQ, tagName));
+                    // 再查询表ArticleTag中有没有这个tag和article的对应关系
+                    auto existCnt = mpArticleTag.count(
+                        Criteria(ArticleTag::Cols::_article, CompareOperator::EQ, article.getValueOfId()) &&
+                        Criteria(ArticleTag::Cols::_tag, CompareOperator::EQ, tagInDb.getValueOfId())
+                    );
+                    if (existCnt <= 0) {
+                        // 如果没有，则向表ArticleTag中插入此tag和article的对应关系
+                        ArticleTag artTag;
+                        artTag.setArticle(article.getValueOfId());
+                        artTag.setTag(tagInDb.getValueOfId());
+                        mpArticleTag.insert(artTag);
+                    }
+                }
+            }
             json["status"] = 0;
         } catch (const std::exception &ex) {
             json["status"] = 2;

@@ -37,7 +37,8 @@ public:
     void updateArticle(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
-        const Article &article
+        const Article &article,
+        const std::vector<std::string> &tags
     ) const;
 
     void deleteArticles(
@@ -82,6 +83,26 @@ inline Article fromRequest(const HttpRequest &req) {
     Article article;
     article.updateByJson(json);
     return article;
+}
+
+template <>
+inline std::vector<std::string> fromRequest(const HttpRequest &req) {
+    std::vector<std::string> tags;
+    auto jsonPtr = req.getJsonObject();
+    if (jsonPtr == nullptr) {
+        return tags;
+    }
+    
+    auto &json = *jsonPtr;
+    if (!json.isMember("tags") || json["tags"].type() != Json::arrayValue) {
+        return tags;
+    }
+
+    for (const auto &tag : json["tags"]) {
+        tags.emplace_back(tag.asString());
+    }
+
+    return tags;
 }
 
 }
