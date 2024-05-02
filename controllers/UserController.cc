@@ -72,6 +72,7 @@ void UserController::userCenter(
         json["error"] = "登录已失效";
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
+        return;
     }
     orm::Mapper<User> mapper(app().getDbClient());
     mapper.findOne(
