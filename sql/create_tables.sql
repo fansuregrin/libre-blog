@@ -31,6 +31,7 @@ CREATE TABLE `category` (
 CREATE TABLE `article_tag` (
   `article` int(11) NOT NULL,
   `tag` int(11) NOT NULL,
+  PRIMARY KEY (`article`,`tag`),
   KEY `article` (`article`),
   KEY `tag` (`tag`),
   CONSTRAINT `article_tag_ibfk_1` FOREIGN KEY (`article`) REFERENCES `article` (`id`),
