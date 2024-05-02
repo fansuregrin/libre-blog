@@ -15,6 +15,8 @@
 - `/user/update`
 - `/user/update/password`
 
+**For more detailed API documentation, please see [👉here](./docs/libre-blog_api.md).**
+
 ## Acknowledgements
 - Drogon: Provides the possibility to build various types of web application server programs.
 - VSCode: Provide an environment for code writing and debugging.
