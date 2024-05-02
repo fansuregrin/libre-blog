@@ -17,32 +17,32 @@ void BlogController::articleList(
     std::function<void (const HttpResponsePtr &)> &&callback,
     int page
 ) const {
+    Json::Value json;
     auto db = drogon::app().getDbClient();
     Mapper<Article> mp(db);
     size_t per_page = 10;
-    auto num_articles = mp.count();
-    auto num_pages = num_articles / per_page + (num_articles%per_page?1:0);
-    auto articles = mp.orderBy(Article::Cols::_create_time, orm::SortOrder::DESC)
-        .paginate(page, per_page).findAll();
-    Json::Value json;
-    if (!articles.empty()) {
+    try {
+        auto num_articles = mp.count();
+        auto num_pages = num_articles / per_page + (num_articles%per_page?1:0);
+        auto articles = mp.orderBy(Article::Cols::_create_time, orm::SortOrder::DESC)
+            .paginate(page, per_page).findAll();
         json["status"] = 0;
         json["num_pages"] = num_pages;
-    } else {
-        json["status"] = 1;
-    }
-    for (const auto &art : articles) {
-        Json::Value article;
-        article["id"] = art.getValueOfId();
-        article["title"] = art.getValueOfTitle();
-        article["author"] = *art.getAuthor();
-        article["author_name"] = art.getUser(db).getValueOfRealname();
-        article["category"] = *art.getCategory();
-        article["category_name"] = art.getCategory(db).getValueOfName();
-        article["create_time"] = art.getValueOfCreateTime()
-            .toCustomedFormattedString("%Y-%m-%d");
-        article["excerpt"] = art.getValueOfExcerpt();
-        json["articles"].append(article);
+        for (const auto &art : articles) {
+            Json::Value article;
+            article["id"] = art.getValueOfId();
+            article["title"] = art.getValueOfTitle();
+            article["author"] = *art.getAuthor();
+            article["author_name"] = art.getUser(db).getValueOfRealname();
+            article["category"] = *art.getCategory();
+            article["category_name"] = art.getCategory(db).getValueOfName();
+            article["create_time"] = art.getValueOfCreateTime()
+                .toCustomedFormattedString("%Y-%m-%d");
+            article["excerpt"] = art.getValueOfExcerpt();
+            json["articles"].append(article);
+        }
+    } catch (const orm::DrogonDbException &ex) {
+        json["status"] = 2;
     }
 
     auto resp = HttpResponse::newHttpJsonResponse(json);
