@@ -4,8 +4,9 @@
 #include <../models/User.h>
 
 using namespace drogon;
+using drogon_model::dg_test::User;
 
-class UserController : public drogon::HttpController<UserController>{
+class UserController : public HttpController<UserController> {
 public:
     METHOD_LIST_BEGIN
     ADD_METHOD_TO(UserController::login, "/login", Post);
@@ -45,7 +46,7 @@ public:
 
 namespace drogon {
 template <>
-inline drogon_model::dg_test::User fromRequest(const HttpRequest &req) {
+inline User fromRequest(const HttpRequest &req) {
     auto jsonPtr = req.getJsonObject();
     if (jsonPtr == nullptr) {
         throw std::invalid_argument("请求体格式错误, 请使用json");
@@ -59,8 +60,11 @@ inline drogon_model::dg_test::User fromRequest(const HttpRequest &req) {
     json["password"].type() != Json::stringValue) {
         throw std::invalid_argument("缺少必备字段: password, 或者类型错误");
     }
-    drogon_model::dg_test::User user;
+    User user;
     user.updateByJson(json);
+    if (user.getValueOfRealname().empty()) {
+        user.setRealname(user.getValueOfUsername());
+    }
     return user;
 }
 }

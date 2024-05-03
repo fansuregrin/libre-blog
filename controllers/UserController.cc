@@ -109,20 +109,20 @@ void UserController::addUser(
 
     // check password
     if (!checkPassword(user.getValueOfPassword())) {
-        json["status"] = 1;
-        json["warning"] = "密码不合法";
+        json["status"] = 4;
+        json["error"] = "密码不合法";
         valid = false;
     }
     // check username
     else if (!checkUsername(user.getValueOfUsername())) {
-        json["status"] = 1;
-        json["warning"] = "用户名不合法";
+        json["status"] = 5;
+        json["error"] = "用户名不合法";
         valid = false;
     }
     // check email 
     else if (!checkEmail(user.getValueOfEmail())) {
-        json["status"] = 1;
-        json["warning"] = "电子邮箱不合法";
+        json["status"] = 6;
+        json["error"] = "电子邮箱不合法";
         valid = false;
     }
     if (!valid) {
@@ -137,8 +137,8 @@ void UserController::addUser(
         [=] (const std::vector<User> &usersInDb) {
             Json::Value json;
             if (usersInDb.size() > 0) {
-                json["status"] = 1;
-                json["warning"] = "该用户名已经被注册";
+                json["status"] = 7;
+                json["error"] = "该用户名已经被注册";
                 auto resp = HttpResponse::newHttpJsonResponse(json);
                 callback(resp);
                 return;
