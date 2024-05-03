@@ -15,6 +15,7 @@ class BlogController : public drogon::HttpController<BlogController> {
 public:
     METHOD_LIST_BEGIN
     ADD_METHOD_TO(BlogController::articleList, "/blog/page/{page}", Get);
+    ADD_METHOD_TO(BlogController::articleListAdmin, "/blog/admin/page/{page}", Get);
     ADD_METHOD_TO(BlogController::getArticle, "/blog/article/{id}", Get);
     ADD_METHOD_TO(BlogController::updateArticle, "/blog/article/update", Post);
     ADD_METHOD_TO(BlogController::deleteArticles, "/blog/article/delete", Post);
@@ -23,6 +24,12 @@ public:
     METHOD_LIST_END
 
     void articleList(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        int page
+    ) const;
+
+    void articleListAdmin(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
         int page

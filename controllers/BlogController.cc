@@ -21,15 +21,14 @@ void BlogController::articleList(
 ) const {
     Json::Value json;
     auto db = drogon::app().getDbClient();
-    Mapper<Article> mp(db);
-    size_t per_page = 10;
+    Mapper<Article> mpArticle(db);
+    size_t perPage = 10;
     try {
-        auto num_articles = mp.count();
-        auto num_pages = num_articles / per_page + (num_articles%per_page?1:0);
-        auto articles = mp.orderBy(Article::Cols::_create_time, orm::SortOrder::DESC)
-            .paginate(page, per_page).findAll();
-        json["status"] = 0;
-        json["num_pages"] = num_pages;
+        auto numArticles = mpArticle.count();
+        auto articles = mpArticle
+            .orderBy(Article::Cols::_create_time, orm::SortOrder::DESC)
+            .paginate(page, perPage).findAll();
+        json["num_pages"] = numArticles / perPage + (numArticles%perPage?1:0);
         for (const auto &art : articles) {
             Json::Value article;
             article["id"] = art.getValueOfId();
@@ -47,7 +46,70 @@ void BlogController::articleList(
             article["excerpt"] = art.getValueOfExcerpt();
             json["articles"].append(article);
         }
+        json["status"] = 0;
     } catch (const orm::DrogonDbException &ex) {
+        json["status"] = 2;
+    }
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+void BlogController::articleListAdmin(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    int page
+) const {
+std::string token;
+    int userId = -1;
+    auto tmp = req->getHeader("Authorization");
+    if (!tmp.empty() && tmp.compare(0, 7, "Bearer ") == 0) {
+        token = tmp.substr(7);
+        verifyUserToken(token, userId);
+    }
+
+    Json::Value json;
+    auto db = drogon::app().getDbClient();
+    Mapper<User> mpUser(db);
+    Mapper<Article> mpArticle(db);
+    size_t perPage = 10;
+    try {
+        auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        auto roleId = userInDb.getValueOfRole();
+        std::vector<Article> articles;
+        int numArticles = 0;
+        if (roleId <= 2) {
+            numArticles = mpArticle.count();
+            articles = mpArticle.orderBy(Article::Cols::_create_time,
+                orm::SortOrder::DESC).paginate(page, perPage).findAll();
+        } else if (roleId == 3) {
+            numArticles = mpArticle.count(Criteria(Article::Cols::_author, userId));
+            articles = mpArticle
+                .orderBy(Article::Cols::_create_time,SortOrder::DESC)
+                .paginate(page, perPage)
+                .findBy(Criteria(Article::Cols::_author, userId));
+        }
+        json["num_pages"] = numArticles / perPage + (numArticles%perPage?1:0);
+        for (const auto &art : articles) {
+            Json::Value article;
+            article["id"] = art.getValueOfId();
+            article["title"] = art.getValueOfTitle();
+            article["author"] = *art.getAuthor();
+            article["author_name"] = art.getUser(db).getValueOfRealname();
+            article["category"] = *art.getCategory();
+            article["category_name"] = art.getCategory(db).getValueOfName();
+            auto tags = art.getTags(db);
+            for (const auto &tag : tags) {
+                article["tags"].append(tag.first.getValueOfName());
+            }
+            article["create_time"] = art.getValueOfCreateTime()
+                .toCustomedFormattedString("%Y-%m-%d");
+            article["excerpt"] = art.getValueOfExcerpt();
+            json["articles"].append(article);
+        }
+        json["status"] = 0;
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
         json["status"] = 2;
     }
 
@@ -70,10 +132,15 @@ void BlogController::getArticle(
 
     Json::Value json;
     auto db = app().getDbClient();
-    Mapper<Article> mp(db);
-    
+    Mapper<Article> mpArticle(db);
+    Mapper<User> mpUser(db);
+    int roleId = 5;
     try {
-        auto art = mp.findOne({Article::Cols::_id, id});
+        if (userId > -1) {
+            auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
+            roleId = userInDb.getValueOfRole();
+        }
+        auto art = mpArticle.findOne({Article::Cols::_id, id});
         int author_id = *art.getAuthor();
         json["status"] = 0;
         Json::Value article;
@@ -91,7 +158,13 @@ void BlogController::getArticle(
             .toCustomedFormattedString("%Y-%m-%d");
         article["content"] = art.getValueOfContent();
         article["excerpt"] = art.getValueOfExcerpt();
-        article["editable"] = (author_id == userId);
+        if (roleId <= 2) {
+            article["editable"] = true;
+        } else if (roleId == 3) {
+            article["editable"] = (userId == author_id);
+        } else {
+            article["editable"] = false;
+        }
         json["article"] = article;
 
     } catch (const orm::DrogonDbException &ex) {
@@ -131,15 +204,21 @@ void BlogController::updateArticle(
     Mapper<Article> mpArticle(db);
     Mapper<Tag> mpTag(db);
     Mapper<ArticleTag> mpArticleTag(db);
+    Mapper<User> mpUser(db);
+    
     try {
         auto artInDb = mpArticle.findOne({Article::Cols::_id, article.getValueOfId()});
-        hasPermission = (userId == *artInDb.getAuthor());
-    } catch (const orm::DrogonDbException &ex) {
-        LOG_DEBUG << ex.base().what();
-    }
+        auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        auto roleId = userInDb.getValueOfRole();
+        if (roleId <= 2) {
+            // administrator 和 editor 有更新任意文章的权限
+            hasPermission = true;
+        } else if (roleId == 3) {
+            // contributor 只能更新自己写的文章
+            hasPermission = (userId == artInDb.getValueOfAuthor());
+        }
 
-    if (hasPermission) {
-        try {
+        if (hasPermission) {
             mpArticle.updateBy(
                 {Article::Cols::_title, Article::Cols::_category,
                  Article::Cols::_excerpt, Article::Cols::_content},
@@ -183,12 +262,13 @@ void BlogController::updateArticle(
                 }
             }
             json["status"] = 0;
-        } catch (const std::exception &ex) {
-            json["status"] = 2;
+        } else {
+            json["status"] = 4;
+            json["error"] = "没有权限";
         }
-    } else {
-        json["status"] = 4;
-        json["error"] = "没有权限";
+    }
+    catch (const std::exception &ex) {
+        json["status"] = 2;
     }
 
     auto resp = HttpResponse::newHttpJsonResponse(json);
