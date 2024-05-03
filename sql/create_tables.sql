@@ -6,7 +6,7 @@ CREATE TABLE `user` (
   `email` varchar(255) DEFAULT NULL,
   `realname` varchar(255) DEFAULT NULL,
   `salt` char(64) NOT NULL DEFAULT uuid(),
-  `role` int(11) NOT NULL,
+  `role` int(11) NOT NULL DEFAULT 4,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   KEY `fk_user_role_to_role_id` (`role`),
