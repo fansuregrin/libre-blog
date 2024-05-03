@@ -2,6 +2,7 @@
 
 #include <drogon/HttpController.h>
 #include <../models/User.h>
+#include <../models/Role.h>
 
 using namespace drogon;
 using drogon_model::dg_test::User;

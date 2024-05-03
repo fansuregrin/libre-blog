@@ -4,8 +4,11 @@
 #include "UserController.h"
 #include "Utils.h"
 
-using namespace orm;
-using namespace drogon_model::dg_test;
+using drogon_model::dg_test::User;
+using drogon_model::dg_test::Role;
+using orm::Mapper;
+using orm::Criteria;
+using orm::CompareOperator;
 using json_traits = jwt::traits::nlohmann_json;
 
 
@@ -43,7 +46,7 @@ void UserController::login(
             auto resp = HttpResponse::newHttpJsonResponse(json);
             callback(resp);
         },
-        [=] (const DrogonDbException &ex) {
+        [=] (const orm::DrogonDbException &ex) {
             Json::Value json;
             json["status"] = 2;
             auto resp = HttpResponse::newHttpJsonResponse(json);
@@ -56,9 +59,9 @@ void UserController::userCenter(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback
 ) const {
+    Json::Value json;
     auto tmp = req->getHeader("Authorization");
     if (tmp.empty() || tmp.compare(0, 7, "Bearer ") != 0) {
-        Json::Value json;
         json["status"] = 2;
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
@@ -67,36 +70,31 @@ void UserController::userCenter(
     auto token = tmp.substr(7);
     int userId = -1;
     if (!verifyUserToken(token, userId)) {
-        Json::Value json;
         json["status"] = 3;
         json["error"] = "登录已失效";
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
         return;
     }
-    orm::Mapper<User> mapper(app().getDbClient());
-    mapper.findOne(
-        {User::Cols::_id, userId},
-        [=] (const User &userInDb) {
-            Json::Value json;
-            json["status"] = 0;
-            json["user"]["id"] = userInDb.getValueOfId();
-            json["user"]["username"] = userInDb.getValueOfUsername();
-            json["user"]["realname"] = userInDb.getValueOfRealname();
-            json["user"]["email"] = userInDb.getValueOfEmail();
-            json["user"]["create_time"] = userInDb.getValueOfCreateTime()
-                .toDbStringLocal();
-            auto resp = HttpResponse::newHttpJsonResponse(json);
-            callback(resp);
-        },
-        [=] (const DrogonDbException &ex) {
-            LOG_DEBUG << ex.base().what();
-            Json::Value json;
-            json["status"] = 2;
-            auto resp = HttpResponse::newHttpJsonResponse(json);
-            callback(resp);
-        }
-    );
+    
+    auto db = app().getDbClient();
+    orm::Mapper<User> mp(db);
+    try {
+        auto userInDb = mp.findOne(Criteria(User::Cols::_id, userId));
+        json["user"]["id"] = userInDb.getValueOfId();
+        json["user"]["username"] = userInDb.getValueOfUsername();
+        json["user"]["realname"] = userInDb.getValueOfRealname();
+        json["user"]["email"] = userInDb.getValueOfEmail();
+        json["user"]["role"] = userInDb.getRole(db).getValueOfName();
+        json["user"]["create_time"] = userInDb.getValueOfCreateTime()
+            .toDbStringLocal();
+        json["status"] = 0;
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
 }
 
 void UserController::addUser(
@@ -159,7 +157,7 @@ void UserController::addUser(
                         auto resp = HttpResponse::newHttpJsonResponse(json);
                         callback(resp);
                     },
-                    [=] (const DrogonDbException &ex) {
+                    [=] (const orm::DrogonDbException &ex) {
                         Json::Value json;
                         json["status"] = 2;
                         json["error"] = "注册失败";
@@ -169,7 +167,7 @@ void UserController::addUser(
                 );
             }
         },
-        [=] (const DrogonDbException &ex) {
+        [=] (const orm::DrogonDbException &ex) {
             Json::Value json;
             json["status"] = 2;
             json["error"] = "注册失败";
@@ -234,7 +232,7 @@ void UserController::updateUser(
                 reqJson["username"], reqJson["email"], reqJson["realname"]
             );
             json["status"] = 0;
-        } catch (const DrogonDbException &ex) {
+        } catch (const orm::DrogonDbException &ex) {
             LOG_DEBUG << ex.base().what();
             json["status"] = 2;
         }
@@ -288,7 +286,7 @@ void UserController::updatePassword(
                 utils::getSha256(reqJson["password"].asString()+userInDb.getValueOfSalt())
             );
             json["status"] = 0;
-        } catch (const DrogonDbException &ex) {
+        } catch (const orm::DrogonDbException &ex) {
             LOG_DEBUG << ex.base().what();
             json["status"] = 2;
         }
