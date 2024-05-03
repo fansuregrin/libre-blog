@@ -1,89 +1,81 @@
-## 全局公共参数
-#### 全局Header参数
-参数名 | 示例值 | 参数描述
---- | --- | ---
-暂无参数
-#### 全局Query参数
-参数名 | 示例值 | 参数描述
---- | --- | ---
-暂无参数
-#### 全局Body参数
-参数名 | 示例值 | 参数描述
---- | --- | ---
-暂无参数
-#### 全局认证方式
-```text
-noauth
-```
-#### 全局预执行脚本
-```javascript
-暂无预执行脚本
-```
-#### 全局后执行脚本
-```javascript
-暂无后执行脚本
-```
 ## /libre-blog
+
 ```text
 暂无描述
 ```
-#### Header参数
-参数名 | 示例值 | 参数描述
---- | --- | ---
-暂无参数
-#### Query参数
-参数名 | 示例值 | 参数描述
---- | --- | ---
-暂无参数
-#### Body参数
-参数名 | 示例值 | 参数描述
---- | --- | ---
-暂无参数
-#### 认证方式
-```text
-bearer
-```
+
+#### 公共Header参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 公共Query参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 公共Body参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
 #### 预执行脚本
+
 ```javascript
-暂无预执行脚本
+apt.environment.set("url", "http://10.140.32.106:10002");
 ```
+
 #### 后执行脚本
+
 ```javascript
 暂无后执行脚本
 ```
+
 ## /libre-blog/获取文章列表
+
 ```text
 获取文章列表
 ```
+
 #### 接口状态
+
 > 开发中
 
 #### 接口URL
-> http://10.140.32.106:10002/blog/page/{page}
+
+> {{url}}/blog/page/{page}
 
 #### 请求方式
+
 > GET
 
 #### Content-Type
+
 > none
 
 #### 路径变量
-参数名 | 示例值 | 参数描述
---- | --- | ---
-page | 1 | 文章列表分页页码，数字类型
-#### 认证方式
-```text
-noauth
-```
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| page | 1 | 文章列表分页页码，数字类型 |
+
 #### 预执行脚本
+
 ```javascript
 暂无预执行脚本
 ```
+
 #### 后执行脚本
+
 ```javascript
 暂无后执行脚本
 ```
+
 #### 成功响应示例
+
 ```javascript
 {
 	"articles": [
@@ -195,43 +187,55 @@ noauth
 	"status": 0
 }
 ```
+
 ## /libre-blog/获取文章
+
 ```text
 获取单篇文章的信息
 ```
+
 #### 接口状态
+
 > 开发中
 
 #### 接口URL
-> http://10.140.32.106:10002/blog/article/{id}
+
+> {{url}}/blog/article/{id}
 
 #### 请求方式
+
 > GET
 
 #### Content-Type
+
 > none
 
 #### 请求Header参数
-参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述
---- | --- | --- | --- | ---
-Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ2NTIwNDEsImlhdCI6MTcxNDY0ODQ0MSwiaXNzIjoiZHJvZ29uIiwidWlkIjozfQ.8986kvIariMlOifEwMQqUd0rNGls3XJr6aZ0Xbg4dfw17UJawAYBh0nsVbH97Wp0tpF3e3ciCzGzXO0mfy5w2w | String | 是 | 用户token
+
+| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
+| --- | --- | ---- | ---- | ---- |
+| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ2NTIwNDEsImlhdCI6MTcxNDY0ODQ0MSwiaXNzIjoiZHJvZ29uIiwidWlkIjozfQ.8986kvIariMlOifEwMQqUd0rNGls3XJr6aZ0Xbg4dfw17UJawAYBh0nsVbH97Wp0tpF3e3ciCzGzXO0mfy5w2w | String | 是 | 用户token |
+
 #### 路径变量
-参数名 | 示例值 | 参数描述
---- | --- | ---
-id | 84 | 文章id
-#### 认证方式
-```text
-bearer
-```
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| id | 84 | 文章id |
+
 #### 预执行脚本
+
 ```javascript
 暂无预执行脚本
 ```
+
 #### 后执行脚本
+
 ```javascript
 暂无后执行脚本
 ```
+
 #### 成功响应示例
+
 ```javascript
 {
 	"article": {
@@ -249,27 +253,37 @@ bearer
 	"status": 0
 }
 ```
+
 ## /libre-blog/更新文章
+
 ```text
 更新文章信息，如标题、分类、标签、内容、摘要等。
 ```
+
 #### 接口状态
+
 > 开发中
 
 #### 接口URL
-> http://10.140.32.106:10002/blog/article/update
+
+> {{url}}/blog/article/update
 
 #### 请求方式
+
 > POST
 
 #### Content-Type
+
 > json
 
 #### 请求Header参数
-参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述
---- | --- | --- | --- | ---
-Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ2NTIwNDEsImlhdCI6MTcxNDY0ODQ0MSwiaXNzIjoiZHJvZ29uIiwidWlkIjozfQ.8986kvIariMlOifEwMQqUd0rNGls3XJr6aZ0Xbg4dfw17UJawAYBh0nsVbH97Wp0tpF3e3ciCzGzXO0mfy5w2w | String | 否 | 用户的token
+
+| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
+| --- | --- | ---- | ---- | ---- |
+| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ2NTIwNDEsImlhdCI6MTcxNDY0ODQ0MSwiaXNzIjoiZHJvZ29uIiwidWlkIjozfQ.8986kvIariMlOifEwMQqUd0rNGls3XJr6aZ0Xbg4dfw17UJawAYBh0nsVbH97Wp0tpF3e3ciCzGzXO0mfy5w2w | String | 否 | 用户的token |
+
 #### 请求Body参数
+
 ```javascript
 {
 	"id": 84,
@@ -283,54 +297,67 @@ Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ2NT
 	]
 }
 ```
-参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述
---- | --- | --- | --- | ---
-id | 84 | Integer | 是 | 文章的id
-title | 标题84 | String | 是 | 文章的标题
-author | 3 | Integer | 是 | 文章的作者id
-category | 5 | Integer | 是 | 文章的分类id
-excerpt | - | String | 是 | 文章的摘要
-content | 我是内容84 | String | 是 | 文章内容
-tags | - | Array | 否 | 文章的标签
-#### 认证方式
-```text
-bearer
-```
+
+| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
+| --- | --- | ---- | ---- | ---- |
+| id | 84 | Integer | 是 | 文章的id |
+| title | 标题84 | String | 是 | 文章的标题 |
+| author | 3 | Integer | 是 | 文章的作者id |
+| category | 5 | Integer | 是 | 文章的分类id |
+| excerpt | - | String | 是 | 文章的摘要 |
+| content | 我是内容84 | String | 是 | 文章内容 |
+| tags | - | Array | 否 | 文章的标签 |
+
 #### 预执行脚本
+
 ```javascript
 暂无预执行脚本
 ```
+
 #### 后执行脚本
+
 ```javascript
 暂无后执行脚本
 ```
+
 #### 成功响应示例
+
 ```javascript
 {
 	"status": 0
 }
 ```
+
 ## /libre-blog/删除文章
+
 ```text
 删除指定id的文章，可以指定多个id
 ```
+
 #### 接口状态
+
 > 开发中
 
 #### 接口URL
-> http://10.140.32.106:10002/blog/article/delete
+
+> {{url}}/blog/article/delete
 
 #### 请求方式
+
 > POST
 
 #### Content-Type
+
 > json
 
 #### 请求Header参数
-参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述
---- | --- | --- | --- | ---
-Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ0NzkyODQsImlhdCI6MTcxNDQ3NTY4NCwiaXNzIjoiZHJvZ29uIiwidWlkIjozfQ.JLBCPy58o1W0DEd4wFrLDbU2AylA5srB1hwdY7CQw_MNHHSbntUG4ATBm1-wwE5tEWU0TMZFZe1-cLK_bRtdZg | String | 是 | 用户token
+
+| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
+| --- | --- | ---- | ---- | ---- |
+| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ0NzkyODQsImlhdCI6MTcxNDQ3NTY4NCwiaXNzIjoiZHJvZ29uIiwidWlkIjozfQ.JLBCPy58o1W0DEd4wFrLDbU2AylA5srB1hwdY7CQw_MNHHSbntUG4ATBm1-wwE5tEWU0TMZFZe1-cLK_bRtdZg | String | 是 | 用户token |
+
 #### 请求Body参数
+
 ```javascript
 {
 	"ids": [
@@ -339,56 +366,67 @@ Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ0Nz
 	]
 }
 ```
-参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述
---- | --- | --- | --- | ---
-ids | 1 | Array | 是 | 需要删除的文章id
-#### 认证方式
-```text
-bearer
-```
+
+| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
+| --- | --- | ---- | ---- | ---- |
+| ids | 1 | Array | 是 | 需要删除的文章id |
+
 #### 预执行脚本
+
 ```javascript
 暂无预执行脚本
 ```
+
 #### 后执行脚本
+
 ```javascript
 暂无后执行脚本
 ```
+
 #### 成功响应示例
+
 ```javascript
 {
 	"status": 0
 }
 ```
+
 ## /libre-blog/获取分类信息
+
 ```text
 获取全部分类信息，预期返回一个包含多个分类信息的数组。
 ```
+
 #### 接口状态
+
 > 开发中
 
 #### 接口URL
-> http://10.140.32.106:10002/blog/category
+
+> {{url}}/blog/category
 
 #### 请求方式
+
 > GET
 
 #### Content-Type
+
 > none
 
-#### 认证方式
-```text
-noauth
-```
 #### 预执行脚本
+
 ```javascript
 暂无预执行脚本
 ```
+
 #### 后执行脚本
+
 ```javascript
 暂无后执行脚本
 ```
+
 #### 成功响应示例
+
 ```javascript
 {
 	"categories": [
@@ -426,40 +464,50 @@ noauth
 	"status": 0
 }
 ```
+
 ## /libre-blog/获取某个分类下的文章列表
+
 ```text
 获取指定分类下的指定页的文章列表。
 ```
+
 #### 接口状态
+
 > 开发中
 
 #### 接口URL
-> http://10.140.32.106:10002/blog/category/{slug}/{page}
+
+> {{url}}/blog/category/{slug}/{page}
 
 #### 请求方式
+
 > GET
 
 #### Content-Type
+
 > none
 
 #### 路径变量
-参数名 | 示例值 | 参数描述
---- | --- | ---
-slug | poem | 分类的缩略名
-page | 1 | 分页的页码
-#### 认证方式
-```text
-noauth
-```
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| slug | poem | 分类的缩略名 |
+| page | 1 | 分页的页码 |
+
 #### 预执行脚本
+
 ```javascript
 暂无预执行脚本
 ```
+
 #### 后执行脚本
+
 ```javascript
 暂无后执行脚本
 ```
+
 #### 成功响应示例
+
 ```javascript
 {
 	"articles": [
@@ -572,39 +620,49 @@ noauth
 	"status": 0
 }
 ```
+
 ## /libre-blog/获取用户信息
+
 ```text
 暂无描述
 ```
+
 #### 接口状态
+
 > 开发中
 
 #### 接口URL
-> http://10.140.32.106:10002/user/center
+
+> {{url}}/user/center
 
 #### 请求方式
+
 > GET
 
 #### Content-Type
+
 > none
 
 #### 请求Header参数
-参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述
---- | --- | --- | --- | ---
-Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ2NjA5ODQsImlhdCI6MTcxNDY1NzM4NCwiaXNzIjoiZHJvZ29uIiwidWlkIjoxfQ.hEWGno-4R_ISpMMb9Y_wkKZaDIuJUGFdPEpSInfZYf-jjOm5YTxOvdB7RlGbCrKsMMWydzPP76kwnSDzR1hlYA | String | 是 | 客户端保存的用户token，由服务端签发
-#### 认证方式
-```text
-bearer
-```
+
+| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
+| --- | --- | ---- | ---- | ---- |
+| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ2NjA5ODQsImlhdCI6MTcxNDY1NzM4NCwiaXNzIjoiZHJvZ29uIiwidWlkIjoxfQ.hEWGno-4R_ISpMMb9Y_wkKZaDIuJUGFdPEpSInfZYf-jjOm5YTxOvdB7RlGbCrKsMMWydzPP76kwnSDzR1hlYA | String | 是 | 客户端保存的用户token，由服务端签发 |
+
 #### 预执行脚本
+
 ```javascript
 暂无预执行脚本
 ```
+
 #### 后执行脚本
+
 ```javascript
 暂无后执行脚本
 ```
+
 #### 成功响应示例
+
 ```javascript
 {
 	"status": 0,
@@ -617,175 +675,265 @@ bearer
 	}
 }
 ```
-参数名 | 示例值 | 参数类型 | 参数描述
---- | --- | --- | ---
-status | 0 | Integer | 状态码
-user | - | Object | 用户信息
-user.create_time | 2024-04-25 04:02:59 | String | 用户的创建时间
-user.email | bobwood@ouc.edu.cn | String | 用户的电子邮箱
-user.id | 1 | Integer | 用户的id
-user.realname | Bob Wood | String | 用户的真实名称
-user.username | bobwood | String | 用户登录时使用的用户名
+
+| 参数名 | 示例值 | 参数类型 | 参数描述 |
+| --- | --- | ---- | ---- |
+| status | 0 | Integer | 状态码 |
+| user | - | Object | 用户信息 |
+| user.create_time | 2024-04-25 04:02:59 | String | 用户的创建时间 |
+| user.email | bobwood@ouc.edu.cn | String | 用户的电子邮箱 |
+| user.id | 1 | Integer | 用户的id |
+| user.realname | Bob Wood | String | 用户的真实名称 |
+| user.username | bobwood | String | 用户登录时使用的用户名 |
+
 ## /libre-blog/用户登录
+
 ```text
 暂无描述
 ```
+
 #### 接口状态
+
 > 开发中
 
 #### 接口URL
-> http://10.140.32.106:10002/login
+
+> {{url}}/login
 
 #### 请求方式
+
 > POST
 
 #### Content-Type
+
 > json
 
 #### 请求Body参数
+
 ```javascript
 {
-    "username": "bobwood",
-    "password": "bw123456"
+    "username": "rbwhite",
+    "password": "rbw1234"
 }
 ```
-参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述
---- | --- | --- | --- | ---
-username | bobwood | String | 是 | 用户名
-password | bw123456 | String | 是 | 用户密码
-#### 认证方式
-```text
-noauth
-```
+
+| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
+| --- | --- | ---- | ---- | ---- |
+| username | bobwood | String | 是 | 用户名 |
+| password | bw123456 | String | 是 | 用户密码 |
+
 #### 预执行脚本
+
 ```javascript
 暂无预执行脚本
 ```
+
 #### 后执行脚本
+
 ```javascript
 暂无后执行脚本
 ```
+
 #### 成功响应示例
+
 ```javascript
 {
 	"status": 0,
 	"token": "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ2NjA5ODQsImlhdCI6MTcxNDY1NzM4NCwiaXNzIjoiZHJvZ29uIiwidWlkIjoxfQ.hEWGno-4R_ISpMMb9Y_wkKZaDIuJUGFdPEpSInfZYf-jjOm5YTxOvdB7RlGbCrKsMMWydzPP76kwnSDzR1hlYA"
 }
 ```
-参数名 | 示例值 | 参数类型 | 参数描述
---- | --- | --- | ---
-status | 0 | Integer | 状态码
-token | eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ2NjA5ODQsImlhdCI6MTcxNDY1NzM4NCwiaXNzIjoiZHJvZ29uIiwidWlkIjoxfQ.hEWGno-4R_ISpMMb9Y_wkKZaDIuJUGFdPEpSInfZYf-jjOm5YTxOvdB7RlGbCrKsMMWydzPP76kwnSDzR1hlYA | String | 用户token
+
+| 参数名 | 示例值 | 参数类型 | 参数描述 |
+| --- | --- | ---- | ---- |
+| status | 0 | Integer | 状态码 |
+| token | eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ2NjA5ODQsImlhdCI6MTcxNDY1NzM4NCwiaXNzIjoiZHJvZ29uIiwidWlkIjoxfQ.hEWGno-4R_ISpMMb9Y_wkKZaDIuJUGFdPEpSInfZYf-jjOm5YTxOvdB7RlGbCrKsMMWydzPP76kwnSDzR1hlYA | String | 用户token |
+
 ## /libre-blog/添加用户
+
 ```text
-暂无描述
+添加新用户。请求json中需要包含username，email和passowrd字段。
 ```
+
 #### 接口状态
+
 > 开发中
 
 #### 接口URL
-> http://10.140.32.106:10002/user/add
+
+> {{url}}/user/add
 
 #### 请求方式
+
 > POST
 
 #### Content-Type
+
 > json
 
 #### 请求Body参数
+
 ```javascript
 {
-    "username": "R.B. White",
+    "username": "rbwhite",
     "email": "rbw@outlook.com",
-    "password": "rbw12345",
+    "password": "rbw1234",
+    "realname": "R. B. Withe"
 }
 ```
-#### 认证方式
-```text
-noauth
-```
+
+| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
+| --- | --- | ---- | ---- | ---- |
+| username | rbwhite | String | 是 | 用户名 |
+| email | rbw@outlook.com | String | 是 | 用户的电子邮箱 |
+| password | rbw12345 | String | 是 | 用户的密码 |
+| realname | R. B. Withe | String | 是 | 用户的真实名称 |
+
 #### 预执行脚本
+
 ```javascript
 暂无预执行脚本
 ```
+
 #### 后执行脚本
+
 ```javascript
 暂无后执行脚本
 ```
+
+#### 成功响应示例
+
+```javascript
+{
+	"message": "注册成功",
+	"status": 0
+}
+```
+
+| 参数名 | 示例值 | 参数类型 | 参数描述 |
+| --- | --- | ---- | ---- |
+| message | 注册成功 | String | 成功消息 |
+| status | 0 | Integer | 状态码 |
+
 ## /libre-blog/更新用户常规信息
+
 ```text
-暂无描述
+更新用户的常规信息。常规信息是指用户的用户名、真实名称、邮箱等，但是不包括密码。更新密码使用单独的api。
 ```
+
 #### 接口状态
+
 > 开发中
 
 #### 接口URL
-> http://10.140.32.106:10002/user/update
+
+> {{url}}/user/update
 
 #### 请求方式
+
 > POST
 
 #### Content-Type
+
 > json
 
 #### 请求Header参数
-参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述
---- | --- | --- | --- | ---
-Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQzODI5MDcsImlhdCI6MTcxNDM3OTMwNywiaXNzIjoiZHJvZ29uIiwidWlkIjozfQ.p9cnIXyJYRVcxqUXlLYm1tPa92ZvcHY1RVSv6uqRCCidikpPpK27I7Uj4qimjxw4IAF3pcyHsms1uZpEUJZ0dQ | String | 是 | -
+
+| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
+| --- | --- | ---- | ---- | ---- |
+| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ3MTE1NTYsImlhdCI6MTcxNDcwNzk1NiwiaXNzIjoiZHJvZ29uIiwidWlkIjoxMX0.vsLtgFJdpqTIvZPxB4WrfZ3Ov8G9HToiMUBDPtT3JZZsdkpprnmL7DB2wlAEcKzBN_cBZy67vcjSXa3BFUtVMA | String | 是 | 用户token |
+
 #### 请求Body参数
+
 ```javascript
 {
-    "username": "xiaohua",
-    "email": "xiaohua@bnu.edu.cn"
+    "username": "rbwhite",
+    "email": "rbw@outlook.com",
+    "realname": "R. B. White"
 }
 ```
-#### 认证方式
-```text
-bearer
-```
+
+| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
+| --- | --- | ---- | ---- | ---- |
+| username | rbwhite | String | 是 | 用户名 |
+| email | rbw@outlook.com | String | 是 | 用户的电子邮箱 |
+| realname | R. B. White | String | 是 | 用户的真实名称 |
+
 #### 预执行脚本
+
 ```javascript
 暂无预执行脚本
 ```
+
 #### 后执行脚本
+
 ```javascript
 暂无后执行脚本
 ```
+
+#### 成功响应示例
+
+```javascript
+{
+	"status": 0
+}
+```
+
 ## /libre-blog/更新用户密码
+
 ```text
-暂无描述
+更新用户密码。
 ```
+
 #### 接口状态
+
 > 开发中
 
 #### 接口URL
-> http://10.140.32.106:10002/user/update/password
+
+> {{url}}/user/update/password
 
 #### 请求方式
+
 > POST
 
 #### Content-Type
+
 > json
 
 #### 请求Header参数
-参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述
---- | --- | --- | --- | ---
-Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQzODU2MjksImlhdCI6MTcxNDM4MjAyOSwiaXNzIjoiZHJvZ29uIiwidWlkIjozfQ.3xMAmixLueWQmUyvW0QYQ0b_hZ7IpiqotoEBXexLkb0yMhonCR8IiiLvgOyFaImJoCH1GgNN5-h7S5Wr6i67PA | String | 是 | -
+
+| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
+| --- | --- | ---- | ---- | ---- |
+| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ3MjE0NTQsImlhdCI6MTcxNDcxNzg1NCwiaXNzIjoiZHJvZ29uIiwidWlkIjoxMX0.71rK8nKW0IySH9eNsVALy2s8VpsWcD6mWaPmWF9Tgly2E3X7pb95Bz7DXWBKPO1AZiilpaQfT4bjnzPPIiN_LA | String | 是 | - |
+
 #### 请求Body参数
+
 ```javascript
 {
-    "password": "moy"
+	"password": "rbw123456"
 }
 ```
-#### 认证方式
-```text
-bearer
-```
+
+| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
+| --- | --- | ---- | ---- | ---- |
+| password | 123456 | String | 否 | 密码 |
+
 #### 预执行脚本
+
 ```javascript
 暂无预执行脚本
 ```
+
 #### 后执行脚本
+
 ```javascript
 暂无后执行脚本
+```
+
+#### 成功响应示例
+
+```javascript
+{
+	"status": 0
+}
 ```
