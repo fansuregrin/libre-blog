@@ -229,9 +229,9 @@ void UserController::updateUser(
         Mapper<User> mp(app().getDbClient());
         try {    
             mp.updateBy(
-                {User::Cols::_username, User::Cols::_email},
+                {User::Cols::_username, User::Cols::_email, User::Cols::_realname},
                 {User::Cols::_id, userId},
-                reqJson["username"], reqJson["email"]
+                reqJson["username"], reqJson["email"], reqJson["realname"]
             );
             json["status"] = 0;
         } catch (const DrogonDbException &ex) {
