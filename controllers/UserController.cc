@@ -220,10 +220,10 @@ void UserController::updateUser(
     auto email = reqJson["email"].asString(); 
     Json::Value json;
     if (!checkUsername(username)) {
-        json["status"] = 4;
+        json["status"] = 5;
         json["error"] = "用户名不合法";
     } else if (!checkEmail(email)) {
-        json["status"] = 5;
+        json["status"] = 6;
         json["error"] = "电子邮件不合法";
     } else {
         Mapper<User> mp(app().getDbClient());
