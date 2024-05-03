@@ -62,6 +62,16 @@
                 "enable_reverse": true
             },
             {
+                "type": "has many",
+                "original_table_name": "role",
+                "original_table_alias": "role",
+                "original_key": "id",
+                "target_table_name": "user",
+                "target_table_alias": "users",
+                "target_key": "role",
+                "enable_reverse": true
+            },
+            {
                 "type": "many to many",
                 "original_table_name": "article",
                 "original_table_alias": "articles",
