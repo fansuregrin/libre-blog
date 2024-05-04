@@ -22,6 +22,7 @@ public:
     ADD_METHOD_TO(BlogController::getCategories, "/blog/category", Get);
     ADD_METHOD_TO(BlogController::articleListByCategory, "/blog/category/{slug}/{page}", Get);
     ADD_METHOD_TO(BlogController::articleListByAuthor, "/blog/user/{id}/{page}", Get);
+    ADD_METHOD_TO(BlogController::articleListByTag, "/blog/tag/{tagName}/{page}", Get);
     METHOD_LIST_END
 
     void articleList(
@@ -70,6 +71,13 @@ public:
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
         int id,
+        int page
+    ) const;
+
+    void articleListByTag(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        const std::string &tagName,
         int page
     ) const;
 };

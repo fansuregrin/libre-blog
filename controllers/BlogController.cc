@@ -141,18 +141,18 @@ void BlogController::getArticle(
             roleId = userInDb.getValueOfRole();
         }
         auto art = mpArticle.findOne({Article::Cols::_id, id});
-        int author_id = *art.getAuthor();
-        json["status"] = 0;
         Json::Value article;
         article["id"] = art.getValueOfId();
         article["title"] = art.getValueOfTitle();
-        article["author"] = author_id;
-        article["author_name"] = art.getUser(db).getValueOfRealname();
-        article["category"] = art.getCategory(db).getValueOfSlug();
-        article["category_name"] = art.getCategory(db).getValueOfName();
+        Json::Value author;
+        auto authorInDb = art.getUser(db);
+        author["id"] = authorInDb.getValueOfId();
+        author["realname"] = authorInDb.getValueOfRealname();
+        article["author"] = author;
+        article["category"] = art.getCategory(db).toJson();
         auto tags = art.getTags(db);
         for (const auto &tag : tags) {
-            article["tags"].append(tag.first.getValueOfName());
+            article["tags"].append(tag.first.toJson());
         }
         article["create_time"] = art.getValueOfCreateTime()
             .toCustomedFormattedString("%Y-%m-%d");
@@ -161,12 +161,12 @@ void BlogController::getArticle(
         if (roleId <= 2) {
             article["editable"] = true;
         } else if (roleId == 3) {
-            article["editable"] = (userId == author_id);
+            article["editable"] = (userId == art.getValueOfAuthor());
         } else {
             article["editable"] = false;
         }
         json["article"] = article;
-
+        json["status"] = 0;
     } catch (const orm::DrogonDbException &ex) {
         json["status"] = 2;
         auto resp = HttpResponse::newHttpJsonResponse(json);
@@ -440,6 +440,34 @@ void BlogController::articleListByAuthor(
             article["excerpt"] = art.getValueOfExcerpt();
             json["articles"].append(article);
         }
+        json["status"] = 0;
+    } catch (const orm::DrogonDbException &ex) {
+        json["status"] = 2;
+    }
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+void BlogController::articleListByTag(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    const std::string &tagName,
+    int page
+) const {
+    Json::Value json;
+    size_t perPage = 10;
+    auto db = app().getDbClient();
+    Mapper<Tag> mpTag(db);
+    Mapper<Article> mpArticle(db);
+    Mapper<ArticleTag> mpArticleTag(db);
+    try {
+        auto tag = mpTag.findOne(Criteria(Tag::Cols::_name, tagName));
+        auto tagId = tag.getValueOfId();
+        json["name"] = tagName;
+        auto numArticles = mpArticleTag.count(Criteria(ArticleTag::Cols::_tag, tagId));
+        auto numPages = numArticles / perPage + (numArticles%perPage?1:0);
+        json["num_pages"] = numPages;
+        // todo: json["articles"]
         json["status"] = 0;
     } catch (const orm::DrogonDbException &ex) {
         json["status"] = 2;
