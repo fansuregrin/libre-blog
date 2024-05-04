@@ -21,6 +21,7 @@ public:
     ADD_METHOD_TO(BlogController::deleteArticles, "/blog/article/delete", Post);
     ADD_METHOD_TO(BlogController::getCategories, "/blog/category", Get);
     ADD_METHOD_TO(BlogController::articleListByCategory, "/blog/category/{slug}/{page}", Get);
+    ADD_METHOD_TO(BlogController::articleListByAuthor, "/blog/user/{id}/{page}", Get);
     METHOD_LIST_END
 
     void articleList(
@@ -62,6 +63,13 @@ public:
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
         std::string slug,
+        int page
+    ) const;
+
+    void articleListByAuthor(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        int id,
         int page
     ) const;
 };

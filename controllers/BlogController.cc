@@ -148,7 +148,7 @@ void BlogController::getArticle(
         article["title"] = art.getValueOfTitle();
         article["author"] = author_id;
         article["author_name"] = art.getUser(db).getValueOfRealname();
-        article["category"] = *art.getCategory();
+        article["category"] = art.getCategory(db).getValueOfSlug();
         article["category_name"] = art.getCategory(db).getValueOfName();
         auto tags = art.getTags(db);
         for (const auto &tag : tags) {
@@ -388,6 +388,53 @@ void BlogController::articleListByCategory(
                 article["tags"].append(tag.first.getValueOfName());
             }
             article["category_name"] = cat_name;
+            article["create_time"] = art.getValueOfCreateTime()
+                .toCustomedFormattedString("%Y-%m-%d");
+            article["excerpt"] = art.getValueOfExcerpt();
+            json["articles"].append(article);
+        }
+        json["status"] = 0;
+    } catch (const orm::DrogonDbException &ex) {
+        json["status"] = 2;
+    }
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+void BlogController::articleListByAuthor(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    int id,
+    int page
+) const {
+    Json::Value json;
+    size_t perPage = 10;
+    auto db = app().getDbClient();
+    Mapper<User> mpUser(db);
+    Mapper<Article> mpArticle(db);
+    try {
+        auto author = mpUser.findOne(Criteria(User::Cols::_id, id));
+        auto authorName = author.getValueOfRealname();
+        json["name"] = authorName;
+        auto numArticles = mpArticle.count(
+            Criteria(Article::Cols::_author, author.getValueOfId()));
+        auto numPages = numArticles / perPage + (numArticles%perPage?1:0);
+        json["num_pages"] = numPages;
+        auto articles = mpArticle.orderBy(Article::Cols::_create_time, SortOrder::DESC)
+            .paginate(page, perPage)
+            .findBy(Criteria(Article::Cols::_author, author.getValueOfId()));
+        for (const auto &art : articles) {
+            Json::Value article;
+            article["id"] = art.getValueOfId();
+            article["title"] = art.getValueOfTitle();
+            article["author"] = art.getValueOfAuthor();
+            article["author_name"] = authorName;
+            article["category"] = art.getValueOfCategory();
+            auto tags = art.getTags(db);
+            for (const auto &tag : tags) {
+                article["tags"].append(tag.first.getValueOfName());
+            }
+            article["category_name"] = art.getCategory(db).getValueOfName();
             article["create_time"] = art.getValueOfCreateTime()
                 .toCustomedFormattedString("%Y-%m-%d");
             article["excerpt"] = art.getValueOfExcerpt();
