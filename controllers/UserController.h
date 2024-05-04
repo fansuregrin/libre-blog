@@ -15,6 +15,7 @@ public:
     ADD_METHOD_TO(UserController::addUser, "/user/add", Post);
     ADD_METHOD_TO(UserController::updateUser, "/user/update", Post);
     ADD_METHOD_TO(UserController::updatePassword, "/user/update/password", Post);
+    ADD_METHOD_TO(UserController::getRole, "/user/role", Get);
     METHOD_LIST_END
 
     void login(
@@ -40,6 +41,11 @@ public:
     ) const;
 
     void updatePassword(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback
+    ) const;
+
+    void getRole(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback
     ) const;

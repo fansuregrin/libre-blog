@@ -298,6 +298,69 @@ void UserController::updatePassword(
     callback(resp);
 }
 
+
+void UserController::getRole(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback
+) const {
+    Json::Value json;
+    auto tmp = req->getHeader("Authorization");
+    if (tmp.empty() || tmp.compare(0, 7, "Bearer ") != 0) {
+        json["status"] = 2;
+        auto resp = HttpResponse::newHttpJsonResponse(json);
+        callback(resp);
+        return;
+    }
+    auto token = tmp.substr(7);
+    int userId = -1;
+    if (!verifyUserToken(token, userId)) {
+        json["status"] = 3;
+        json["error"] = "登录已失效";
+        auto resp = HttpResponse::newHttpJsonResponse(json);
+        callback(resp);
+        return;
+    }
+
+    auto db = app().getDbClient();
+    Mapper<User> mpUser(db);
+    try {
+        auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        auto roleId = userInDb.getValueOfRole();
+        auto roleName = userInDb.getRole(db).getValueOfName();
+        Json::Value role;
+        role["roleId"] = roleId;
+        role["roleName"] = roleName;
+        switch (roleId) {
+        case 1: {
+            role["manage"].append("article");
+            break;
+        }
+        case 2: {
+            role["manage"].append("article");
+            break;
+        }
+        case 3: {
+            role["manage"].append("article");
+            break;
+        }
+        case 4: {
+            break;
+        }
+        case 5: {
+            break;
+        }
+        }
+        json["role"] = role;
+        json["status"] = 0;
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
 bool checkEmail(const std::string &email) {
     if (email.empty()) return false;
     std::smatch res;
