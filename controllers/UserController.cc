@@ -2,7 +2,7 @@
 #include <jwt-cpp/jwt.h>
 #include <jwt-cpp/traits/nlohmann-json/traits.h>
 #include "UserController.h"
-#include "Utils.h"
+#include "../utils/Utils.h"
 
 using drogon_model::dg_test::User;
 using drogon_model::dg_test::Role;

@@ -1,7 +1,7 @@
 #include <jwt-cpp/jwt.h>
 #include <jwt-cpp/traits/nlohmann-json/traits.h>
 #include "BlogController.h"
-#include "Utils.h"
+#include "../utils/Utils.h"
 
 using orm::Mapper;
 using orm::Criteria;
