@@ -1,4 +1,3 @@
-#include <regex>
 #include <jwt-cpp/jwt.h>
 #include <jwt-cpp/traits/nlohmann-json/traits.h>
 #include "UserController.h"
@@ -10,11 +9,6 @@ using orm::Mapper;
 using orm::Criteria;
 using orm::CompareOperator;
 using json_traits = jwt::traits::nlohmann_json;
-
-
-const auto emailPattern = std::regex(
-    R"(^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*@(\w+)(\.(\w+))+$)"
-);
 
 
 void UserController::login(
@@ -60,22 +54,9 @@ void UserController::userCenter(
     std::function<void (const HttpResponsePtr &)> &&callback
 ) const {
     Json::Value json;
-    auto tmp = req->getHeader("Authorization");
-    if (tmp.empty() || tmp.compare(0, 7, "Bearer ") != 0) {
-        json["status"] = 2;
-        auto resp = HttpResponse::newHttpJsonResponse(json);
-        callback(resp);
-        return;
-    }
-    auto token = tmp.substr(7);
-    int userId = -1;
-    if (!verifyUserToken(token, userId)) {
-        json["status"] = 3;
-        json["error"] = "登录已失效";
-        auto resp = HttpResponse::newHttpJsonResponse(json);
-        callback(resp);
-        return;
-    }
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
     
     auto db = app().getDbClient();
     orm::Mapper<User> mp(db);
@@ -181,24 +162,9 @@ void UserController::updateUser(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback
 ) const {
-    auto tmp = req->getHeader("Authorization");
-    if (tmp.empty() || tmp.compare(0, 7, "Bearer ") != 0) {
-        Json::Value json;
-        json["status"] = 2;
-        auto resp = HttpResponse::newHttpJsonResponse(json);
-        callback(resp);
-        return;
-    }
-    auto token = tmp.substr(7);
-    int userId = -1;
-    if (!verifyUserToken(token, userId)) {
-        Json::Value json;
-        json["status"] = 3;
-        json["error"] = "登录已失效";
-        auto resp = HttpResponse::newHttpJsonResponse(json);
-        callback(resp);
-        return;
-    }
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
 
     auto pJson = req->getJsonObject();
     if (pJson == nullptr) {
@@ -245,24 +211,9 @@ void UserController::updatePassword(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback
 ) const {
-    auto tmp = req->getHeader("Authorization");
-    if (tmp.empty() || tmp.compare(0, 7, "Bearer ") != 0) {
-        Json::Value json;
-        json["status"] = 2;
-        auto resp = HttpResponse::newHttpJsonResponse(json);
-        callback(resp);
-        return;
-    }
-    auto token = tmp.substr(7);
-    int userId = -1;
-    if (!verifyUserToken(token, userId)) {
-        Json::Value json;
-        json["status"] = 3;
-        json["error"] = "登录已失效";
-        auto resp = HttpResponse::newHttpJsonResponse(json);
-        callback(resp);
-        return;
-    }
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
 
     auto pJson = req->getJsonObject();
     if (pJson == nullptr) {
@@ -304,22 +255,9 @@ void UserController::getRole(
     std::function<void (const HttpResponsePtr &)> &&callback
 ) const {
     Json::Value json;
-    auto tmp = req->getHeader("Authorization");
-    if (tmp.empty() || tmp.compare(0, 7, "Bearer ") != 0) {
-        json["status"] = 2;
-        auto resp = HttpResponse::newHttpJsonResponse(json);
-        callback(resp);
-        return;
-    }
-    auto token = tmp.substr(7);
-    int userId = -1;
-    if (!verifyUserToken(token, userId)) {
-        json["status"] = 3;
-        json["error"] = "登录已失效";
-        auto resp = HttpResponse::newHttpJsonResponse(json);
-        callback(resp);
-        return;
-    }
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
 
     auto db = app().getDbClient();
     Mapper<User> mpUser(db);
@@ -359,28 +297,4 @@ void UserController::getRole(
 
     auto resp = HttpResponse::newHttpJsonResponse(json);
     callback(resp);
-}
-
-bool checkEmail(const std::string &email) {
-    if (email.empty()) return false;
-    std::smatch res;
-    return std::regex_match(email, res, emailPattern);
-}
-
-bool checkUsername(const std::string &username) {
-    if (username.size() < 1) return false;
-    if (std::isspace(*username.cbegin()) || std::isspace(*username.crbegin())) {
-        return false;
-    }
-    return true;
-}
-
-bool checkPassword(const std::string &password) {
-    if (password.size() < 6) return false;
-    for (const auto &ch:password) {
-        if (std::isspace(ch)) {
-            return false;
-        }
-    } 
-    return true;
 }

@@ -59,13 +59,9 @@ void BlogController::articleListAdmin(
     std::function<void (const HttpResponsePtr &)> &&callback,
     int page
 ) const {
-std::string token;
-    int userId = -1;
-    auto tmp = req->getHeader("Authorization");
-    if (!tmp.empty() && tmp.compare(0, 7, "Bearer ") == 0) {
-        token = tmp.substr(7);
-        verifyUserToken(token, userId);
-    }
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
 
     Json::Value json;
     auto db = drogon::app().getDbClient();
@@ -121,24 +117,11 @@ void BlogController::getArticle(
     std::function<void (const HttpResponsePtr &)> &&callback,
     int id
 ) const {
-    std::string token;
-    int userId = -1;
-    auto tmp = req->getHeader("Authorization");
-    if (!tmp.empty() && tmp.compare(0, 7, "Bearer ") == 0) {
-        token = tmp.substr(7);
-        verifyUserToken(token, userId);
-    }
-
     Json::Value json;
     auto db = app().getDbClient();
     Mapper<Article> mpArticle(db);
-    Mapper<User> mpUser(db);
     int roleId = 5;
     try {
-        if (userId > -1) {
-            auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
-            roleId = userInDb.getValueOfRole();
-        }
         auto art = mpArticle.findOne({Article::Cols::_id, id});
         Json::Value article;
         article["id"] = art.getValueOfId();
@@ -153,17 +136,9 @@ void BlogController::getArticle(
         for (const auto &tag : tags) {
             article["tags"].append(tag.first.toJson());
         }
-        article["create_time"] = art.getValueOfCreateTime()
-            .toCustomedFormattedString("%Y-%m-%d");
+        article["create_time"] = art.getValueOfCreateTime().toDbString();
         article["content"] = art.getValueOfContent();
         article["excerpt"] = art.getValueOfExcerpt();
-        if (roleId <= 2) {
-            article["editable"] = true;
-        } else if (roleId == 3) {
-            article["editable"] = (userId == art.getValueOfAuthor());
-        } else {
-            article["editable"] = false;
-        }
         json["article"] = article;
         json["status"] = 0;
     } catch (const orm::DrogonDbException &ex) {
@@ -184,20 +159,9 @@ void BlogController::updateArticle(
 ) const {
     bool hasPermission = false;
     Json::Value json;
-    
-    std::string token;
-    auto tmp = req->getHeader("Authorization");
-    if (!tmp.empty() && tmp.compare(0, 7, "Bearer ") == 0) {
-        token = tmp.substr(7);
-    }
-    int userId = -1;
-    if (!verifyUserToken(token, userId)) {
-        json["status"] = 3;
-        json["error"] = "登录已失效";
-        auto resp = HttpResponse::newHttpJsonResponse(json);
-        callback(resp);
-        return;
-    }
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
 
     auto db = app().getDbClient();
     Mapper<Article> mpArticle(db);
@@ -280,19 +244,9 @@ void BlogController::deleteArticles(
 ) const {
     Json::Value json;
 
-    std::string token;
-    auto tmp = req->getHeader("Authorization");
-    if (!tmp.empty() && tmp.compare(0, 7, "Bearer ") == 0) {
-        token = tmp.substr(7);
-    }
-    int userId = -1;
-    if (!verifyUserToken(token, userId)) {
-        json["status"] = 3;
-        json["error"] = "登录已失效";
-        auto resp = HttpResponse::newHttpJsonResponse(json);
-        callback(resp);
-        return;
-    }
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
 
     auto pJson = req->getJsonObject();
     if (!pJson) {

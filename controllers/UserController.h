@@ -11,11 +11,11 @@ class UserController : public HttpController<UserController> {
 public:
     METHOD_LIST_BEGIN
     ADD_METHOD_TO(UserController::login, "/login", Post);
-    ADD_METHOD_TO(UserController::userCenter, "/user/center", Get);
+    ADD_METHOD_TO(UserController::userCenter, "/user/center", Get, "LoginFilter");
     ADD_METHOD_TO(UserController::addUser, "/user/add", Post);
-    ADD_METHOD_TO(UserController::updateUser, "/user/update", Post);
-    ADD_METHOD_TO(UserController::updatePassword, "/user/update/password", Post);
-    ADD_METHOD_TO(UserController::getRole, "/user/role", Get);
+    ADD_METHOD_TO(UserController::updateUser, "/user/update", Post, "LoginFilter");
+    ADD_METHOD_TO(UserController::updatePassword, "/user/update/password", Post, "LoginFilter");
+    ADD_METHOD_TO(UserController::getRole, "/user/role", Get, "LoginFilter");
     METHOD_LIST_END
 
     void login(

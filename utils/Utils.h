@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 #include <string>
+#include <regex>
 #include <trantor/utils/Logger.h>
 #include <jwt-cpp/jwt.h>
 #include <jwt-cpp/traits/nlohmann-json/traits.h>
@@ -18,6 +19,14 @@ MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEO55sfkgK5AhGqNcwr0M5lIMaSV8DJt/L
 CldRlEwg401gT5hNG8etmrVf1WP9ET2wwPOG1JjSrijxq0U9NZd2MQ==
 -----END PUBLIC KEY-----)";
 
-bool verifyUserToken(const std::string &token, int &userId);
+const auto emailPattern = std::regex(
+    R"(^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*@(\w+)(\.(\w+))+$)"
+);
+
+bool verifyUserToken(const std::string &token);
+bool checkEmail(const std::string &email);
+bool checkUsername(const std::string &username);
+bool checkPassword(const std::string &password);
+
 
 #endif
