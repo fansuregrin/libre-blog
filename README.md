@@ -44,7 +44,7 @@ make && sudo make install
 
 ### Build
 1. Create database and data tables
-Please see [🛠️here](./sql/create_tables.sql)
+Please see [🛠️here](./sql/README.md)
 2. Generate database model code
 ```shell
 git clone https://github.com/fansuregrin/libre-blog.git
