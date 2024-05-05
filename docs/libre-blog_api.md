@@ -26,6 +26,7 @@
 
 ```javascript
 apt.environment.set("url", "http://10.140.32.106:10002");
+apt.globals.set("url", "http://10.140.32.106:10002");
 ```
 
 #### 后执行脚本
@@ -60,7 +61,7 @@ apt.environment.set("url", "http://10.140.32.106:10002");
 
 | 参数名 | 示例值 | 参数描述 |
 | --- | --- | ---- |
-| page | 1 | 文章列表分页页码，数字类型 |
+| page | 1 | 文章列表的分页页码 |
 
 #### 预执行脚本
 
@@ -80,111 +81,721 @@ apt.environment.set("url", "http://10.140.32.106:10002");
 {
 	"articles": [
 		{
-			"author": 1,
-			"author_name": "Bob Wood",
-			"category": 3,
-			"category_name": "短篇小说",
-			"create_time": "2023-01-18",
+			"author": {
+				"id": 1,
+				"realname": "Bob Wood"
+			},
+			"category": {
+				"id": 3,
+				"name": "短篇小说",
+				"slug": "short-story"
+			},
+			"create_time": "2023-01-18 23:53:41",
 			"excerpt": "",
 			"id": 100,
 			"title": "山"
 		},
 		{
-			"author": 2,
-			"author_name": "小华",
-			"category": 2,
-			"category_name": "诗歌",
-			"create_time": "2022-12-30",
+			"author": {
+				"id": 2,
+				"realname": "小华"
+			},
+			"category": {
+				"id": 1,
+				"name": "未分类",
+				"slug": "uncategoried"
+			},
+			"create_time": "2022-12-30 07:20:41",
 			"excerpt": "我的家乡是一座静谧而美丽的小镇，充满了勤劳和乐观的人们，他们热爱生活，创造着美好的未来。",
 			"id": 97,
 			"title": "我的家乡"
 		},
 		{
-			"author": 5,
-			"author_name": "迪迪",
-			"category": 4,
-			"category_name": "童话故事",
-			"create_time": "2022-12-28",
+			"author": {
+				"id": 5,
+				"realname": "迪迪"
+			},
+			"category": {
+				"id": 4,
+				"name": "童话故事",
+				"slug": "fairy-tale"
+			},
+			"create_time": "2022-12-28 06:00:02",
 			"excerpt": "",
 			"id": 96,
-			"title": "标题96"
+			"tags": [
+				{
+					"id": 10,
+					"name": "格林童话",
+					"slug": "green-brother"
+				}
+			],
+			"title": "莴苣姑娘"
 		},
 		{
-			"author": 1,
-			"author_name": "Bob Wood",
-			"category": 4,
-			"category_name": "童话故事",
-			"create_time": "2022-12-21",
+			"author": {
+				"id": 1,
+				"realname": "Bob Wood"
+			},
+			"category": {
+				"id": 4,
+				"name": "童话故事",
+				"slug": "fairy-tale"
+			},
+			"create_time": "2022-12-21 13:42:40",
 			"excerpt": "",
 			"id": 95,
+			"tags": [
+				{
+					"id": 10,
+					"name": "格林童话",
+					"slug": "green-brother"
+				}
+			],
 			"title": "小红帽"
 		},
 		{
-			"author": 3,
-			"author_name": "小莫",
-			"category": 4,
-			"category_name": "童话故事",
-			"create_time": "2022-12-14",
-			"excerpt": "",
-			"id": 94,
-			"title": "标题94"
-		},
-		{
-			"author": 2,
-			"author_name": "小华",
-			"category": 3,
-			"category_name": "短篇小说",
-			"create_time": "2022-12-07",
+			"author": {
+				"id": 2,
+				"realname": "小华"
+			},
+			"category": {
+				"id": 3,
+				"name": "短篇小说",
+				"slug": "short-story"
+			},
+			"create_time": "2022-12-07 22:49:16",
 			"excerpt": "",
 			"id": 93,
-			"title": "标题93"
+			"title": "这是一个超级长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长的标题"
 		},
 		{
-			"author": 2,
-			"author_name": "小华",
-			"category": 1,
-			"category_name": "未分类",
-			"create_time": "2022-12-04",
+			"author": {
+				"id": 2,
+				"realname": "小华"
+			},
+			"category": {
+				"id": 6,
+				"name": "技术博文",
+				"slug": "tech-blog"
+			},
+			"create_time": "2022-12-04 10:35:27",
 			"excerpt": "",
 			"id": 92,
+			"tags": [
+				{
+					"id": 13,
+					"name": "C++",
+					"slug": "C++"
+				}
+			],
 			"title": "C++智能指针"
 		},
 		{
-			"author": 5,
-			"author_name": "迪迪",
-			"category": 4,
-			"category_name": "童话故事",
-			"create_time": "2022-11-27",
+			"author": {
+				"id": 5,
+				"realname": "迪迪"
+			},
+			"category": {
+				"id": 4,
+				"name": "童话故事",
+				"slug": "fairy-tale"
+			},
+			"create_time": "2022-11-27 17:20:24",
 			"excerpt": "",
 			"id": 91,
 			"title": "标题91"
 		},
 		{
-			"author": 4,
-			"author_name": "Tom Smith",
-			"category": 1,
-			"category_name": "未分类",
-			"create_time": "2022-11-22",
+			"author": {
+				"id": 4,
+				"realname": "Tom Smith"
+			},
+			"category": {
+				"id": 1,
+				"name": "未分类",
+				"slug": "uncategoried"
+			},
+			"create_time": "2022-11-22 02:11:08",
 			"excerpt": "",
 			"id": 90,
+			"tags": [
+				{
+					"id": 10,
+					"name": "格林童话",
+					"slug": "green-brother"
+				}
+			],
 			"title": "标题90"
 		},
 		{
-			"author": 1,
-			"author_name": "Bob Wood",
-			"category": 2,
-			"category_name": "诗歌",
-			"create_time": "2022-11-19",
+			"author": {
+				"id": 1,
+				"realname": "Bob Wood"
+			},
+			"category": {
+				"id": 2,
+				"name": "诗歌",
+				"slug": "poem"
+			},
+			"create_time": "2022-11-19 19:12:25",
 			"excerpt": "",
 			"id": 89,
 			"tags": [
-				"C++"
+				{
+					"id": 13,
+					"name": "C++",
+					"slug": "C++"
+				}
 			],
 			"title": "月亮"
+		},
+		{
+			"author": {
+				"id": 4,
+				"realname": "Tom Smith"
+			},
+			"category": {
+				"id": 5,
+				"name": "新闻",
+				"slug": "news"
+			},
+			"create_time": "2022-11-18 19:03:29",
+			"excerpt": "",
+			"id": 88,
+			"tags": [
+				{
+					"id": 4,
+					"name": "Python",
+					"slug": "python"
+				},
+				{
+					"id": 13,
+					"name": "C++",
+					"slug": "C++"
+				},
+				{
+					"id": 15,
+					"name": "MySQL",
+					"slug": "MySQL"
+				}
+			],
+			"title": "标题88"
 		}
 	],
 	"num_pages": 10,
 	"status": 0
+}
+```
+
+## /libre-blog/获取某个分类下的文章列表
+
+```text
+获取指定分类下的指定页的文章列表。
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/category/{slug}/{page}
+
+#### 请求方式
+
+> GET
+
+#### Content-Type
+
+> none
+
+#### 路径变量
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| slug | poem | 分类的缩略名 |
+| page | 1 | 分页的页码 |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+#### 成功响应示例
+
+```javascript
+{
+	"articles": [
+		{
+			"author": {
+				"id": 1,
+				"realname": "Bob Wood"
+			},
+			"create_time": "2022-11-19 19:12:25",
+			"excerpt": "",
+			"id": 89,
+			"tags": [
+				{
+					"id": 13,
+					"name": "C++",
+					"slug": "C++"
+				}
+			],
+			"title": "月亮"
+		},
+		{
+			"author": {
+				"id": 1,
+				"realname": "Bob Wood"
+			},
+			"create_time": "2022-11-13 18:06:08",
+			"excerpt": "",
+			"id": 87,
+			"title": "标题87"
+		},
+		{
+			"author": {
+				"id": 4,
+				"realname": "Tom Smith"
+			},
+			"create_time": "2022-11-11 06:57:47",
+			"excerpt": "",
+			"id": 86,
+			"title": "标题86"
+		},
+		{
+			"author": {
+				"id": 4,
+				"realname": "Tom Smith"
+			},
+			"create_time": "2022-10-09 22:32:02",
+			"excerpt": "",
+			"id": 79,
+			"title": "标题79"
+		},
+		{
+			"author": {
+				"id": 4,
+				"realname": "Tom Smith"
+			},
+			"create_time": "2022-04-28 17:48:35",
+			"excerpt": "",
+			"id": 54,
+			"title": "标题54"
+		},
+		{
+			"author": {
+				"id": 1,
+				"realname": "Bob Wood"
+			},
+			"create_time": "2022-02-27 11:01:55",
+			"excerpt": "",
+			"id": 44,
+			"title": "标题44"
+		},
+		{
+			"author": {
+				"id": 3,
+				"realname": "小莫"
+			},
+			"create_time": "2022-01-20 22:16:55",
+			"excerpt": "",
+			"id": 36,
+			"title": "标题36"
+		},
+		{
+			"author": {
+				"id": 4,
+				"realname": "Tom Smith"
+			},
+			"create_time": "2021-12-31 09:49:51",
+			"excerpt": "",
+			"id": 34,
+			"title": "标题34"
+		},
+		{
+			"author": {
+				"id": 4,
+				"realname": "Tom Smith"
+			},
+			"create_time": "2021-10-27 17:25:33",
+			"excerpt": "",
+			"id": 23,
+			"title": "标题23"
+		},
+		{
+			"author": {
+				"id": 4,
+				"realname": "Tom Smith"
+			},
+			"create_time": "2021-09-14 12:30:43",
+			"excerpt": "",
+			"id": 16,
+			"title": "标题16"
+		}
+	],
+	"category": {
+		"id": 2,
+		"name": "诗歌",
+		"slug": "poem"
+	},
+	"num_pages": 2,
+	"status": 0
+}
+```
+
+## /libre-blog/获取某个用户下的文章列表
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/user/{id}/{page}
+
+#### 请求方式
+
+> GET
+
+#### Content-Type
+
+> none
+
+#### 路径变量
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| id | 1 | 用户id |
+| page | 1 | 分页页码 |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+#### 成功响应示例
+
+```javascript
+{
+	"articles": [
+		{
+			"category": {
+				"id": 3,
+				"name": "短篇小说",
+				"slug": "short-story"
+			},
+			"create_time": "2023-01-18 23:53:41",
+			"excerpt": "",
+			"id": 100,
+			"title": "山"
+		},
+		{
+			"category": {
+				"id": 4,
+				"name": "童话故事",
+				"slug": "fairy-tale"
+			},
+			"create_time": "2022-12-21 13:42:40",
+			"excerpt": "",
+			"id": 95,
+			"tags": [
+				{
+					"id": 10,
+					"name": "格林童话",
+					"slug": "green-brother"
+				}
+			],
+			"title": "小红帽"
+		},
+		{
+			"category": {
+				"id": 2,
+				"name": "诗歌",
+				"slug": "poem"
+			},
+			"create_time": "2022-11-19 19:12:25",
+			"excerpt": "",
+			"id": 89,
+			"tags": [
+				{
+					"id": 13,
+					"name": "C++",
+					"slug": "C++"
+				}
+			],
+			"title": "月亮"
+		},
+		{
+			"category": {
+				"id": 2,
+				"name": "诗歌",
+				"slug": "poem"
+			},
+			"create_time": "2022-11-13 18:06:08",
+			"excerpt": "",
+			"id": 87,
+			"title": "标题87"
+		},
+		{
+			"category": {
+				"id": 1,
+				"name": "未分类",
+				"slug": "uncategoried"
+			},
+			"create_time": "2022-08-29 08:45:39",
+			"excerpt": "",
+			"id": 72,
+			"title": "标题72"
+		},
+		{
+			"category": {
+				"id": 1,
+				"name": "未分类",
+				"slug": "uncategoried"
+			},
+			"create_time": "2022-07-21 16:24:42",
+			"excerpt": "",
+			"id": 67,
+			"title": "标题67"
+		},
+		{
+			"category": {
+				"id": 5,
+				"name": "新闻",
+				"slug": "news"
+			},
+			"create_time": "2022-06-13 23:15:51",
+			"excerpt": "",
+			"id": 61,
+			"title": "标题61"
+		},
+		{
+			"category": {
+				"id": 1,
+				"name": "未分类",
+				"slug": "uncategoried"
+			},
+			"create_time": "2022-04-26 08:53:16",
+			"excerpt": "",
+			"id": 53,
+			"title": "标题53"
+		},
+		{
+			"category": {
+				"id": 5,
+				"name": "新闻",
+				"slug": "news"
+			},
+			"create_time": "2022-04-07 18:04:31",
+			"excerpt": "",
+			"id": 50,
+			"title": "标题50"
+		},
+		{
+			"category": {
+				"id": 2,
+				"name": "诗歌",
+				"slug": "poem"
+			},
+			"create_time": "2022-02-27 11:01:55",
+			"excerpt": "",
+			"id": 44,
+			"title": "标题44"
+		}
+	],
+	"author": {
+		"id": 1,
+		"realname": "Bob Wood"
+	},
+	"num_pages": 2,
+	"status": 0
+}
+```
+
+## /libre-blog/获取某个标签下的文章列表
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/tag/{slug}/{page}
+
+#### 请求方式
+
+> GET
+
+#### Content-Type
+
+> none
+
+#### 路径变量
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| slug | green-brother | - |
+| page | 1 | - |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+#### 成功响应示例
+
+```javascript
+{
+	"articles": [
+		{
+			"author": {
+				"id": 5,
+				"realname": "迪迪"
+			},
+			"category": {
+				"id": 4,
+				"name": "童话故事",
+				"slug": "fairy-tale"
+			},
+			"create_time": "2022-12-28 06:00:02",
+			"excerpt": "",
+			"id": 96,
+			"tags": [
+				{
+					"id": 10,
+					"name": "格林童话",
+					"slug": "green-brother"
+				}
+			],
+			"title": "莴苣姑娘"
+		},
+		{
+			"author": {
+				"id": 1,
+				"realname": "Bob Wood"
+			},
+			"category": {
+				"id": 4,
+				"name": "童话故事",
+				"slug": "fairy-tale"
+			},
+			"create_time": "2022-12-21 13:42:40",
+			"excerpt": "",
+			"id": 95,
+			"tags": [
+				{
+					"id": 10,
+					"name": "格林童话",
+					"slug": "green-brother"
+				}
+			],
+			"title": "小红帽"
+		},
+		{
+			"author": {
+				"id": 4,
+				"realname": "Tom Smith"
+			},
+			"category": {
+				"id": 1,
+				"name": "未分类",
+				"slug": "uncategoried"
+			},
+			"create_time": "2022-11-22 02:11:08",
+			"excerpt": "",
+			"id": 90,
+			"tags": [
+				{
+					"id": 10,
+					"name": "格林童话",
+					"slug": "green-brother"
+				}
+			],
+			"title": "标题90"
+		},
+		{
+			"author": {
+				"id": 2,
+				"realname": "小华"
+			},
+			"category": {
+				"id": 4,
+				"name": "童话故事",
+				"slug": "fairy-tale"
+			},
+			"create_time": "2022-09-06 04:26:40",
+			"excerpt": "",
+			"id": 73,
+			"tags": [
+				{
+					"id": 10,
+					"name": "格林童话",
+					"slug": "green-brother"
+				}
+			],
+			"title": "标题73"
+		},
+		{
+			"author": {
+				"id": 1,
+				"realname": "Bob Wood"
+			},
+			"category": {
+				"id": 4,
+				"name": "童话故事",
+				"slug": "fairy-tale"
+			},
+			"create_time": "2021-10-03 02:16:32",
+			"excerpt": "",
+			"id": 18,
+			"tags": [
+				{
+					"id": 10,
+					"name": "格林童话",
+					"slug": "green-brother"
+				}
+			],
+			"title": "标题18"
+		}
+	],
+	"num_pages": 1,
+	"status": 0,
+	"tag": {
+		"id": 10,
+		"name": "格林童话",
+		"slug": "green-brother"
+	}
 }
 ```
 
@@ -214,13 +825,13 @@ apt.environment.set("url", "http://10.140.32.106:10002");
 
 | 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
 | --- | --- | ---- | ---- | ---- |
-| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ2NTIwNDEsImlhdCI6MTcxNDY0ODQ0MSwiaXNzIjoiZHJvZ29uIiwidWlkIjozfQ.8986kvIariMlOifEwMQqUd0rNGls3XJr6aZ0Xbg4dfw17UJawAYBh0nsVbH97Wp0tpF3e3ciCzGzXO0mfy5w2w | String | 是 | 用户token |
+| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ3Mzk2MzIsImlhdCI6MTcxNDczNjAzMiwiaXNzIjoiZHJvZ29uIiwidWlkIjoxfQ.6N7w-wI95VbiUkWKKOFdqagzPQMLgw8EcJkkFVA1oqEAnSRTcLd25hlObaNV8y86PGaKDcSUq76JrqSTdsRoNw | String | 是 | 用户token |
 
 #### 路径变量
 
 | 参数名 | 示例值 | 参数描述 |
 | --- | --- | ---- |
-| id | 84 | 文章id |
+| id | 95 | 文章id |
 
 #### 预执行脚本
 
@@ -239,16 +850,28 @@ apt.environment.set("url", "http://10.140.32.106:10002");
 ```javascript
 {
 	"article": {
-		"author": 3,
-		"author_name": "小莫",
-		"category": 5,
-		"category_name": "新闻",
-		"content": "我是内容84",
-		"create_time": "2022-11-03",
+		"author": {
+			"id": 1,
+			"realname": "Bob Wood"
+		},
+		"category": {
+			"id": 4,
+			"name": "童话故事",
+			"slug": "fairy-tale"
+		},
+		"content": "",
+		"create_time": "2022-12-21",
 		"editable": false,
 		"excerpt": "",
-		"id": 84,
-		"title": "标题84"
+		"id": 95,
+		"tags": [
+			{
+				"id": 10,
+				"name": "格林童话",
+				"slug": "green-brother"
+			}
+		],
+		"title": "小红帽"
 	},
 	"status": 0
 }
@@ -465,162 +1088,6 @@ apt.environment.set("url", "http://10.140.32.106:10002");
 }
 ```
 
-## /libre-blog/获取某个分类下的文章列表
-
-```text
-获取指定分类下的指定页的文章列表。
-```
-
-#### 接口状态
-
-> 开发中
-
-#### 接口URL
-
-> {{url}}/blog/category/{slug}/{page}
-
-#### 请求方式
-
-> GET
-
-#### Content-Type
-
-> none
-
-#### 路径变量
-
-| 参数名 | 示例值 | 参数描述 |
-| --- | --- | ---- |
-| slug | poem | 分类的缩略名 |
-| page | 1 | 分页的页码 |
-
-#### 预执行脚本
-
-```javascript
-暂无预执行脚本
-```
-
-#### 后执行脚本
-
-```javascript
-暂无后执行脚本
-```
-
-#### 成功响应示例
-
-```javascript
-{
-	"articles": [
-		{
-			"author": 2,
-			"author_name": "小华",
-			"category": 2,
-			"category_name": "诗歌",
-			"create_time": "2022-12-30",
-			"excerpt": "我的家乡是一座静谧而美丽的小镇，充满了勤劳和乐观的人们，他们热爱生活，创造着美好的未来。",
-			"id": 97,
-			"title": "我的家乡"
-		},
-		{
-			"author": 1,
-			"author_name": "Bob Wood",
-			"category": 2,
-			"category_name": "诗歌",
-			"create_time": "2022-11-19",
-			"excerpt": "",
-			"id": 89,
-			"tags": [
-				"C++"
-			],
-			"title": "月亮"
-		},
-		{
-			"author": 1,
-			"author_name": "Bob Wood",
-			"category": 2,
-			"category_name": "诗歌",
-			"create_time": "2022-11-13",
-			"excerpt": "",
-			"id": 87,
-			"title": "标题87"
-		},
-		{
-			"author": 4,
-			"author_name": "Tom Smith",
-			"category": 2,
-			"category_name": "诗歌",
-			"create_time": "2022-11-11",
-			"excerpt": "",
-			"id": 86,
-			"title": "标题86"
-		},
-		{
-			"author": 4,
-			"author_name": "Tom Smith",
-			"category": 2,
-			"category_name": "诗歌",
-			"create_time": "2022-10-09",
-			"excerpt": "",
-			"id": 79,
-			"title": "标题79"
-		},
-		{
-			"author": 4,
-			"author_name": "Tom Smith",
-			"category": 2,
-			"category_name": "诗歌",
-			"create_time": "2022-04-28",
-			"excerpt": "",
-			"id": 54,
-			"title": "标题54"
-		},
-		{
-			"author": 1,
-			"author_name": "Bob Wood",
-			"category": 2,
-			"category_name": "诗歌",
-			"create_time": "2022-02-27",
-			"excerpt": "",
-			"id": 44,
-			"title": "标题44"
-		},
-		{
-			"author": 3,
-			"author_name": "小莫",
-			"category": 2,
-			"category_name": "诗歌",
-			"create_time": "2022-01-20",
-			"excerpt": "",
-			"id": 36,
-			"title": "标题36"
-		},
-		{
-			"author": 4,
-			"author_name": "Tom Smith",
-			"category": 2,
-			"category_name": "诗歌",
-			"create_time": "2021-12-31",
-			"excerpt": "",
-			"id": 34,
-			"title": "标题34"
-		},
-		{
-			"author": 4,
-			"author_name": "Tom Smith",
-			"category": 2,
-			"category_name": "诗歌",
-			"create_time": "2021-10-27",
-			"excerpt": "",
-			"id": 23,
-			"title": "标题23"
-		}
-	],
-	"name": "诗歌",
-	"num_pages": 2,
-	"status": 0
-}
-```
-
 ## /libre-blog/获取用户信息
 
 ```text
@@ -647,7 +1114,7 @@ apt.environment.set("url", "http://10.140.32.106:10002");
 
 | 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
 | --- | --- | ---- | ---- | ---- |
-| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ2NjA5ODQsImlhdCI6MTcxNDY1NzM4NCwiaXNzIjoiZHJvZ29uIiwidWlkIjoxfQ.hEWGno-4R_ISpMMb9Y_wkKZaDIuJUGFdPEpSInfZYf-jjOm5YTxOvdB7RlGbCrKsMMWydzPP76kwnSDzR1hlYA | String | 是 | 客户端保存的用户token，由服务端签发 |
+| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ3Mjc0NjMsImlhdCI6MTcxNDcyMzg2MywiaXNzIjoiZHJvZ29uIiwidWlkIjoxMX0.tTluVJo30WJIptEkHsd6sveg0tPB021MCFz-mbbEqof1YOONnDzt6r5uFaqj895IYc6fvsq7Z21SFaSxVuA9ag | String | 是 | 客户端保存的用户token，由服务端签发 |
 
 #### 预执行脚本
 
@@ -712,8 +1179,8 @@ apt.environment.set("url", "http://10.140.32.106:10002");
 
 ```javascript
 {
-    "username": "rbwhite",
-    "password": "rbw1234"
+    "username": "bobwood",
+    "password": "bw1234"
 }
 ```
 
@@ -936,4 +1403,90 @@ apt.environment.set("url", "http://10.140.32.106:10002");
 {
 	"status": 0
 }
+```
+
+## /libre-blog/后台管理获取文章列表
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/admin/page/{page}
+
+#### 请求方式
+
+> GET
+
+#### Content-Type
+
+> none
+
+#### 请求Header参数
+
+| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
+| --- | --- | ---- | ---- | ---- |
+| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ3MzkwNzEsImlhdCI6MTcxNDczNTQ3MSwiaXNzIjoiZHJvZ29uIiwidWlkIjo1fQ.zPPKyMiY8bupn8lZQkxBnax1IbzQBwOZFFZVpTpKcyD1oyVbVEGqFXDMAimIaEZz_zG6gPQB6JR7ogzra0PIFQ | String | 是 | 用户token |
+
+#### 路径变量
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| page | 1 | 文章列表的分页页码 |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/获取角色信息
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/user/role
+
+#### 请求方式
+
+> GET
+
+#### Content-Type
+
+> none
+
+#### 请求Header参数
+
+| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
+| --- | --- | ---- | ---- | ---- |
+| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ4MTIwMjIsImlhdCI6MTcxNDgwODQyMiwiaXNzIjoiZHJvZ29uIiwidWlkIjoxfQ.ATIGPKZ5Vc6BD-VyyTrcG4lfH60Jg35H1vi4ItCKBwX3vsdP1xWYl-hHkPeBn78A1p5xHAgwIXyN5ExN1GcJ3A | String | 是 | - |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
 ```
