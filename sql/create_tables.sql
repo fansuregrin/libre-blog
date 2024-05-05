@@ -57,9 +57,9 @@ CREATE TABLE `article` (
   `content` text DEFAULT NULL,
   `excerpt` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `author` (`author`),
-  KEY `category` (`category`),
+  KEY `fk_article_category_to_category_id` (`category`),
   KEY `fk_article_author_to_author_id` (`author`),
-  CONSTRAINT `article_ibfk_2` FOREIGN KEY (`category`) REFERENCES `category` (`id`),
+  KEY `idx_create_time` (`create_time`),
+  CONSTRAINT `fk_article_category_to_category_id` FOREIGN KEY (`category`) REFERENCES `category` (`id`),
   CONSTRAINT `fk_article_author_to_author_id` FOREIGN KEY (`author`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
