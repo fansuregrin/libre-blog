@@ -799,6 +799,46 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 }
 ```
 
+## /libre-blog/后台管理获取文章列表
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/admin/page/{page}
+
+#### 请求方式
+
+> GET
+
+#### Content-Type
+
+> none
+
+#### 路径变量
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| page | 1 | 文章列表的分页页码 |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
 ## /libre-blog/获取文章
 
 ```text
@@ -820,12 +860,6 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 #### Content-Type
 
 > none
-
-#### 请求Header参数
-
-| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
-| --- | --- | ---- | ---- | ---- |
-| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ3Mzk2MzIsImlhdCI6MTcxNDczNjAzMiwiaXNzIjoiZHJvZ29uIiwidWlkIjoxfQ.6N7w-wI95VbiUkWKKOFdqagzPQMLgw8EcJkkFVA1oqEAnSRTcLd25hlObaNV8y86PGaKDcSUq76JrqSTdsRoNw | String | 是 | 用户token |
 
 #### 路径变量
 
@@ -860,8 +894,7 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 			"slug": "fairy-tale"
 		},
 		"content": "",
-		"create_time": "2022-12-21",
-		"editable": false,
+		"create_time": "2022-12-21 13:42:40",
 		"excerpt": "",
 		"id": 95,
 		"tags": [
@@ -898,12 +931,6 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 #### Content-Type
 
 > json
-
-#### 请求Header参数
-
-| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
-| --- | --- | ---- | ---- | ---- |
-| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ2NTIwNDEsImlhdCI6MTcxNDY0ODQ0MSwiaXNzIjoiZHJvZ29uIiwidWlkIjozfQ.8986kvIariMlOifEwMQqUd0rNGls3XJr6aZ0Xbg4dfw17UJawAYBh0nsVbH97Wp0tpF3e3ciCzGzXO0mfy5w2w | String | 否 | 用户的token |
 
 #### 请求Body参数
 
@@ -972,12 +999,6 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 #### Content-Type
 
 > json
-
-#### 请求Header参数
-
-| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
-| --- | --- | ---- | ---- | ---- |
-| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ0NzkyODQsImlhdCI6MTcxNDQ3NTY4NCwiaXNzIjoiZHJvZ29uIiwidWlkIjozfQ.JLBCPy58o1W0DEd4wFrLDbU2AylA5srB1hwdY7CQw_MNHHSbntUG4ATBm1-wwE5tEWU0TMZFZe1-cLK_bRtdZg | String | 是 | 用户token |
 
 #### 请求Body参数
 
@@ -1109,12 +1130,6 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 #### Content-Type
 
 > none
-
-#### 请求Header参数
-
-| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
-| --- | --- | ---- | ---- | ---- |
-| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ3Mjc0NjMsImlhdCI6MTcxNDcyMzg2MywiaXNzIjoiZHJvZ29uIiwidWlkIjoxMX0.tTluVJo30WJIptEkHsd6sveg0tPB021MCFz-mbbEqof1YOONnDzt6r5uFaqj895IYc6fvsq7Z21SFaSxVuA9ag | String | 是 | 客户端保存的用户token，由服务端签发 |
 
 #### 预执行脚本
 
@@ -1303,12 +1318,6 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 
 > json
 
-#### 请求Header参数
-
-| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
-| --- | --- | ---- | ---- | ---- |
-| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ3MTE1NTYsImlhdCI6MTcxNDcwNzk1NiwiaXNzIjoiZHJvZ29uIiwidWlkIjoxMX0.vsLtgFJdpqTIvZPxB4WrfZ3Ov8G9HToiMUBDPtT3JZZsdkpprnmL7DB2wlAEcKzBN_cBZy67vcjSXa3BFUtVMA | String | 是 | 用户token |
-
 #### 请求Body参数
 
 ```javascript
@@ -1367,17 +1376,11 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 
 > json
 
-#### 请求Header参数
-
-| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
-| --- | --- | ---- | ---- | ---- |
-| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ3MjE0NTQsImlhdCI6MTcxNDcxNzg1NCwiaXNzIjoiZHJvZ29uIiwidWlkIjoxMX0.71rK8nKW0IySH9eNsVALy2s8VpsWcD6mWaPmWF9Tgly2E3X7pb95Bz7DXWBKPO1AZiilpaQfT4bjnzPPIiN_LA | String | 是 | - |
-
 #### 请求Body参数
 
 ```javascript
 {
-	"password": "rbw123456"
+	"password": "bw1234"
 }
 ```
 
@@ -1405,52 +1408,6 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 }
 ```
 
-## /libre-blog/后台管理获取文章列表
-
-```text
-暂无描述
-```
-
-#### 接口状态
-
-> 开发中
-
-#### 接口URL
-
-> {{url}}/blog/admin/page/{page}
-
-#### 请求方式
-
-> GET
-
-#### Content-Type
-
-> none
-
-#### 请求Header参数
-
-| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
-| --- | --- | ---- | ---- | ---- |
-| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ3MzkwNzEsImlhdCI6MTcxNDczNTQ3MSwiaXNzIjoiZHJvZ29uIiwidWlkIjo1fQ.zPPKyMiY8bupn8lZQkxBnax1IbzQBwOZFFZVpTpKcyD1oyVbVEGqFXDMAimIaEZz_zG6gPQB6JR7ogzra0PIFQ | String | 是 | 用户token |
-
-#### 路径变量
-
-| 参数名 | 示例值 | 参数描述 |
-| --- | --- | ---- |
-| page | 1 | 文章列表的分页页码 |
-
-#### 预执行脚本
-
-```javascript
-暂无预执行脚本
-```
-
-#### 后执行脚本
-
-```javascript
-暂无后执行脚本
-```
-
 ## /libre-blog/获取角色信息
 
 ```text
@@ -1472,12 +1429,6 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 #### Content-Type
 
 > none
-
-#### 请求Header参数
-
-| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
-| --- | --- | ---- | ---- | ---- |
-| Authorization | Bearer eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ4MTIwMjIsImlhdCI6MTcxNDgwODQyMiwiaXNzIjoiZHJvZ29uIiwidWlkIjoxfQ.ATIGPKZ5Vc6BD-VyyTrcG4lfH60Jg35H1vi4ItCKBwX3vsdP1xWYl-hHkPeBn78A1p5xHAgwIXyN5ExN1GcJ3A | String | 是 | - |
 
 #### 预执行脚本
 
