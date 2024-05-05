@@ -63,7 +63,7 @@ public:
     void articleListByCategory(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
-        std::string slug,
+        const std::string &slug,
         int page
     ) const;
 

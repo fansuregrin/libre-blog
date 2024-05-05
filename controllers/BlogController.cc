@@ -33,16 +33,15 @@ void BlogController::articleList(
             Json::Value article;
             article["id"] = art.getValueOfId();
             article["title"] = art.getValueOfTitle();
-            article["author"] = *art.getAuthor();
-            article["author_name"] = art.getUser(db).getValueOfRealname();
-            article["category"] = *art.getCategory();
-            article["category_name"] = art.getCategory(db).getValueOfName();
+            auto author = art.getUser(db);
+            article["author"]["id"] = author.getValueOfId();
+            article["author"]["realname"] = author.getValueOfRealname();
+            article["category"] = art.getCategory(db).toJson();
             auto tags = art.getTags(db);
             for (const auto &tag : tags) {
-                article["tags"].append(tag.first.getValueOfName());
+                article["tags"].append(tag.first.toJson());
             }
-            article["create_time"] = art.getValueOfCreateTime()
-                .toCustomedFormattedString("%Y-%m-%d");
+            article["create_time"] = art.getValueOfCreateTime().toDbString();
             article["excerpt"] = art.getValueOfExcerpt();
             json["articles"].append(article);
         }
@@ -357,40 +356,38 @@ void BlogController::getCategories(
 void BlogController::articleListByCategory(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
-    std::string slug,
+    const std::string &slug,
     int page
 ) const {
     Json::Value json;
-    size_t per_page = 10;
+    size_t perPage = 10;
     auto db = app().getDbClient();
     Mapper<Category> mpCategory(db);
     Mapper<Article> mpArticle(db);
     try {
-        auto cat = mpCategory.findOne(Criteria(Category::Cols::_slug, CompareOperator::EQ, slug));
-        auto cat_name = cat.getValueOfName();
-        json["name"] = cat_name;
-        auto num_articles = mpArticle.count(
-            Criteria(Article::Cols::_category, CompareOperator::EQ, cat.getValueOfId()));
-        auto num_pages = num_articles / per_page + (num_articles%per_page?1:0);
+        auto cat = mpCategory.findOne(Criteria(Category::Cols::_slug, slug));
+        json["category"] = cat.toJson();
+        auto numArticles = mpArticle.count(
+            Criteria(Article::Cols::_category, cat.getValueOfId()));
+        auto num_pages = numArticles / perPage + (numArticles%perPage?1:0);
         json["num_pages"] = num_pages;
-        auto articles = mpArticle.orderBy(Article::Cols::_create_time, SortOrder::DESC)
-            .paginate(page, per_page)
-            .findBy(Criteria(Article::Cols::_category, CompareOperator::EQ, cat.getValueOfId()));
+        auto articles = mpArticle
+            .orderBy(Article::Cols::_create_time, SortOrder::DESC)
+            .paginate(page, perPage)
+            .findBy(Criteria(Article::Cols::_category, cat.getValueOfId()));
         for (const auto &art : articles) {
             Json::Value article;
             article["id"] = art.getValueOfId();
             article["title"] = art.getValueOfTitle();
-            article["author"] = *art.getAuthor();
-            article["author_name"] = art.getUser(db).getValueOfRealname();
-            article["category"] = *art.getCategory();
+            article["create_time"] = art.getValueOfCreateTime().toDbString();
+            article["excerpt"] = art.getValueOfExcerpt();
+            auto author = art.getUser(db);
+            article["author"]["id"] = author.getValueOfId();
+            article["author"]["realname"] = author.getValueOfRealname();
             auto tags = art.getTags(db);
             for (const auto &tag : tags) {
-                article["tags"].append(tag.first.getValueOfName());
+                article["tags"].append(tag.first.toJson());
             }
-            article["category_name"] = cat_name;
-            article["create_time"] = art.getValueOfCreateTime()
-                .toCustomedFormattedString("%Y-%m-%d");
-            article["excerpt"] = art.getValueOfExcerpt();
             json["articles"].append(article);
         }
         json["status"] = 0;
@@ -414,8 +411,8 @@ void BlogController::articleListByAuthor(
     Mapper<Article> mpArticle(db);
     try {
         auto author = mpUser.findOne(Criteria(User::Cols::_id, id));
-        auto authorName = author.getValueOfRealname();
-        json["name"] = authorName;
+        json["author"]["id"] = author.getValueOfId();
+        json["author"]["realname"] = author.getValueOfRealname();
         auto numArticles = mpArticle.count(
             Criteria(Article::Cols::_author, author.getValueOfId()));
         auto numPages = numArticles / perPage + (numArticles%perPage?1:0);
@@ -427,17 +424,13 @@ void BlogController::articleListByAuthor(
             Json::Value article;
             article["id"] = art.getValueOfId();
             article["title"] = art.getValueOfTitle();
-            article["author"] = art.getValueOfAuthor();
-            article["author_name"] = authorName;
-            article["category"] = art.getValueOfCategory();
+            article["create_time"] = art.getValueOfCreateTime().toDbString();
+            article["excerpt"] = art.getValueOfExcerpt();
+            article["category"] = art.getCategory(db).toJson();
             auto tags = art.getTags(db);
             for (const auto &tag : tags) {
-                article["tags"].append(tag.first.getValueOfName());
+                article["tags"].append(tag.first.toJson());
             }
-            article["category_name"] = art.getCategory(db).getValueOfName();
-            article["create_time"] = art.getValueOfCreateTime()
-                .toCustomedFormattedString("%Y-%m-%d");
-            article["excerpt"] = art.getValueOfExcerpt();
             json["articles"].append(article);
         }
         json["status"] = 0;
@@ -463,30 +456,47 @@ void BlogController::articleListByTag(
     try {
         auto tag = mpTag.findOne(Criteria(Tag::Cols::_slug, slug));
         auto tagId = tag.getValueOfId();
-        json["name"] = tag.getValueOfName();
+        json["tag"] = tag.toJson();
         auto numArticles = mpArticleTag.count(Criteria(ArticleTag::Cols::_tag, tagId));
         auto numPages = numArticles / perPage + (numArticles%perPage?1:0);
         json["num_pages"] = numPages;
         auto res = db->execSqlSync(
             "SELECT "
-            "art.id,art.title,art.author,user.realname as author_name,"
-            "art.category,art.create_time,art.excerpt "
+            "art.id,art.title,art.create_time,art.excerpt,"
+            "art.author as author_id,user.realname as author_name,"
+            "art.category as cat_id,cat.slug as cat_slug,cat.name as cat_name "
             "FROM article art "
             "JOIN article_tag ON art.id = article_tag.article "
             "JOIN user ON art.author = user.id "
+            "JOIN category cat ON art.category = cat.id "
             "WHERE article_tag.tag = ? "
             "ORDER BY art.create_time DESC LIMIT ?,?;",
             tagId, (page-1)*perPage, perPage
         );
         for (const auto &row : res) {
             Json::Value art;
-            art["id"] = row["id"].as<int>();
+            auto artId = row["id"].as<int>();
+            art["id"] = artId;
             art["title"] = row["title"].as<std::string>();
-            art["author"] = row["author"].as<int>();
-            art["author_name"] = row["author_name"].as<std::string>();
-            art["category"] = row["category"].as<int>();
             art["create_time"] = row["create_time"].as<std::string>();
             art["excerpt"] = row["excerpt"].as<std::string>();
+            art["author"]["id"] = row["author_id"].as<int>();
+            art["author"]["realname"] = row["author_name"].as<std::string>();
+            art["category"]["id"] = row["cat_id"].as<int>();
+            art["category"]["name"] = row["cat_name"].as<std::string>();
+            art["category"]["slug"] = row["cat_slug"].as<std::string>();
+            auto tagsRes = db->execSqlSync(
+                "SELECT tag.id,tag.slug,tag.name FROM tag "
+                "JOIN article_tag ON tag.id = article_tag.tag "
+                "WHERE article_tag.article = ?;", artId
+            );
+            for (const auto &tagRow : tagsRes) {
+                Json::Value tagItem;
+                tagItem["id"] = tagRow["id"].as<int>();
+                tagItem["name"] = tagRow["name"].as<std::string>();
+                tagItem["slug"] = tagRow["slug"].as<std::string>();
+                art["tags"].append(tagItem);
+            }
             json["articles"].append(art);
         }
         json["status"] = 0;
