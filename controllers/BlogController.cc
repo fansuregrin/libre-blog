@@ -451,7 +451,7 @@ void BlogController::articleListByAuthor(
 void BlogController::articleListByTag(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
-    const std::string &tagName,
+    const std::string &slug,
     int page
 ) const {
     Json::Value json;
@@ -461,13 +461,34 @@ void BlogController::articleListByTag(
     Mapper<Article> mpArticle(db);
     Mapper<ArticleTag> mpArticleTag(db);
     try {
-        auto tag = mpTag.findOne(Criteria(Tag::Cols::_name, tagName));
+        auto tag = mpTag.findOne(Criteria(Tag::Cols::_slug, slug));
         auto tagId = tag.getValueOfId();
-        json["name"] = tagName;
+        json["name"] = tag.getValueOfName();
         auto numArticles = mpArticleTag.count(Criteria(ArticleTag::Cols::_tag, tagId));
         auto numPages = numArticles / perPage + (numArticles%perPage?1:0);
         json["num_pages"] = numPages;
-        // todo: json["articles"]
+        auto res = db->execSqlSync(
+            "SELECT "
+            "art.id,art.title,art.author,user.realname as author_name,"
+            "art.category,art.create_time,art.excerpt "
+            "FROM article art "
+            "JOIN article_tag ON art.id = article_tag.article "
+            "JOIN user ON art.author = user.id "
+            "WHERE article_tag.tag = ? "
+            "ORDER BY art.create_time DESC LIMIT ?,?;",
+            tagId, (page-1)*perPage, perPage
+        );
+        for (const auto &row : res) {
+            Json::Value art;
+            art["id"] = row["id"].as<int>();
+            art["title"] = row["title"].as<std::string>();
+            art["author"] = row["author"].as<int>();
+            art["author_name"] = row["author_name"].as<std::string>();
+            art["category"] = row["category"].as<int>();
+            art["create_time"] = row["create_time"].as<std::string>();
+            art["excerpt"] = row["excerpt"].as<std::string>();
+            json["articles"].append(art);
+        }
         json["status"] = 0;
     } catch (const orm::DrogonDbException &ex) {
         json["status"] = 2;
