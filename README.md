@@ -4,16 +4,20 @@
 
 ## API List
 - `/blog/page/{page}`
+- `/blog/category/{slug}/{page}`
+- `/blog/user/{id}/{page}`
+- `/blog/tag/{slug}/{page}`
+- `/blog/admin/page/{page}`
 - `/blog/article/{id}`
 - `/blog/article/update`
 - `/blog/article/delete`
 - `/blog/category`
-- `/blog/category/{slug}/{page}`
 - `/login`
 - `/user/center`
 - `/user/add`
 - `/user/update`
 - `/user/update/password`
+- `/user/role`
 
 **For more detailed API documentation, please see [👉here](./docs/libre-blog_api.md).**
 
