@@ -598,6 +598,7 @@ void BlogController::getMenuAdmin(
         auto menuInDb = mpMenu.findOne(
             Criteria(Menu::Cols::_id, roleInDb.getValueOfMenu()));
         json["menu"] = generateMenu(mpMenu, menuInDb.getValueOfId());
+        json["status"] = 0;
     } catch (const orm::DrogonDbException &ex) {
         LOG_DEBUG << ex.base().what();
         json["status"] = 2;
