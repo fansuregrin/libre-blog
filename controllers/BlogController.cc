@@ -200,8 +200,8 @@ void BlogController::addArticle(
             json["status"] = 4;
             json["error"] = "没有权限";
         }
-    } catch (const std::exception &ex) {
-        LOG_DEBUG << ex.what();
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
         json["status"] = 2;
     }
 
@@ -287,8 +287,8 @@ void BlogController::updateArticle(
             json["status"] = 4;
             json["error"] = "没有权限";
         }
-    }
-    catch (const std::exception &ex) {
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
         json["status"] = 2;
     }
 
@@ -513,6 +513,26 @@ void BlogController::articleListByTag(
         }
         json["status"] = 0;
     } catch (const orm::DrogonDbException &ex) {
+        json["status"] = 2;
+    }
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+void BlogController::getCategory(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    int id
+) const {
+    Json::Value json;
+    auto db = app().getDbClient();
+    Mapper<Category> mpCategory(db);
+    try {
+        auto catInDb = mpCategory.findOne(Criteria(Category::Cols::_id, id));
+        json["category"] = catInDb.toJson();
+        json["status"] = 0;
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
         json["status"] = 2;
     }
     auto resp = HttpResponse::newHttpJsonResponse(json);
