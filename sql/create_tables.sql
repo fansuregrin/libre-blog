@@ -63,3 +63,12 @@ CREATE TABLE `article` (
   CONSTRAINT `fk_article_category_to_category_id` FOREIGN KEY (`category`) REFERENCES `category` (`id`),
   CONSTRAINT `fk_article_author_to_author_id` FOREIGN KEY (`author`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `menu` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `label` varchar(100) DEFAULT NULL,
+  `key` varchar(100) DEFAULT NULL,
+  `parent` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_parent_key` (`parent`,`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
