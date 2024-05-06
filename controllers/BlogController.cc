@@ -576,3 +576,49 @@ void BlogController::updateCategory(
     auto resp = HttpResponse::newHttpJsonResponse(json);
     callback(resp);
 }
+
+void BlogController::getMenuAdmin(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback
+) const {
+    Json::Value json;
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
+
+    auto db = app().getDbClient();
+    Mapper<User> mpUser(db);
+    Mapper<Role> mpRole(db);
+    Mapper<Menu> mpMenu(db);
+
+    try {
+        auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        auto roleInDb = mpRole.findOne(
+            Criteria(Role::Cols::_id, userInDb.getValueOfRole()));
+        auto menuInDb = mpMenu.findOne(
+            Criteria(Menu::Cols::_id, roleInDb.getValueOfMenu()));
+        json["menu"] = generateMenu(mpMenu, menuInDb.getValueOfId());
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+Json::Value generateMenu(Mapper<Menu> &mp, int32_t id) {
+    auto subMenus = mp.findBy(Criteria(Menu::Cols::_parent, id));
+    Json::Value menuItems(Json::arrayValue);
+    for (const auto &subMenu : subMenus) {
+        Json::Value menuItem;
+        menuItem["label"] = subMenu.getValueOfLabel();
+        menuItem["key"] = subMenu.getValueOfKey();
+        auto children = generateMenu(mp, subMenu.getValueOfId());
+        if (!children.empty()) {
+            menuItem["children"] = children;
+        }
+        menuItems.append(menuItem);
+    }
+    return menuItems;
+}

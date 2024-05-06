@@ -2,10 +2,12 @@
 
 #include <drogon/HttpController.h>
 #include "../models/User.h"
+#include "../models/Role.h"
 #include "../models/Category.h"
 #include "../models/Article.h"
 #include "../models/Tag.h"
 #include "../models/ArticleTag.h"
+#include "../models/Menu.h"
 
 using namespace drogon;
 using orm::Mapper;
@@ -14,9 +16,11 @@ using orm::CompareOperator;
 using orm::SortOrder;
 using drogon_model::dg_test::Article;
 using drogon_model::dg_test::User;
+using drogon_model::dg_test::Role;
 using drogon_model::dg_test::Category;
 using drogon_model::dg_test::Tag;
 using drogon_model::dg_test::ArticleTag;
+using drogon_model::dg_test::Menu;
 
 class BlogController : public drogon::HttpController<BlogController> {
 public:
@@ -33,6 +37,7 @@ public:
     ADD_METHOD_TO(BlogController::articleListByCategory, "/blog/category/{slug}/{page}", Get);
     ADD_METHOD_TO(BlogController::articleListByAuthor, "/blog/user/{id}/{page}", Get);
     ADD_METHOD_TO(BlogController::articleListByTag, "/blog/tag/{slug}/{page}", Get);
+    ADD_METHOD_TO(BlogController::getMenuAdmin, "/blog/admin/menu", Get, "LoginFilter");
     METHOD_LIST_END
 
     void articleList(
@@ -108,6 +113,11 @@ public:
         const std::string &slug,
         int page
     ) const;
+
+    void getMenuAdmin(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback
+    ) const;
 };
 
 
@@ -170,3 +180,5 @@ inline Category fromRequest(const HttpRequest &req) {
 }
 
 }
+
+Json::Value generateMenu(Mapper<Menu> &mp, int32_t id);
