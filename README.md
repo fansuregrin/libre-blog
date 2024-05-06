@@ -9,9 +9,12 @@
 - `/blog/tag/{slug}/{page}`
 - `/blog/admin/page/{page}`
 - `/blog/article/{id}`
+- `/blog/article/add`
 - `/blog/article/update`
 - `/blog/article/delete`
 - `/blog/category`
+- `/blog/category/update`
+- `/blog/admin/menu`
 - `/login`
 - `/user/center`
 - `/user/add`
