@@ -9,7 +9,14 @@
 
 using namespace drogon;
 using orm::Mapper;
+using orm::Criteria;
+using orm::CompareOperator;
+using orm::SortOrder;
 using drogon_model::dg_test::Article;
+using drogon_model::dg_test::User;
+using drogon_model::dg_test::Category;
+using drogon_model::dg_test::Tag;
+using drogon_model::dg_test::ArticleTag;
 
 class BlogController : public drogon::HttpController<BlogController> {
 public:
@@ -17,9 +24,11 @@ public:
     ADD_METHOD_TO(BlogController::articleList, "/blog/page/{page}", Get);
     ADD_METHOD_TO(BlogController::articleListAdmin, "/blog/admin/page/{page}", Get, "LoginFilter");
     ADD_METHOD_TO(BlogController::getArticle, "/blog/article/{id}", Get);
-    ADD_METHOD_TO(BlogController::updateArticle, "/blog/article/update", Post, "LoginFilter");
-    ADD_METHOD_TO(BlogController::deleteArticles, "/blog/article/delete", Post, "LoginFilter");
+    ADD_METHOD_TO(BlogController::addArticle, "/blog/article/add", Post, "LoginFilter", "JsonFilter");
+    ADD_METHOD_TO(BlogController::updateArticle, "/blog/article/update", Post, "LoginFilter", "JsonFilter");
+    ADD_METHOD_TO(BlogController::deleteArticles, "/blog/article/delete", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::getCategories, "/blog/category", Get);
+    ADD_METHOD_TO(BlogController::updateCategory, "/blog/category/update", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::articleListByCategory, "/blog/category/{slug}/{page}", Get);
     ADD_METHOD_TO(BlogController::articleListByAuthor, "/blog/user/{id}/{page}", Get);
     ADD_METHOD_TO(BlogController::articleListByTag, "/blog/tag/{slug}/{page}", Get);
@@ -43,6 +52,12 @@ public:
         int id
     ) const;
 
+    void addArticle(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        const std::vector<std::string> &tags
+    ) const;
+
     void updateArticle(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
@@ -58,6 +73,12 @@ public:
     void getCategories(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback
+    ) const;
+
+    void updateCategory(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        const Category &cat
     ) const;
 
     void articleListByCategory(
@@ -87,12 +108,7 @@ namespace drogon {
 
 template <>
 inline Article fromRequest(const HttpRequest &req) {
-    auto jsonPtr = req.getJsonObject();
-    if (jsonPtr == nullptr) {
-        throw std::invalid_argument("请求体格式错误, 请使用json");
-    }
-    
-    auto &json = *jsonPtr;
+    auto &json = *req.getJsonObject();
     if (!json.isMember("id") || json["id"].type() != Json::intValue) {
         throw std::invalid_argument("缺少必备字段: id, 或者类型错误");
     }
@@ -126,6 +142,24 @@ inline std::vector<std::string> fromRequest(const HttpRequest &req) {
     }
 
     return tags;
+}
+
+template <>
+inline Category fromRequest(const HttpRequest &req) {
+    auto &json = *req.getJsonObject();
+    if (!json.isMember("id") || json["id"].type() != Json::intValue) {
+        throw std::invalid_argument("缺少必备字段: id, 或者类型错误");
+    }
+    if (!json.isMember("name") || json["name"].type() != Json::stringValue) {
+        throw std::invalid_argument("缺少必备字段: name, 或者类型错误");
+    }
+    if (!json.isMember("slug") || json["slug"].type() != Json::stringValue) {
+        throw std::invalid_argument("缺少必备字段: slug, 或者类型错误");
+    }
+
+    Category cat;
+    cat.updateByJson(json);
+    return cat;
 }
 
 }

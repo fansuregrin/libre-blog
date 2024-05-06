@@ -12,9 +12,9 @@ public:
     METHOD_LIST_BEGIN
     ADD_METHOD_TO(UserController::login, "/login", Post);
     ADD_METHOD_TO(UserController::userCenter, "/user/center", Get, "LoginFilter");
-    ADD_METHOD_TO(UserController::addUser, "/user/add", Post);
-    ADD_METHOD_TO(UserController::updateUser, "/user/update", Post, "LoginFilter");
-    ADD_METHOD_TO(UserController::updatePassword, "/user/update/password", Post, "LoginFilter");
+    ADD_METHOD_TO(UserController::addUser, "/user/add", Post, "JsonFilter");
+    ADD_METHOD_TO(UserController::updateUser, "/user/update", Post, "LoginFilter", "JsonFilter");
+    ADD_METHOD_TO(UserController::updatePassword, "/user/update/password", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::getRole, "/user/role", Get, "LoginFilter");
     METHOD_LIST_END
 
@@ -75,7 +75,3 @@ inline User fromRequest(const HttpRequest &req) {
     return user;
 }
 }
-
-bool checkEmail(const std::string &email);
-bool checkUsername(const std::string &username);
-bool checkPassword(const std::string &password);

@@ -3,16 +3,6 @@
 #include "BlogController.h"
 #include "../utils/Utils.h"
 
-using orm::Mapper;
-using orm::Criteria;
-using orm::CompareOperator;
-using orm::SortOrder;
-using drogon_model::dg_test::Article;
-using drogon_model::dg_test::User;
-using drogon_model::dg_test::Category;
-using drogon_model::dg_test::Tag;
-using drogon_model::dg_test::ArticleTag;
-
 
 void BlogController::articleList(
     const HttpRequestPtr& req,
@@ -147,6 +137,74 @@ void BlogController::getArticle(
         callback(resp);
     }
     
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+void BlogController::addArticle(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    const std::vector<std::string> &tags
+) const {
+    Json::Value json;
+    bool hasPermission = false;
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
+
+    auto db = app().getDbClient();
+    Mapper<Article> mpArticle(db);
+    Mapper<Tag> mpTag(db);
+    Mapper<ArticleTag> mpArticleTag(db);
+    Mapper<User> mpUser(db);
+    
+    try {
+        auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        auto roleId = userInDb.getValueOfRole();
+        if (roleId <= 3) {
+            // administrator,editor,contributor 有新增文章的权限
+            hasPermission = true;
+        }
+
+        if (hasPermission) {
+            Article art;
+            art.updateByJson(*req->getJsonObject());
+            art.setAuthor(userId);
+            if (art.getCategory() == nullptr) {
+                art.setCategory(1);
+            }
+            mpArticle.insert(art);
+            
+            // 依次处理前端传过来的每一个tag
+            for (const auto &tagName : tags) {
+                Tag tag;
+                // 查询表Tag中有没有指定name字段的tag
+                auto cnt = mpTag.count(Criteria(Tag::Cols::_name, tagName));
+                if (cnt <= 0) {
+                    // 如果没有，则需要向表Tag中插入新的tag
+                    tag.setName(tagName);
+                    tag.setSlug(tagName);
+                    mpTag.insert(tag);
+                } else {
+                    // 如果有，则需要从表Tag中获取这个tag
+                    tag = mpTag.findOne(Criteria(Tag::Cols::_name, tagName));
+                }
+                // 然后，向表ArticleTag中插入此tag和article的对应关系
+                ArticleTag artTag;
+                artTag.setArticle(art.getValueOfId());
+                artTag.setTag(tag.getValueOfId());
+                mpArticleTag.insert(artTag);
+            }
+            json["status"] = 0;
+        } else {
+            json["status"] = 4;
+            json["error"] = "没有权限";
+        }
+    } catch (const std::exception &ex) {
+        LOG_DEBUG << ex.what();
+        json["status"] = 2;
+    }
+
     auto resp = HttpResponse::newHttpJsonResponse(json);
     callback(resp);
 }
@@ -457,6 +515,44 @@ void BlogController::articleListByTag(
     } catch (const orm::DrogonDbException &ex) {
         json["status"] = 2;
     }
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+void BlogController::updateCategory(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    const Category &cat
+) const {
+    bool hasPermission = false;
+    Json::Value json;
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
+
+    auto db = app().getDbClient();
+    Mapper<User> mpUser(db);
+    Mapper<Category> mpCategory(db);
+
+    try {
+        auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        auto roleId = userInDb.getValueOfRole();
+        if (roleId <= 2) {
+            // administrator 和 editor 有更新分类的权限
+            hasPermission = true;
+        }
+        if (hasPermission) {
+            mpCategory.update(cat);
+            json["status"] = 0;
+        } else {
+            json["status"] = 4;
+            json["error"] = "没有权限";
+        }
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+
     auto resp = HttpResponse::newHttpJsonResponse(json);
     callback(resp);
 }

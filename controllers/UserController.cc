@@ -166,11 +166,7 @@ void UserController::updateUser(
     auto decoded = jwt::decode<json_traits>(token);
     int userId = decoded.get_payload_claim("uid").as_integer();
 
-    auto pJson = req->getJsonObject();
-    if (pJson == nullptr) {
-       throw std::invalid_argument("请求体格式错误, 请使用json"); 
-    }
-    const auto &reqJson = *pJson;
+    const auto &reqJson = *req->getJsonObject();
     if (!reqJson.isMember("username") || 
     reqJson["username"].type() != Json::stringValue) {
         throw std::invalid_argument("缺少必备字段: username, 或者类型错误");
