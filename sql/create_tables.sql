@@ -16,8 +16,11 @@ CREATE TABLE `user` (
 CREATE TABLE `role` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
+  `menu` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`)
+  UNIQUE KEY `name` (`name`),
+  KEY `fk_role_menu_to_menu_id` (`menu`),
+  CONSTRAINT `fk_role_menu_to_menu_id` FOREIGN KEY (`menu`) REFERENCES `menu` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `tag` (
