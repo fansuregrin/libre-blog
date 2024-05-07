@@ -547,6 +547,50 @@ void BlogController::getCategory(
     callback(resp);
 }
 
+void BlogController::addCategory(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback
+) const {
+    Json::Value json;
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
+
+    auto db = app().getDbClient();
+    Mapper<Category> mpCategory(db);
+    Mapper<User> mpUser(db);
+    Mapper<Role> mpRole(db);
+
+    try {
+        auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        if (userInDb.getValueOfRole() <= 2) {
+            // 只有 administrator 和 editor 才有新增分类的权限
+            auto &reqJson = *req->getJsonObject();
+            if (!reqJson.isMember("name") || 
+            reqJson["name"].type() != Json::stringValue) {
+                throw std::invalid_argument("缺少必备字段: name, 或者类型错误");
+            }
+            if (!reqJson.isMember("slug") || 
+            reqJson["slug"].type() != Json::stringValue) {
+                throw std::invalid_argument("缺少必备字段: slug, 或者类型错误");
+            }
+
+            Category cat(reqJson);
+            mpCategory.insert(cat);
+            json["status"] = 0;
+        } else {
+            json["status"] = 4;
+            json["error"] = "没有权限";
+        }
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
 void BlogController::updateCategory(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
