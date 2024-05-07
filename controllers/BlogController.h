@@ -35,6 +35,7 @@ public:
     ADD_METHOD_TO(BlogController::getCategory, "/blog/category/{id}", Get);
     ADD_METHOD_TO(BlogController::addCategory, "/blog/category/add", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::updateCategory, "/blog/category/update", Post, "LoginFilter", "JsonFilter");
+    ADD_METHOD_TO(BlogController::deleteCategories, "/blog/category/delete", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::articleListByCategory, "/blog/category/{slug}/{page}", Get);
     ADD_METHOD_TO(BlogController::articleListByAuthor, "/blog/user/{id}/{page}", Get);
     ADD_METHOD_TO(BlogController::articleListByTag, "/blog/tag/{slug}/{page}", Get);
@@ -97,6 +98,11 @@ public:
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
         const Category &cat
+    ) const;
+
+    void deleteCategories(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback
     ) const;
 
     void articleListByCategory(

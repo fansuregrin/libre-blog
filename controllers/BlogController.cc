@@ -315,31 +315,25 @@ void BlogController::deleteArticles(
         throw std::invalid_argument("缺少必备字段: ids, 或者类型错误");
     }
 
-    int count = reqJson["ids"].size();
-    if (count <= 0) {
-        json["status"] = 2;
-        auto resp = HttpResponse::newHttpJsonResponse(json);
-        callback(resp);
-        return;
+    std::vector<int> idList;
+    for (const auto &id : reqJson["ids"]) {
+        idList.emplace_back(id.asInt());
     }
 
-    Json::Value ids = reqJson["ids"];
-    std::vector<int> idList(count);
-    for (int i=0; i<count; ++i) {
-        idList[i] = ids[i].asUInt();
-    }
     auto db = app().getDbClient();
     Mapper<Article> mpArticle(db);
     Mapper<ArticleTag> mpArticleTag(db);
     try {
-        // 在删除文章之前需要删除文章与标签的关系
-        mpArticleTag.deleteBy(
-            Criteria(ArticleTag::Cols::_article, CompareOperator::In, idList)
-        );
-        // 删除article和tag的关系后，才能删除文章
-        mpArticle.deleteBy(
-            Criteria(Article::Cols::_id, CompareOperator::In, idList)
-        );
+        if (!idList.empty()) {
+            // 在删除文章之前需要删除文章与标签的关系
+            mpArticleTag.deleteBy(
+                Criteria(ArticleTag::Cols::_article, CompareOperator::In, idList)
+            );
+            // 删除article和tag的关系后，才能删除文章
+            mpArticle.deleteBy(
+                Criteria(Article::Cols::_id, CompareOperator::In, idList)
+            );
+        }
         json["status"] = 0;
     } catch (const orm::DrogonDbException &ex) {
         LOG_DEBUG << ex.base().what();
@@ -620,6 +614,52 @@ void BlogController::updateCategory(
             json["status"] = 4;
             json["error"] = "没有权限";
         }
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+void BlogController::deleteCategories(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback
+) const {
+    Json::Value json;
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
+
+
+    const auto &reqJson = *req->getJsonObject();
+    if (!reqJson.isMember("ids") || reqJson["ids"].type() != Json::arrayValue) {
+        throw std::invalid_argument("缺少必备字段: ids, 或者类型错误");
+    }
+
+    std::vector<int> idList;
+    for (const auto &id : reqJson["ids"]) {
+        if (id.asInt() > 1) {
+            idList.emplace_back(id.asInt());
+        }
+    }
+    
+    auto db = app().getDbClient();
+    Mapper<Article> mpArticle(db);
+    Mapper<Category> mpCategory(db);
+    try {
+        if (!idList.empty()) {
+            // 将要删除的分类下面的文章的分类id改成保留分类的id（即id为1的分类）
+            mpArticle.updateBy(
+                {Article::Cols::_category},
+                Criteria(Article::Cols::_category, CompareOperator::In, idList),
+                1);
+            // 更新了文章的category后才能删除这些分类
+            mpCategory.deleteBy(
+                Criteria(Category::Cols::_id, CompareOperator::In, idList));
+        }
+        json["status"] = 0;
     } catch (const orm::DrogonDbException &ex) {
         LOG_DEBUG << ex.base().what();
         json["status"] = 2;
