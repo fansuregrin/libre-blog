@@ -356,7 +356,8 @@ void BlogController::getCategories(
     Json::Value json;
     Mapper<Category> mp(app().getDbClient());
     try {
-        auto categoires = mp.findAll();
+        auto categoires = mp.findBy(
+            Criteria(Category::Cols::_id, CompareOperator::GT, 1));
         for (const auto &cat : categoires) {
             Json::Value item;
             item["name"] = cat.getValueOfName();
