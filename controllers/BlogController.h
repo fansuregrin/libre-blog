@@ -38,6 +38,9 @@ public:
     ADD_METHOD_TO(BlogController::updateCategory, "/blog/category/update", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::deleteCategories, "/blog/category/delete", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::articleListByTag, "/blog/tag/{slug}/{page}", Get);
+    ADD_METHOD_TO(BlogController::tagList, "/blog/tags/{page}", Get);
+    ADD_METHOD_TO(BlogController::getTag, "/blog/tag/{id}", Get);
+    ADD_METHOD_TO(BlogController::updateTag, "/blog/tag/update", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::articleListByAuthor, "/blog/user/{id}/{page}", Get);
     ADD_METHOD_TO(BlogController::getMenuAdmin, "/blog/admin/menu", Get, "LoginFilter");
     METHOD_LIST_END
@@ -126,6 +129,24 @@ public:
         int page
     ) const;
 
+    void tagList(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        int page
+    ) const;
+
+    void getTag(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        int id
+    ) const;
+
+    void updateTag(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        const Tag &tag
+    ) const;
+
     void getMenuAdmin(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback
@@ -189,6 +210,24 @@ inline Category fromRequest(const HttpRequest &req) {
     Category cat;
     cat.updateByJson(json);
     return cat;
+}
+
+template <>
+inline Tag fromRequest(const HttpRequest &req) {
+    auto &json = *req.getJsonObject();
+    if (!json.isMember("id") || json["id"].type() != Json::intValue) {
+        throw std::invalid_argument("缺少必备字段: id, 或者类型错误");
+    }
+    if (!json.isMember("name") || json["name"].type() != Json::stringValue) {
+        throw std::invalid_argument("缺少必备字段: name, 或者类型错误");
+    }
+    if (!json.isMember("slug") || json["slug"].type() != Json::stringValue) {
+        throw std::invalid_argument("缺少必备字段: slug, 或者类型错误");
+    }
+
+    Tag tag;
+    tag.updateByJson(json);
+    return tag;
 }
 
 }

@@ -301,6 +301,7 @@ void BlogController::deleteArticles(
     std::function<void (const HttpResponsePtr &)> &&callback
 ) const {
     Json::Value json;
+    bool hasPermission = false;
 
     auto token = req->getHeader("Authorization").substr(7);
     auto decoded = jwt::decode<json_traits>(token);
@@ -323,18 +324,38 @@ void BlogController::deleteArticles(
     auto db = app().getDbClient();
     Mapper<Article> mpArticle(db);
     Mapper<ArticleTag> mpArticleTag(db);
+    Mapper<User> mpUser(db);
     try {
-        if (!idList.empty()) {
-            // 在删除文章之前需要删除文章与标签的关系
-            mpArticleTag.deleteBy(
-                Criteria(ArticleTag::Cols::_article, CompareOperator::In, idList)
-            );
-            // 删除article和tag的关系后，才能删除文章
-            mpArticle.deleteBy(
-                Criteria(Article::Cols::_id, CompareOperator::In, idList)
-            );
+        auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        auto roleId = userInDb.getValueOfRole();
+        if (roleId <= 2 ) {
+            // administrator(id=1) 和 editor(id=2) 有删除任意文章的权限
+            if (!idList.empty()) {
+                // 在删除文章之前需要删除文章与标签的关系
+                mpArticleTag.deleteBy(
+                    Criteria(ArticleTag::Cols::_article, CompareOperator::In, idList)
+                );
+                // 删除article和tag的关系后，才能删除文章
+                mpArticle.deleteBy(
+                    Criteria(Article::Cols::_id, CompareOperator::In, idList)
+                );
+            }
+            json["status"] = 0;
+        } else if (roleId == 3) {
+            // contributor(id=3) 只能删除自己写的文章
+            // todo: 删除文章id在idList中，并且文章的user是userId的文章
+            // db->execSqlSync(
+            //     "DELTE FROM article_tag "
+            //     "JOIN article art ON article_tag.article = art.id "
+            //     "WHERE article_tag.article IN ? AND art.author = userId;",
+            //     idList
+            // );
+            // db->execSqlSync(
+            //     "DELETE FROM article WHERE id IN ? AND author = userId;",
+            //     idList
+            // );
+            json["status"] = 0;
         }
-        json["status"] = 0;
     } catch (const orm::DrogonDbException &ex) {
         LOG_DEBUG << ex.base().what();
         json["status"] = 2;
@@ -602,12 +623,8 @@ void BlogController::updateCategory(
 
     try {
         auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
-        auto roleId = userInDb.getValueOfRole();
-        if (roleId <= 2) {
-            // administrator 和 editor 有更新分类的权限
-            hasPermission = true;
-        }
-        if (hasPermission) {
+        if (userInDb.getValueOfRole() <= 2) {
+            // 只有 administrator 和 editor 有更新分类的权限
             mpCategory.update(cat);
             json["status"] = 0;
         } else {
@@ -648,18 +665,115 @@ void BlogController::deleteCategories(
     auto db = app().getDbClient();
     Mapper<Article> mpArticle(db);
     Mapper<Category> mpCategory(db);
+    Mapper<User> mpUser(db);
     try {
-        if (!idList.empty()) {
-            // 将要删除的分类下面的文章的分类id改成保留分类的id（即id为1的分类）
-            mpArticle.updateBy(
-                {Article::Cols::_category},
-                Criteria(Article::Cols::_category, CompareOperator::In, idList),
-                1);
-            // 更新了文章的category后才能删除这些分类
-            mpCategory.deleteBy(
-                Criteria(Category::Cols::_id, CompareOperator::In, idList));
+        auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        if (userInDb.getValueOfRole() <= 2) {
+            // 只有 administrator(id=1) 和 editor(id=2) 有删除分类的权限
+            if (!idList.empty()) {
+                // 将要删除的分类下面的文章的分类id改成保留分类的id（即id为1的分类）
+                mpArticle.updateBy(
+                    {Article::Cols::_category},
+                    Criteria(Article::Cols::_category, CompareOperator::In, idList),
+                    1);
+                // 更新了文章的category后才能删除这些分类
+                mpCategory.deleteBy(
+                    Criteria(Category::Cols::_id, CompareOperator::In, idList));
+            }
+            json["status"] = 0;
+        } else {
+            json["status"] = 4;
+            json["error"] = "没有权限";
+        }
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+void BlogController::tagList(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    int page
+) const {
+    Json::Value json;
+    auto db = app().getDbClient();
+    Mapper<Tag> mpTag(db);
+    Mapper<ArticleTag> mpArticleTag(db);
+    try {
+        auto numTags = mpTag.count();
+        int perPage = 10;
+        json["num_pages"] = numTags / perPage + (numTags%perPage?1:0);
+        auto tags = mpTag.paginate(page, perPage).findAll();
+        for (const auto tagInDb : tags) {
+            Json::Value tag;
+            tag["id"] = tagInDb.getValueOfId();
+            tag["name"] = tagInDb.getValueOfName();
+            tag["slug"] = tagInDb.getValueOfSlug();
+            tag["num_articles"] = mpArticleTag.count(
+                Criteria(ArticleTag::Cols::_tag, tagInDb.getValueOfId()));
+            json["tags"].append(tag);
         }
         json["status"] = 0;
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+void BlogController::getTag(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    int id
+) const {
+    Json::Value json;
+    auto db = app().getDbClient();
+    Mapper<Tag> mpTag(db);
+    try {
+        auto tagInDb = mpTag.findOne(Criteria(Tag::Cols::_id, id));
+        json["tag"]["id"] = tagInDb.getValueOfId();
+        json["tag"]["name"] = tagInDb.getValueOfName();
+        json["tag"]["slug"] = tagInDb.getValueOfSlug();
+        json["status"] = 0;
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+void BlogController::updateTag(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    const Tag &tag
+) const {
+    Json::Value json;
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
+
+    auto db = app().getDbClient();
+    Mapper<User> mpUser(db);
+    Mapper<Tag> mpTag(db);
+
+    try {
+        auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        if (userInDb.getValueOfRole() <= 2) {
+            // 只有 administrator 和 editor 才有更新标签的权限
+            mpTag.update(tag);
+            json["status"] = 0;
+        } else {
+            json["status"] = 4;
+            json["error"] = "没有权限";
+        }
     } catch (const orm::DrogonDbException &ex) {
         LOG_DEBUG << ex.base().what();
         json["status"] = 2;
