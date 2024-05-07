@@ -25,20 +25,20 @@ using drogon_model::dg_test::Menu;
 class BlogController : public drogon::HttpController<BlogController> {
 public:
     METHOD_LIST_BEGIN
-    ADD_METHOD_TO(BlogController::articleList, "/blog/page/{page}", Get);
-    ADD_METHOD_TO(BlogController::articleListAdmin, "/blog/admin/page/{page}", Get, "LoginFilter");
+    ADD_METHOD_TO(BlogController::articleList, "/blog/articles/{page}", Get);
+    ADD_METHOD_TO(BlogController::articleListAdmin, "/blog/admin/articles/{page}", Get, "LoginFilter");
     ADD_METHOD_TO(BlogController::getArticle, "/blog/article/{id}", Get);
     ADD_METHOD_TO(BlogController::addArticle, "/blog/article/add", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::updateArticle, "/blog/article/update", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::deleteArticles, "/blog/article/delete", Post, "LoginFilter", "JsonFilter");
+    ADD_METHOD_TO(BlogController::articleListByCategory, "/blog/category/{slug}/{page}", Get);
     ADD_METHOD_TO(BlogController::getCategories, "/blog/category", Get);
     ADD_METHOD_TO(BlogController::getCategory, "/blog/category/{id}", Get);
     ADD_METHOD_TO(BlogController::addCategory, "/blog/category/add", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::updateCategory, "/blog/category/update", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::deleteCategories, "/blog/category/delete", Post, "LoginFilter", "JsonFilter");
-    ADD_METHOD_TO(BlogController::articleListByCategory, "/blog/category/{slug}/{page}", Get);
-    ADD_METHOD_TO(BlogController::articleListByAuthor, "/blog/user/{id}/{page}", Get);
     ADD_METHOD_TO(BlogController::articleListByTag, "/blog/tag/{slug}/{page}", Get);
+    ADD_METHOD_TO(BlogController::articleListByAuthor, "/blog/user/{id}/{page}", Get);
     ADD_METHOD_TO(BlogController::getMenuAdmin, "/blog/admin/menu", Get, "LoginFilter");
     METHOD_LIST_END
 
