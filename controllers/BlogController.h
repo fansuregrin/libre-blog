@@ -32,7 +32,7 @@ public:
     ADD_METHOD_TO(BlogController::updateArticle, "/blog/article/update", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::deleteArticles, "/blog/article/delete", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::articleListByCategory, "/blog/category/{slug}/{page}", Get);
-    ADD_METHOD_TO(BlogController::getCategories, "/blog/category", Get);
+    ADD_METHOD_TO(BlogController::getCategories, "/blog/categories", Get);
     ADD_METHOD_TO(BlogController::getCategory, "/blog/category/{id}", Get);
     ADD_METHOD_TO(BlogController::addCategory, "/blog/category/add", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::updateCategory, "/blog/category/update", Post, "LoginFilter", "JsonFilter");

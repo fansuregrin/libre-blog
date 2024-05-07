@@ -3,17 +3,20 @@
 **Libre-blog** is a blog system. This repository uses the [Drogon](https://github.com/drogonframework/drogon) framework to implement the **backend API** of libre-blog. The front-end implementation of libre-blog is [👉here](https://github.com/fansuregrin/libre-blog-frontend).
 
 ## API List
-- `/blog/page/{page}`
+- `/blog/articles/{page}`
+- `/blog/admin/articles/{page}`
 - `/blog/category/{slug}/{page}`
 - `/blog/user/{id}/{page}`
 - `/blog/tag/{slug}/{page}`
-- `/blog/admin/page/{page}`
 - `/blog/article/{id}`
 - `/blog/article/add`
 - `/blog/article/update`
 - `/blog/article/delete`
-- `/blog/category`
+- `/blog/categories`
+- `/blog/category/{id}`
+- `/blog/category/add`
 - `/blog/category/update`
+- `/blog/category/delete`
 - `/blog/admin/menu`
 - `/login`
 - `/user/center`
