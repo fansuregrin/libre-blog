@@ -1,3 +1,22 @@
+CREATE TABLE `menu` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `label` varchar(100) DEFAULT NULL,
+  `key` varchar(100) DEFAULT NULL,
+  `parent` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_parent_key` (`parent`,`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `role` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `menu` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  KEY `fk_role_menu_to_menu_id` (`menu`),
+  CONSTRAINT `fk_role_menu_to_menu_id` FOREIGN KEY (`menu`) REFERENCES `menu` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 CREATE TABLE `user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(255) NOT NULL,
@@ -11,16 +30,6 @@ CREATE TABLE `user` (
   UNIQUE KEY `username` (`username`),
   KEY `fk_user_role_to_role_id` (`role`),
   CONSTRAINT `fk_user_role_to_role_id` FOREIGN KEY (`role`) REFERENCES `role` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `role` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `menu` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  KEY `fk_role_menu_to_menu_id` (`menu`),
-  CONSTRAINT `fk_role_menu_to_menu_id` FOREIGN KEY (`menu`) REFERENCES `menu` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `tag` (
@@ -41,16 +50,6 @@ CREATE TABLE `category` (
   UNIQUE KEY `slug` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `article_tag` (
-  `article` int(11) NOT NULL,
-  `tag` int(11) NOT NULL,
-  PRIMARY KEY (`article`,`tag`),
-  KEY `article` (`article`),
-  KEY `tag` (`tag`),
-  CONSTRAINT `article_tag_ibfk_1` FOREIGN KEY (`article`) REFERENCES `article` (`id`),
-  CONSTRAINT `article_tag_ibfk_2` FOREIGN KEY (`tag`) REFERENCES `tag` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 CREATE TABLE `article` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) DEFAULT NULL,
@@ -67,11 +66,12 @@ CREATE TABLE `article` (
   CONSTRAINT `fk_article_author_to_author_id` FOREIGN KEY (`author`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `menu` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `label` varchar(100) DEFAULT NULL,
-  `key` varchar(100) DEFAULT NULL,
-  `parent` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_parent_key` (`parent`,`key`)
+CREATE TABLE `article_tag` (
+  `article` int(11) NOT NULL,
+  `tag` int(11) NOT NULL,
+  PRIMARY KEY (`article`,`tag`),
+  KEY `article` (`article`),
+  KEY `tag` (`tag`),
+  CONSTRAINT `article_tag_ibfk_1` FOREIGN KEY (`article`) REFERENCES `article` (`id`),
+  CONSTRAINT `article_tag_ibfk_2` FOREIGN KEY (`tag`) REFERENCES `tag` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
