@@ -328,9 +328,16 @@ void BlogController::deleteArticles(
     for (int i=0; i<count; ++i) {
         idList[i] = ids[i].asUInt();
     }
-    Mapper<Article> mp(app().getDbClient());
+    auto db = app().getDbClient();
+    Mapper<Article> mpArticle(db);
+    Mapper<ArticleTag> mpArticleTag(db);
     try {
-        mp.deleteBy(
+        // 在删除文章之前需要删除文章与标签的关系
+        mpArticleTag.deleteBy(
+            Criteria(ArticleTag::Cols::_article, CompareOperator::In, idList)
+        );
+        // 删除article和tag的关系后，才能删除文章
+        mpArticle.deleteBy(
             Criteria(Article::Cols::_id, CompareOperator::In, idList)
         );
         json["status"] = 0;
