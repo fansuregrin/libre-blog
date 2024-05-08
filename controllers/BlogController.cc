@@ -219,7 +219,7 @@ void BlogController::addArticle(
 void BlogController::updateArticle(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
-    const drogon_model::dg_test::Article &article,
+    const Article &article,
     const std::vector<std::string> &tags
 ) const {
     bool hasPermission = false;

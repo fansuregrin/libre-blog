@@ -22,7 +22,7 @@ public:
     METHOD_LIST_BEGIN
     ADD_METHOD_TO(UserController::login, "/login", Post);
     ADD_METHOD_TO(UserController::userCenter, "/user/center", Get, "LoginFilter");
-    ADD_METHOD_TO(UserController::addUser, "/user/add", Post, "JsonFilter");
+    ADD_METHOD_TO(UserController::register_, "/user/register", Post, "JsonFilter");
     ADD_METHOD_TO(UserController::userList, "/users/{page}", Get, "LoginFilter");
     ADD_METHOD_TO(UserController::updateUser, "/user/update", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::updatePassword, "/user/update/password", Post, "LoginFilter", "JsonFilter");
@@ -41,7 +41,7 @@ public:
         std::function<void (const HttpResponsePtr &)> &&callback
     ) const;
 
-    void addUser(
+    void register_(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
         const User &user

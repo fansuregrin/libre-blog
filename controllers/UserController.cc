@@ -7,7 +7,7 @@
 void UserController::login(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
-    const drogon_model::dg_test::User &user
+    const User &user
 ) const {
     orm::Mapper<User> mapper(app().getDbClient());
 
@@ -71,10 +71,10 @@ void UserController::userCenter(
     callback(resp);
 }
 
-void UserController::addUser(
+void UserController::register_(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
-    const drogon_model::dg_test::User &user
+    const User &user
 ) const {
     Json::Value json;
     bool valid = true;
