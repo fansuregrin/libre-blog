@@ -3,10 +3,14 @@
 #include <drogon/HttpController.h>
 #include <../models/User.h>
 #include <../models/Role.h>
+#include <../models/Article.h>
+#include <../models/ArticleTag.h>
 
 using namespace drogon;
 using drogon_model::dg_test::User;
 using drogon_model::dg_test::Role;
+using drogon_model::dg_test::Article;
+using drogon_model::dg_test::ArticleTag;
 using orm::Mapper;
 using orm::Criteria;
 using orm::CompareOperator;
@@ -22,13 +26,14 @@ public:
     ADD_METHOD_TO(UserController::userList, "/users/{page}", Get, "LoginFilter");
     ADD_METHOD_TO(UserController::updateUser, "/user/update", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::updatePassword, "/user/update/password", Post, "LoginFilter", "JsonFilter");
+    ADD_METHOD_TO(UserController::deleteUsers, "/user/delete", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::getRole, "/user/role", Get, "LoginFilter");
     METHOD_LIST_END
 
     void login(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
-        const drogon_model::dg_test::User &user
+        const User &user
     ) const;
 
     void userCenter(
@@ -39,7 +44,7 @@ public:
     void addUser(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
-        const drogon_model::dg_test::User &user
+        const User &user
     ) const;
 
     void userList(
@@ -54,6 +59,11 @@ public:
     ) const;
 
     void updatePassword(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback
+    ) const;
+
+    void deleteUsers(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback
     ) const;
