@@ -74,7 +74,7 @@ void UserController::userCenter(
 void UserController::register_(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
-    const User &user
+    User user
 ) const {
     Json::Value json;
     bool valid = true;
@@ -103,52 +103,28 @@ void UserController::register_(
         return;
     }
 
-    Mapper<User> mapper(app().getDbClient());
-    mapper.findBy(
-        {User::Cols::_username, user.getValueOfUsername()},
-        [=] (const std::vector<User> &usersInDb) {
-            Json::Value json;
-            if (usersInDb.size() > 0) {
-                json["status"] = 7;
-                json["error"] = "该用户名已经被注册";
-                auto resp = HttpResponse::newHttpJsonResponse(json);
-                callback(resp);
-                return;
-            } else {
-                User user_ = user;
-                auto uuid = utils::getUuid();
-                user_.setSalt(uuid);
-                user_.setPassword(
-                    utils::getSha256(user_.getValueOfPassword() + uuid)
-                );
-                Mapper<User> m(app().getDbClient());
-                m.insert(
-                    user_,
-                    [=] (const User &u) {
-                        Json::Value json;
-                        json["status"] = 0;
-                        json["message"] = "注册成功";
-                        auto resp = HttpResponse::newHttpJsonResponse(json);
-                        callback(resp);
-                    },
-                    [=] (const orm::DrogonDbException &ex) {
-                        Json::Value json;
-                        json["status"] = 2;
-                        json["error"] = "注册失败";
-                        auto resp = HttpResponse::newHttpJsonResponse(json);
-                        callback(resp);
-                    }
-                );
-            }
-        },
-        [=] (const orm::DrogonDbException &ex) {
-            Json::Value json;
-            json["status"] = 2;
-            json["error"] = "注册失败";
-            auto resp = HttpResponse::newHttpJsonResponse(json);
-            callback(resp);
+    auto db = app().getDbClient();
+    Mapper<User> mpUser(db);
+    try {
+        auto cnt = mpUser.count({User::Cols::_username, user.getValueOfUsername()});
+        if (cnt > 0) {
+            json["status"] = 7;
+            json["error"] = "该用户名已经被注册";
+        } else {
+            auto uuid = utils::getUuid();
+            user.setSalt(uuid);
+            user.setPassword(
+                utils::getSha256(user.getValueOfPassword() + uuid)
+            );
+            mpUser.insert(user);
+            json["status"] = 0;
         }
-    );
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
 }
 
 void UserController::userList(

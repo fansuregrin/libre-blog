@@ -44,7 +44,7 @@ public:
     void register_(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
-        const User &user
+        User user
     ) const;
 
     void userList(
