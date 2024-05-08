@@ -19,6 +19,7 @@ public:
     ADD_METHOD_TO(UserController::login, "/login", Post);
     ADD_METHOD_TO(UserController::userCenter, "/user/center", Get, "LoginFilter");
     ADD_METHOD_TO(UserController::addUser, "/user/add", Post, "JsonFilter");
+    ADD_METHOD_TO(UserController::userList, "/users/{page}", Get, "LoginFilter");
     ADD_METHOD_TO(UserController::updateUser, "/user/update", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::updatePassword, "/user/update/password", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::getRole, "/user/role", Get, "LoginFilter");
@@ -39,6 +40,12 @@ public:
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
         const drogon_model::dg_test::User &user
+    ) const;
+
+    void userList(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        int page
     ) const;
 
     void updateUser(
