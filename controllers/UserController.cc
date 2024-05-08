@@ -247,11 +247,7 @@ void UserController::updatePassword(
     auto decoded = jwt::decode<json_traits>(token);
     int userId = decoded.get_payload_claim("uid").as_integer();
 
-    auto pJson = req->getJsonObject();
-    if (pJson == nullptr) {
-       throw std::invalid_argument("请求体格式错误, 请使用json"); 
-    }
-    const auto &reqJson = *pJson;
+    const auto &reqJson = *req->getJsonObject();
     if (!reqJson.isMember("password") || 
     reqJson["password"].type() != Json::stringValue) {
         throw std::invalid_argument("缺少必备字段: password, 或者类型错误");
