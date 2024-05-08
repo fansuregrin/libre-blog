@@ -147,7 +147,6 @@ void BlogController::addArticle(
     const std::vector<std::string> &tags
 ) const {
     Json::Value json;
-    bool hasPermission = false;
     auto token = req->getHeader("Authorization").substr(7);
     auto decoded = jwt::decode<json_traits>(token);
     int userId = decoded.get_payload_claim("uid").as_integer();
@@ -160,13 +159,8 @@ void BlogController::addArticle(
     
     try {
         auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
-        auto roleId = userInDb.getValueOfRole();
-        if (roleId <= 3) {
-            // administrator,editor,contributor 有新增文章的权限
-            hasPermission = true;
-        }
-
-        if (hasPermission) {
+        if (userInDb.getValueOfRole() <= 3) {
+            // administrator(id=1),editor(id=2),contributor(id=3)有新增文章的权限
             Article art;
             art.updateByJson(*req->getJsonObject());
             art.setAuthor(userId);
@@ -301,7 +295,6 @@ void BlogController::deleteArticles(
     std::function<void (const HttpResponsePtr &)> &&callback
 ) const {
     Json::Value json;
-    bool hasPermission = false;
 
     auto token = req->getHeader("Authorization").substr(7);
     auto decoded = jwt::decode<json_traits>(token);
@@ -343,18 +336,27 @@ void BlogController::deleteArticles(
             json["status"] = 0;
         } else if (roleId == 3) {
             // contributor(id=3) 只能删除自己写的文章
-            // todo: 删除文章id在idList中，并且文章的user是userId的文章
-            // db->execSqlSync(
-            //     "DELTE FROM article_tag "
-            //     "JOIN article art ON article_tag.article = art.id "
-            //     "WHERE article_tag.article IN ? AND art.author = userId;",
-            //     idList
-            // );
-            // db->execSqlSync(
-            //     "DELETE FROM article WHERE id IN ? AND author = userId;",
-            //     idList
-            // );
+            auto articles = mpArticle.findBy(
+                Criteria(Article::Cols::_id, CompareOperator::In, idList) &&
+                Criteria(Article::Cols::_author, userId));
+            std::vector<int> ids;
+            for (const auto &art : articles) {
+                ids.emplace_back(art.getValueOfId());
+            }
+            if (!ids.empty()) {
+                // 在删除文章之前需要删除文章与标签的关系
+                mpArticleTag.deleteBy(
+                    Criteria(ArticleTag::Cols::_article, CompareOperator::In, ids)
+                );
+                // 删除article和tag的关系后，才能删除文章
+                mpArticle.deleteBy(
+                    Criteria(Article::Cols::_id, CompareOperator::In, ids)
+                );
+            }
             json["status"] = 0;
+        } else {
+            json["status"] = 4;
+            json["error"] = "没有权限";
         }
     } catch (const orm::DrogonDbException &ex) {
         LOG_DEBUG << ex.base().what();
@@ -579,7 +581,7 @@ void BlogController::addCategory(
     try {
         auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
         if (userInDb.getValueOfRole() <= 2) {
-            // 只有 administrator 和 editor 才有新增分类的权限
+            // 只有 administrator(id=1) 和 editor(id=2) 才有新增分类的权限
             auto &reqJson = *req->getJsonObject();
             if (!reqJson.isMember("name") || 
             reqJson["name"].type() != Json::stringValue) {
@@ -611,7 +613,6 @@ void BlogController::updateCategory(
     std::function<void (const HttpResponsePtr &)> &&callback,
     const Category &cat
 ) const {
-    bool hasPermission = false;
     Json::Value json;
     auto token = req->getHeader("Authorization").substr(7);
     auto decoded = jwt::decode<json_traits>(token);
@@ -624,7 +625,7 @@ void BlogController::updateCategory(
     try {
         auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
         if (userInDb.getValueOfRole() <= 2) {
-            // 只有 administrator 和 editor 有更新分类的权限
+            // 只有 administrator(id=1) 和 editor(id=2) 有更新分类的权限
             mpCategory.update(cat);
             json["status"] = 0;
         } else {
@@ -648,7 +649,6 @@ void BlogController::deleteCategories(
     auto token = req->getHeader("Authorization").substr(7);
     auto decoded = jwt::decode<json_traits>(token);
     int userId = decoded.get_payload_claim("uid").as_integer();
-
 
     const auto &reqJson = *req->getJsonObject();
     if (!reqJson.isMember("ids") || reqJson["ids"].type() != Json::arrayValue) {
