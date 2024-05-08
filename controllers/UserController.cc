@@ -176,7 +176,7 @@ void UserController::userList(
     callback(resp);
 }
 
-void UserController::updateUser(
+void UserController::updateGeneralInfo(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback
 ) const {

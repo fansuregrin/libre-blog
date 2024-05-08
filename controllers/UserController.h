@@ -24,7 +24,7 @@ public:
     ADD_METHOD_TO(UserController::userCenter, "/user/center", Get, "LoginFilter");
     ADD_METHOD_TO(UserController::register_, "/user/register", Post, "JsonFilter");
     ADD_METHOD_TO(UserController::userList, "/users/{page}", Get, "LoginFilter");
-    ADD_METHOD_TO(UserController::updateUser, "/user/update", Post, "LoginFilter", "JsonFilter");
+    ADD_METHOD_TO(UserController::updateGeneralInfo, "/user/update/general-info", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::updatePassword, "/user/update/password", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::deleteUsers, "/user/delete", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::getRole, "/user/role", Get, "LoginFilter");
@@ -53,7 +53,7 @@ public:
         int page
     ) const;
 
-    void updateUser(
+    void updateGeneralInfo(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback
     ) const;
