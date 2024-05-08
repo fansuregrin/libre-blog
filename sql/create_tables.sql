@@ -13,7 +13,7 @@ CREATE TABLE `role` (
   `menu` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
-  KEY `fk_role_menu_to_menu_id` (`menu`),
+  KEY `idx_menu` (`menu`),
   CONSTRAINT `fk_role_menu_to_menu_id` FOREIGN KEY (`menu`) REFERENCES `menu` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -28,7 +28,7 @@ CREATE TABLE `user` (
   `role` int(11) NOT NULL DEFAULT 4,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
-  KEY `fk_user_role_to_role_id` (`role`),
+  KEY `idx_role` (`role`),
   CONSTRAINT `fk_user_role_to_role_id` FOREIGN KEY (`role`) REFERENCES `role` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -59,11 +59,11 @@ CREATE TABLE `article` (
   `content` text DEFAULT NULL,
   `excerpt` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `fk_article_category_to_category_id` (`category`),
-  KEY `fk_article_author_to_author_id` (`author`),
   KEY `idx_create_time` (`create_time`),
-  CONSTRAINT `fk_article_category_to_category_id` FOREIGN KEY (`category`) REFERENCES `category` (`id`),
-  CONSTRAINT `fk_article_author_to_author_id` FOREIGN KEY (`author`) REFERENCES `user` (`id`)
+  KEY `idx_author` (`author`),
+  KEY `idx_category` (`category`),
+  CONSTRAINT `fk_article_author_to_author_id` FOREIGN KEY (`author`) REFERENCES `user` (`id`),
+  CONSTRAINT `fk_article_category_to_category_id` FOREIGN KEY (`category`) REFERENCES `category` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `article_tag` (
@@ -74,4 +74,11 @@ CREATE TABLE `article_tag` (
   KEY `tag` (`tag`),
   CONSTRAINT `article_tag_ibfk_1` FOREIGN KEY (`article`) REFERENCES `article` (`id`),
   CONSTRAINT `article_tag_ibfk_2` FOREIGN KEY (`tag`) REFERENCES `tag` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `option` (
+  `name` varchar(32) NOT NULL,
+  `user` int(11) NOT NULL,
+  `value` mediumtext DEFAULT NULL,
+  PRIMARY KEY (`name`,`user`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
