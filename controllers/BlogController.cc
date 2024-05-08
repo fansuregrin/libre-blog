@@ -750,6 +750,48 @@ void BlogController::getTag(
     callback(resp);
 }
 
+void BlogController::addTag(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback
+) const {
+    Json::Value json;
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
+
+    auto db = app().getDbClient();
+    Mapper<User> mpUser(db);
+    Mapper<Tag> mpTag(db);
+
+    try {
+        auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        if (userInDb.getValueOfRole() <= 2) {
+            // 只有 administrator(id=1) 和 editor(id=2) 才有新增标签的权限
+            auto &reqJson = *req->getJsonObject();
+            if (!reqJson.isMember("name") || 
+            reqJson["name"].type() != Json::stringValue) {
+                throw std::invalid_argument("缺少必备字段: name, 或者类型错误");
+            }
+            if (!reqJson.isMember("slug") || 
+            reqJson["slug"].type() != Json::stringValue) {
+                throw std::invalid_argument("缺少必备字段: slug, 或者类型错误");
+            }
+            Tag tag(reqJson);
+            mpTag.insert(tag);
+            json["status"] = 0;
+        } else {
+            json["status"] = 4;
+            json["error"] = "没有权限";
+        }
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
 void BlogController::updateTag(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
@@ -767,8 +809,57 @@ void BlogController::updateTag(
     try {
         auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
         if (userInDb.getValueOfRole() <= 2) {
-            // 只有 administrator 和 editor 才有更新标签的权限
+            // 只有 administrator(id=1) 和 editor(id=2) 才有更新标签的权限
             mpTag.update(tag);
+            json["status"] = 0;
+        } else {
+            json["status"] = 4;
+            json["error"] = "没有权限";
+        }
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+void BlogController::deleteTags(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback
+) const {
+    Json::Value json;
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
+
+    const auto &reqJson = *req->getJsonObject();
+    if (!reqJson.isMember("ids") || reqJson["ids"].type() != Json::arrayValue) {
+        throw std::invalid_argument("缺少必备字段: ids, 或者类型错误");
+    }
+
+    std::vector<int> idList;
+    for (const auto &id : reqJson["ids"]) {
+        if (id.asInt() > 1) {
+            idList.emplace_back(id.asInt());
+        }
+    }
+
+    auto db = app().getDbClient();
+    Mapper<User> mpUser(db);
+    Mapper<Tag> mpTag(db);
+    Mapper<ArticleTag> mpArticleTag(db);
+
+    try {
+        auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        if (userInDb.getValueOfRole() <= 2) {
+            // 只有 administrator(id=1) 和 editor(id=2) 才有删除标签的权限
+            if (!idList.empty()) {
+                mpArticleTag.deleteBy(
+                    Criteria(ArticleTag::Cols::_tag, CompareOperator::In, idList));
+                mpTag.deleteBy(Criteria(Tag::Cols::_id, CompareOperator::In, idList)); 
+            }
             json["status"] = 0;
         } else {
             json["status"] = 4;

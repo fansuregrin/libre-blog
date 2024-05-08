@@ -40,7 +40,9 @@ public:
     ADD_METHOD_TO(BlogController::articleListByTag, "/blog/tag/{slug}/{page}", Get);
     ADD_METHOD_TO(BlogController::tagList, "/blog/tags/{page}", Get);
     ADD_METHOD_TO(BlogController::getTag, "/blog/tag/{id}", Get);
+    ADD_METHOD_TO(BlogController::addTag, "/blog/tag/add", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::updateTag, "/blog/tag/update", Post, "LoginFilter", "JsonFilter");
+    ADD_METHOD_TO(BlogController::deleteTags, "/blog/tag/delete", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::articleListByAuthor, "/blog/user/{id}/{page}", Get);
     ADD_METHOD_TO(BlogController::getMenuAdmin, "/blog/admin/menu", Get, "LoginFilter");
     METHOD_LIST_END
@@ -141,10 +143,20 @@ public:
         int id
     ) const;
 
+    void addTag(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback
+    ) const;
+
     void updateTag(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
         const Tag &tag
+    ) const;
+
+    void deleteTags(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback
     ) const;
 
     void getMenuAdmin(
