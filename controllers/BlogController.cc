@@ -10,6 +10,13 @@ void BlogController::articleList(
     int page
 ) const {
     Json::Value json;
+    
+    if (page < 1) {
+        json["status"] = 5;
+        json["error"] = "页码不合法";
+        callback(HttpResponse::newHttpJsonResponse(json));
+    }
+
     auto db = drogon::app().getDbClient();
     Mapper<Article> mpArticle(db);
     size_t perPage = 10;
@@ -49,11 +56,17 @@ void BlogController::articleListAdmin(
     std::function<void (const HttpResponsePtr &)> &&callback,
     int page
 ) const {
+    Json::Value json;
     auto token = req->getHeader("Authorization").substr(7);
     auto decoded = jwt::decode<json_traits>(token);
     int userId = decoded.get_payload_claim("uid").as_integer();
 
-    Json::Value json;
+    if (page < 1) {
+        json["status"] = 5;
+        json["error"] = "页码不合法";
+        callback(HttpResponse::newHttpJsonResponse(json));
+    }
+
     auto db = drogon::app().getDbClient();
     Mapper<User> mpUser(db);
     Mapper<Article> mpArticle(db);
@@ -397,6 +410,13 @@ void BlogController::articleListByCategory(
     int page
 ) const {
     Json::Value json;
+
+    if (page < 1) {
+        json["status"] = 5;
+        json["error"] = "页码不合法";
+        callback(HttpResponse::newHttpJsonResponse(json));
+    }
+
     size_t perPage = 10;
     auto db = app().getDbClient();
     Mapper<Category> mpCategory(db);
@@ -442,6 +462,13 @@ void BlogController::articleListByAuthor(
     int page
 ) const {
     Json::Value json;
+
+    if (page < 1) {
+        json["status"] = 5;
+        json["error"] = "页码不合法";
+        callback(HttpResponse::newHttpJsonResponse(json));
+    }
+
     size_t perPage = 10;
     auto db = app().getDbClient();
     Mapper<User> mpUser(db);
@@ -485,6 +512,13 @@ void BlogController::articleListByTag(
     int page
 ) const {
     Json::Value json;
+
+    if (page < 1) {
+        json["status"] = 5;
+        json["error"] = "页码不合法";
+        callback(HttpResponse::newHttpJsonResponse(json));
+    }
+
     size_t perPage = 10;
     auto db = app().getDbClient();
     Mapper<Tag> mpTag(db);
@@ -700,6 +734,13 @@ void BlogController::tagList(
     int page
 ) const {
     Json::Value json;
+
+    if (page < 1) {
+        json["status"] = 5;
+        json["error"] = "页码不合法";
+        callback(HttpResponse::newHttpJsonResponse(json));
+    }
+
     auto db = app().getDbClient();
     Mapper<Tag> mpTag(db);
     Mapper<ArticleTag> mpArticleTag(db);

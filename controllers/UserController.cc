@@ -161,6 +161,12 @@ void UserController::userList(
     auto decoded = jwt::decode<json_traits>(token);
     int userId = decoded.get_payload_claim("uid").as_integer();
 
+    if (page < 1) {
+        json["status"] = 5;
+        json["error"] = "页码不合法";
+        callback(HttpResponse::newHttpJsonResponse(json));
+    }
+
     auto db = app().getDbClient();
     Mapper<User> mpUser(db);
     try {
