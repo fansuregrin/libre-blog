@@ -45,6 +45,7 @@ public:
     ADD_METHOD_TO(BlogController::deleteTags, "/blog/tag/delete", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::articleListByAuthor, "/blog/user/{id}/{page}", Get);
     ADD_METHOD_TO(BlogController::getMenuAdmin, "/blog/admin/menu", Get, "LoginFilter");
+    ADD_METHOD_TO(BlogController::getMenu, "/blog/menu", Get);
     METHOD_LIST_END
 
     void articleList(
@@ -160,6 +161,11 @@ public:
     ) const;
 
     void getMenuAdmin(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback
+    ) const;
+
+    void getMenu(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback
     ) const;

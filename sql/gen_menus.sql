@@ -44,3 +44,8 @@ INSERT INTO menu(`id`,`key`,`label`,`parent`) VALUES
   (30, 'index', '首页', 4),
   (31, 'logout', '登出', 4),
   (32, 'userCenter', '个人中心', 29);
+
+-- visitor 的菜单项
+INSERT INTO menu(`id`,`key`,`label`,`parent`) VALUES 
+  (33, 'index', '首页', 5),
+  (34, 'categories', '分类', 5);

@@ -946,8 +946,31 @@ void BlogController::getMenuAdmin(
     callback(resp);
 }
 
+void BlogController::getMenu(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback
+) const {
+    Json::Value json;
+    auto db = app().getDbClient();
+    Mapper<Menu> mpMenu(db);
+
+    try {
+        auto menuInDb = mpMenu.findOne(
+            Criteria(Menu::Cols::_id, 5));
+        json["menu"] = generateMenu(mpMenu, menuInDb.getValueOfId());
+        json["status"] = 0;
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
 Json::Value generateMenu(Mapper<Menu> &mp, int32_t id) {
-    auto subMenus = mp.findBy(Criteria(Menu::Cols::_parent, id));
+    auto subMenus = mp.orderBy(Menu::Cols::_id, SortOrder::ASC)
+        .findBy(Criteria(Menu::Cols::_parent, id));
     Json::Value menuItems(Json::arrayValue);
     for (const auto &subMenu : subMenus) {
         Json::Value menuItem;
