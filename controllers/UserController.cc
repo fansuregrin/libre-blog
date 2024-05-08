@@ -3,13 +3,6 @@
 #include "UserController.h"
 #include "../utils/Utils.h"
 
-using drogon_model::dg_test::User;
-using drogon_model::dg_test::Role;
-using orm::Mapper;
-using orm::Criteria;
-using orm::CompareOperator;
-using json_traits = jwt::traits::nlohmann_json;
-
 
 void UserController::login(
     const HttpRequestPtr& req,
@@ -264,26 +257,6 @@ void UserController::getRole(
         Json::Value role;
         role["roleId"] = roleId;
         role["roleName"] = roleName;
-        switch (roleId) {
-        case 1: {
-            role["manage"].append("article");
-            break;
-        }
-        case 2: {
-            role["manage"].append("article");
-            break;
-        }
-        case 3: {
-            role["manage"].append("article");
-            break;
-        }
-        case 4: {
-            break;
-        }
-        case 5: {
-            break;
-        }
-        }
         json["role"] = role;
         json["status"] = 0;
     } catch (const orm::DrogonDbException &ex) {

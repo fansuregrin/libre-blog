@@ -6,6 +6,12 @@
 
 using namespace drogon;
 using drogon_model::dg_test::User;
+using drogon_model::dg_test::Role;
+using orm::Mapper;
+using orm::Criteria;
+using orm::CompareOperator;
+using json_traits = jwt::traits::nlohmann_json;
+
 
 class UserController : public HttpController<UserController> {
 public:
