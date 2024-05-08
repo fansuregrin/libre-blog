@@ -259,6 +259,156 @@ void UserController::updatePassword(
     callback(resp);
 }
 
+
+void UserController::addUser(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    User user
+) const {
+    Json::Value json;
+
+    bool valid = true;
+    // check password
+    if (!checkPassword(user.getValueOfPassword())) {
+        json["status"] = 5;
+        json["error"] = "密码不合法";
+        valid = false;
+    }
+    // check username
+    else if (!checkUsername(user.getValueOfUsername())) {
+        json["status"] = 6;
+        json["error"] = "用户名不合法";
+        valid = false;
+    }
+    // check email 
+    else if (!checkEmail(user.getValueOfEmail())) {
+        json["status"] = 7;
+        json["error"] = "电子邮箱不合法";
+        valid = false;
+    }
+    if (!valid) {
+        auto resp = HttpResponse::newHttpJsonResponse(json);
+        callback(resp);
+        return;
+    }
+
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
+
+    auto db = app().getDbClient();
+    Mapper<User> mpUser(db);
+    try {
+        auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        if (userInDb.getValueOfRole() == 1) {
+            // 只有 administrator(id=1) 才有添加用户的权限
+            auto cnt = mpUser.count(
+                {User::Cols::_username, user.getValueOfUsername()});
+            if (cnt > 1) {
+                json["status"] = 8;
+                json["error"] = "用户名已被占用";
+            } else {
+                auto uuid = utils::getUuid();
+                user.setSalt(uuid);
+                user.setPassword(
+                    utils::getSha256(user.getValueOfPassword() + uuid)
+                );
+                mpUser.insert(user);
+                json["status"] = 0;
+            }
+        } else {
+            json["status"] = 4;
+            json["error"] = "没有权限";
+        }
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
+void UserController::updateUser(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    User user
+) const {
+    Json::Value json;
+
+    bool valid = true;
+    // check password
+    if (!user.getValueOfPassword().empty() && 
+    !checkPassword(user.getValueOfPassword())) {
+        json["status"] = 5;
+        json["errror"] = "密码不合法";
+        valid = false;
+    }
+    // check username
+    else if (!checkUsername(user.getValueOfUsername())) {
+        json["status"] = 6;
+        json["error"] = "用户名不合法";
+        valid = false;
+    }
+    // check email 
+    else if (!checkEmail(user.getValueOfEmail())) {
+        json["status"] = 7;
+        json["error"] = "电子邮箱不合法";
+        valid = false;
+    }
+    if (!valid) {
+        auto resp = HttpResponse::newHttpJsonResponse(json);
+        callback(resp);
+        return;
+    }
+
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
+
+    auto db = app().getDbClient();
+    Mapper<User> mpUser(db);
+    try {
+        auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        if (userInDb.getValueOfRole() == 1) {
+            // 只有 administrator(id=1) 才有更新用户的权限
+            auto oldUser = mpUser.findOne(
+                {User::Cols::_username, user.getValueOfUsername()});
+            if (oldUser.getValueOfId() != user.getValueOfId()) {
+                json["status"] = 8;
+                json["error"] = "用户名已被占用";
+            } else {
+                if (!user.getValueOfPassword().empty()) {
+                    auto uuid = utils::getUuid();
+                    user.setSalt(uuid);
+                    user.setPassword(
+                        utils::getSha256(user.getValueOfPassword() + uuid)
+                    );
+                    mpUser.update(user);
+                } else {
+                    mpUser.updateBy(
+                        {User::Cols::_username, User::Cols::_realname, 
+                        User::Cols::_email, User::Cols::_role},
+                        {User::Cols::_id, user.getValueOfId()},
+                        user.getValueOfUsername(), user.getValueOfRealname(),
+                        user.getValueOfEmail(), user.getValueOfRole()
+                    );
+                }
+                json["status"] = 0;
+            }
+        } else {
+            json["status"] = 4;
+            json["error"] = "没有权限";
+        }
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
 void UserController::deleteUsers(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback
