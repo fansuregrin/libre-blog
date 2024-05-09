@@ -14,13 +14,13 @@ using orm::Mapper;
 using orm::Criteria;
 using orm::CompareOperator;
 using orm::SortOrder;
-using drogon_model::dg_test::Article;
-using drogon_model::dg_test::User;
-using drogon_model::dg_test::Role;
-using drogon_model::dg_test::Category;
-using drogon_model::dg_test::Tag;
-using drogon_model::dg_test::ArticleTag;
-using drogon_model::dg_test::Menu;
+using drogon_model::libre_blog::Article;
+using drogon_model::libre_blog::User;
+using drogon_model::libre_blog::Role;
+using drogon_model::libre_blog::Category;
+using drogon_model::libre_blog::Tag;
+using drogon_model::libre_blog::ArticleTag;
+using drogon_model::libre_blog::Menu;
 
 class BlogController : public drogon::HttpController<BlogController> {
 public:

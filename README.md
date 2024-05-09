@@ -3,27 +3,45 @@
 **Libre-blog** is a blog system. This repository uses the [Drogon](https://github.com/drogonframework/drogon) framework to implement the **backend API** of libre-blog. The front-end implementation of libre-blog is [👉here](https://github.com/fansuregrin/libre-blog-frontend).
 
 ## API List
-- `/blog/articles/{page}`
-- `/blog/admin/articles/{page}`
-- `/blog/category/{slug}/{page}`
-- `/blog/user/{id}/{page}`
-- `/blog/tag/{slug}/{page}`
-- `/blog/article/{id}`
-- `/blog/article/add`
-- `/blog/article/update`
-- `/blog/article/delete`
-- `/blog/categories`
-- `/blog/category/{id}`
-- `/blog/category/add`
-- `/blog/category/update`
-- `/blog/category/delete`
-- `/blog/admin/menu`
-- `/login`
-- `/user/center`
-- `/user/add`
-- `/user/update`
-- `/user/update/password`
-- `/user/role`
+- article
+    - `/blog/articles/{page}`
+    - `/blog/category/{slug}/{page}`
+    - `/blog/tag/{slug}/{page}`
+    - `/blog/user/{id}/{page}`
+    - `/blog/admin/articles/{page}`
+    - `/blog/article/{id}`
+    - `/blog/article/add`
+    - `/blog/article/update`
+    - `/blog/article/delete`
+- category
+    - `/blog/categories`
+    - `/blog/category/{id}`
+    - `/blog/category/add`
+    - `/blog/category/update`
+    - `/blog/category/delete`
+- tag
+    - `/blog/tags/{page}`
+    - `/blog/tag/{id}`
+    - `/blog/tag/add`
+    - `/blog/tag/update`
+    - `/blog/tag/delete`
+- user
+    - `/login`
+    - `/register`
+    - `/user/center`
+    - `/user/update/general-info`
+    - `/user/update/password`
+    - `/users/{page}`
+    - `/user/{id}`
+    - `/user/add`
+    - `/user/update`
+    - `/user/delete`
+    - `/user/role`
+- role
+    - `/roles`
+- menu
+    - `/blog/admin/menu`
+    - `/blog/menu`
 
 **For more detailed API documentation, please see [👉here](./docs/libre-blog_api.md).**
 

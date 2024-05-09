@@ -7,10 +7,10 @@
 #include <../models/ArticleTag.h>
 
 using namespace drogon;
-using drogon_model::dg_test::User;
-using drogon_model::dg_test::Role;
-using drogon_model::dg_test::Article;
-using drogon_model::dg_test::ArticleTag;
+using drogon_model::libre_blog::User;
+using drogon_model::libre_blog::Role;
+using drogon_model::libre_blog::Article;
+using drogon_model::libre_blog::ArticleTag;
 using orm::Mapper;
 using orm::Criteria;
 using orm::CompareOperator;

@@ -8,7 +8,7 @@
     //port: server port, 5432 by default;
     "port": 3306,
     //dbname: Database name;
-    "dbname": "dg_test",
+    "dbname": "libre_blog",
     //schema: valid for postgreSQL, "public" by default;
     // "schema": "public",
     //user: User name
