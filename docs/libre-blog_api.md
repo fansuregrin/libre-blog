@@ -35,7 +35,43 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 暂无后执行脚本
 ```
 
-## /libre-blog/获取文章列表
+## /libre-blog/文章
+
+```text
+与操作文章相关的API
+```
+
+#### 公共Header参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 公共Query参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 公共Body参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/文章/获取文章列表
 
 ```text
 获取文章列表
@@ -47,7 +83,7 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 
 #### 接口URL
 
-> {{url}}/blog/page/{page}
+> {{url}}/blog/articles/{page}
 
 #### 请求方式
 
@@ -288,7 +324,7 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 }
 ```
 
-## /libre-blog/获取某个分类下的文章列表
+## /libre-blog/文章/获取某个分类下的文章列表
 
 ```text
 获取指定分类下的指定页的文章列表。
@@ -452,7 +488,7 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 }
 ```
 
-## /libre-blog/获取某个用户下的文章列表
+## /libre-blog/文章/获取某个用户下的文章列表
 
 ```text
 暂无描述
@@ -632,7 +668,7 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 }
 ```
 
-## /libre-blog/获取某个标签下的文章列表
+## /libre-blog/文章/获取某个标签下的文章列表
 
 ```text
 暂无描述
@@ -799,7 +835,7 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 }
 ```
 
-## /libre-blog/后台管理获取文章列表
+## /libre-blog/文章/后台管理获取文章列表
 
 ```text
 暂无描述
@@ -811,7 +847,7 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 
 #### 接口URL
 
-> {{url}}/blog/admin/page/{page}
+> {{url}}/blog/admin/articles/{page}
 
 #### 请求方式
 
@@ -839,7 +875,7 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 暂无后执行脚本
 ```
 
-## /libre-blog/获取文章
+## /libre-blog/文章/获取文章
 
 ```text
 获取单篇文章的信息
@@ -910,7 +946,50 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 }
 ```
 
-## /libre-blog/更新文章
+## /libre-blog/文章/添加文章
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/article/add
+
+#### 请求方式
+
+> POST
+
+#### Content-Type
+
+> json
+
+#### 请求Body参数
+
+```javascript
+{
+    "title": "一个小人物",
+    "category": 25,
+}
+```
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/文章/更新文章
 
 ```text
 更新文章信息，如标题、分类、标签、内容、摘要等。
@@ -978,7 +1057,7 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 }
 ```
 
-## /libre-blog/删除文章
+## /libre-blog/文章/删除文章
 
 ```text
 删除指定id的文章，可以指定多个id
@@ -1005,8 +1084,7 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 ```javascript
 {
 	"ids": [
-		1,
-		2
+		8, 9, 10, 11
 	]
 }
 ```
@@ -1035,7 +1113,43 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 }
 ```
 
-## /libre-blog/获取分类信息
+## /libre-blog/分类
+
+```text
+与操作分类相关的API
+```
+
+#### 公共Header参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 公共Query参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 公共Body参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/分类/获取分类列表
 
 ```text
 获取全部分类信息，预期返回一个包含多个分类信息的数组。
@@ -1047,7 +1161,7 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 
 #### 接口URL
 
-> {{url}}/blog/category
+> {{url}}/blog/categories
 
 #### 请求方式
 
@@ -1075,41 +1189,36 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 {
 	"categories": [
 		{
-			"id": 1,
-			"name": "未分类",
-			"slug": "uncategoried"
-		},
-		{
 			"id": 2,
 			"name": "诗歌",
-			"slug": "poem"
+			"slug": "poetry"
 		},
 		{
 			"id": 3,
-			"name": "短篇小说",
-			"slug": "short-story"
+			"name": "小说",
+			"slug": "novel"
 		},
 		{
 			"id": 4,
-			"name": "童话故事",
-			"slug": "fairy-tale"
+			"name": "散文",
+			"slug": "prose"
 		},
 		{
 			"id": 5,
-			"name": "新闻",
-			"slug": "news"
+			"name": "随笔",
+			"slug": "essay"
 		},
 		{
 			"id": 6,
-			"name": "技术博文",
-			"slug": "tech-blog"
+			"name": "技术文章",
+			"slug": "tech-art"
 		}
 	],
 	"status": 0
 }
 ```
 
-## /libre-blog/获取用户信息
+## /libre-blog/分类/获取分类
 
 ```text
 暂无描述
@@ -1121,7 +1230,7 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 
 #### 接口URL
 
-> {{url}}/user/center
+> {{url}}/blog/category/{id}
 
 #### 请求方式
 
@@ -1130,6 +1239,348 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 #### Content-Type
 
 > none
+
+#### 路径变量
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| id | 3 | 分类的id |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+#### 成功响应示例
+
+```javascript
+{
+	"category": {
+		"id": 3,
+		"name": "小说",
+		"slug": "novel"
+	},
+	"status": 0
+}
+```
+
+## /libre-blog/分类/添加分类
+
+```text
+添加分类。
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/category/add
+
+#### 请求方式
+
+> POST
+
+#### Content-Type
+
+> json
+
+#### 请求Body参数
+
+```javascript
+{
+    "name": "散文",
+    "slug": "prose"
+}
+```
+
+| 参数名 | 示例值 | 参数类型 | 是否必填 | 参数描述 |
+| --- | --- | ---- | ---- | ---- |
+| name | 散文 | String | 是 | 分类的名称 |
+| slug | prose | String | 是 | 分类的缩略名 |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/分类/更新分类信息
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/category/update
+
+#### 请求方式
+
+> POST
+
+#### Content-Type
+
+> json
+
+#### 请求Body参数
+
+```javascript
+{
+    "id": 2,
+    "name": "诗歌",
+    "slug": "poem"
+}
+```
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/分类/删除分类
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/category/delete
+
+#### 请求方式
+
+> POST
+
+#### Content-Type
+
+> json
+
+#### 请求Body参数
+
+```javascript
+{
+    "ids": [
+        1
+    ]
+}
+```
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/标签
+
+```text
+与操作标签相关的API
+```
+
+#### 公共Header参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 公共Query参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 公共Body参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/标签/获取标签列表
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/tags/{page}
+
+#### 请求方式
+
+> GET
+
+#### Content-Type
+
+> none
+
+#### 路径变量
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| page | 1 | 分页的页码 |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+#### 成功响应示例
+
+```javascript
+{
+	"num_pages": 2,
+	"status": 0,
+	"tags": [
+		{
+			"id": 1,
+			"name": "新闻",
+			"num_articles": 0,
+			"slug": "news"
+		},
+		{
+			"id": 2,
+			"name": "格林童话",
+			"num_articles": 0,
+			"slug": "green-brother"
+		},
+		{
+			"id": 3,
+			"name": "C++",
+			"num_articles": 1,
+			"slug": "cpp"
+		},
+		{
+			"id": 4,
+			"name": "Python",
+			"num_articles": 0,
+			"slug": "python"
+		},
+		{
+			"id": 5,
+			"name": "后端开发",
+			"num_articles": 0,
+			"slug": "backend-dev"
+		},
+		{
+			"id": 6,
+			"name": "前端开发",
+			"num_articles": 0,
+			"slug": "frontend-dev"
+		},
+		{
+			"id": 7,
+			"name": "Rust",
+			"num_articles": 0,
+			"slug": "rust"
+		},
+		{
+			"id": 8,
+			"name": "短篇小说",
+			"num_articles": 1,
+			"slug": "short-story"
+		},
+		{
+			"id": 9,
+			"name": "科幻小说",
+			"num_articles": 0,
+			"slug": "sci-fi"
+		},
+		{
+			"id": 10,
+			"name": "刘慈欣",
+			"num_articles": 0,
+			"slug": "liu-ci-xin"
+		}
+	]
+}
+```
+
+## /libre-blog/标签/获取标签信息
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/tag/{id}
+
+#### 请求方式
+
+> GET
+
+#### Content-Type
+
+> none
+
+#### 路径变量
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| id | 2 | 标签的id |
 
 #### 预执行脚本
 
@@ -1148,27 +1599,182 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 ```javascript
 {
 	"status": 0,
-	"user": {
-		"create_time": "2024-04-25 04:02:59",
-		"email": "bobwood@ouc.edu.cn",
-		"id": 1,
-		"realname": "Bob Wood",
-		"username": "bobwood"
+	"tag": {
+		"id": 2,
+		"name": "格林童话",
+		"slug": "green-brother"
 	}
 }
 ```
 
-| 参数名 | 示例值 | 参数类型 | 参数描述 |
-| --- | --- | ---- | ---- |
-| status | 0 | Integer | 状态码 |
-| user | - | Object | 用户信息 |
-| user.create_time | 2024-04-25 04:02:59 | String | 用户的创建时间 |
-| user.email | bobwood@ouc.edu.cn | String | 用户的电子邮箱 |
-| user.id | 1 | Integer | 用户的id |
-| user.realname | Bob Wood | String | 用户的真实名称 |
-| user.username | bobwood | String | 用户登录时使用的用户名 |
+## /libre-blog/标签/添加标签
 
-## /libre-blog/用户登录
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/tag/add
+
+#### 请求方式
+
+> POST
+
+#### Content-Type
+
+> json
+
+#### 请求Body参数
+
+```javascript
+{
+    "name": "悬疑小说",
+    "slug": "suspense-novel"
+}
+```
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/标签/更新标签信息
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/tag/update
+
+#### 请求方式
+
+> POST
+
+#### Content-Type
+
+> json
+
+#### 请求Body参数
+
+```javascript
+{
+    "id": 6,
+    "name": "数据库",
+    "slug": "database" 
+}
+```
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/标签/删除标签
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/tag/delete
+
+#### 请求方式
+
+> POST
+
+#### Content-Type
+
+> json
+
+#### 请求Body参数
+
+```javascript
+{
+    "ids": [
+        
+    ]
+}
+```
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/用户
+
+```text
+与操作用户相关的API
+```
+
+#### 公共Header参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 公共Query参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 公共Body参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/用户/用户登录
 
 ```text
 暂无描述
@@ -1230,10 +1836,10 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 | status | 0 | Integer | 状态码 |
 | token | eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MTQ2NjA5ODQsImlhdCI6MTcxNDY1NzM4NCwiaXNzIjoiZHJvZ29uIiwidWlkIjoxfQ.hEWGno-4R_ISpMMb9Y_wkKZaDIuJUGFdPEpSInfZYf-jjOm5YTxOvdB7RlGbCrKsMMWydzPP76kwnSDzR1hlYA | String | 用户token |
 
-## /libre-blog/添加用户
+## /libre-blog/用户/用户注册
 
 ```text
-添加新用户。请求json中需要包含username，email和passowrd字段。
+用户注册。请求json中需要包含username，email和passowrd字段。
 ```
 
 #### 接口状态
@@ -1242,7 +1848,7 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 
 #### 接口URL
 
-> {{url}}/user/add
+> {{url}}/user/register
 
 #### 请求方式
 
@@ -1296,7 +1902,67 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 | message | 注册成功 | String | 成功消息 |
 | status | 0 | Integer | 状态码 |
 
-## /libre-blog/更新用户常规信息
+## /libre-blog/用户/个人中心
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/user/center
+
+#### 请求方式
+
+> GET
+
+#### Content-Type
+
+> none
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+#### 成功响应示例
+
+```javascript
+{
+	"status": 0,
+	"user": {
+		"create_time": "2024-05-09 08:01:11",
+		"email": "bobwood@ouc.edu.cn",
+		"id": 1,
+		"realname": "Bob Wood",
+		"role": "administrator",
+		"username": "bobwood"
+	}
+}
+```
+
+| 参数名 | 示例值 | 参数类型 | 参数描述 |
+| --- | --- | ---- | ---- |
+| status | 0 | Integer | 状态码 |
+| user | - | Object | 用户信息 |
+| user.create_time | 2024-04-25 04:02:59 | String | 用户的创建时间 |
+| user.email | bobwood@ouc.edu.cn | String | 用户的电子邮箱 |
+| user.id | 1 | Integer | 用户的id |
+| user.realname | Bob Wood | String | 用户的真实名称 |
+| user.username | bobwood | String | 用户登录时使用的用户名 |
+
+## /libre-blog/用户/个人中心更新用户常规信息
 
 ```text
 更新用户的常规信息。常规信息是指用户的用户名、真实名称、邮箱等，但是不包括密码。更新密码使用单独的api。
@@ -1354,7 +2020,7 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 }
 ```
 
-## /libre-blog/更新用户密码
+## /libre-blog/用户/个人中心更新用户密码
 
 ```text
 更新用户密码。
@@ -1408,7 +2074,290 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 }
 ```
 
-## /libre-blog/获取角色信息
+## /libre-blog/用户/获取用户列表
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/users/{page}
+
+#### 请求方式
+
+> GET
+
+#### Content-Type
+
+> none
+
+#### 路径变量
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| page | 1 | 分页的页码 |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+#### 成功响应示例
+
+```javascript
+{
+	"num_pages": 1,
+	"status": 0,
+	"users": [
+		{
+			"create_time": "2024-05-09 08:01:11",
+			"email": "bobwood@ouc.edu.cn",
+			"id": 1,
+			"realname": "Bob Wood",
+			"role": "administrator",
+			"username": "bobwood"
+		},
+		{
+			"create_time": "2024-05-09 08:37:47",
+			"email": "mike@gmail.com",
+			"id": 2,
+			"realname": "Mike Black",
+			"role": "contributor",
+			"username": "mike"
+		},
+		{
+			"create_time": "2024-05-09 08:45:38",
+			"email": "xiaoshuai@abc.org",
+			"id": 3,
+			"realname": "小帅",
+			"role": "subscriber",
+			"username": "xiaoshuai"
+		},
+		{
+			"create_time": "2024-05-09 08:46:22",
+			"email": "xiaomei@xxoo.hub",
+			"id": 4,
+			"realname": "小美",
+			"role": "editor",
+			"username": "xiaomei"
+		},
+		{
+			"create_time": "2024-05-09 09:00:11",
+			"email": "xiaohua@163.com",
+			"id": 5,
+			"realname": "xiaohua",
+			"role": "subscriber",
+			"username": "xiaohua"
+		}
+	]
+}
+```
+
+## /libre-blog/用户/后台获取用户信息
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/user/{id}
+
+#### 请求方式
+
+> GET
+
+#### Content-Type
+
+> none
+
+#### 路径变量
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| id | 2 | 用户id |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+#### 成功响应示例
+
+```javascript
+{
+	"status": 0,
+	"user": {
+		"email": "mike@gmail.com",
+		"id": 2,
+		"realname": "Mike Black",
+		"role": {
+			"id": 3,
+			"name": "contributor"
+		},
+		"username": "mike"
+	}
+}
+```
+
+## /libre-blog/用户/删除用户
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/user/delete
+
+#### 请求方式
+
+> POST
+
+#### Content-Type
+
+> json
+
+#### 请求Body参数
+
+```javascript
+{
+    "ids": [
+        11, 13
+    ]
+}
+```
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/用户/后台添加用户
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/user/add
+
+#### 请求方式
+
+> POST
+
+#### Content-Type
+
+> json
+
+#### 请求Body参数
+
+```javascript
+{
+    "username": "jack",
+    "password": "jack1234",
+    "email": "jack@gmail.com"
+}
+```
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/用户/后台更新用户
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/user/update
+
+#### 请求方式
+
+> POST
+
+#### Content-Type
+
+> json
+
+#### 请求Body参数
+
+```javascript
+{
+    "id": 13,
+    "username": "jack",
+    "password": "",
+    "email": "jack@gmail.com",
+    "role": 4
+}
+```
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/用户/获取当前用户的角色信息
 
 ```text
 暂无描述
@@ -1440,4 +2389,284 @@ apt.globals.set("url", "http://10.140.32.106:10002");
 
 ```javascript
 暂无后执行脚本
+```
+
+#### 成功响应示例
+
+```javascript
+{
+	"role": {
+		"roleId": 1,
+		"roleName": "administrator"
+	},
+	"status": 0
+}
+```
+
+## /libre-blog/角色
+
+```text
+暂无描述
+```
+
+#### 公共Header参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 公共Query参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 公共Body参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/角色/获取角色列表
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/roles
+
+#### 请求方式
+
+> GET
+
+#### Content-Type
+
+> none
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+#### 成功响应示例
+
+```javascript
+{
+	"roles": [
+		{
+			"id": 1,
+			"name": "administrator"
+		},
+		{
+			"id": 2,
+			"name": "editor"
+		},
+		{
+			"id": 3,
+			"name": "contributor"
+		},
+		{
+			"id": 4,
+			"name": "subscriber"
+		}
+	],
+	"status": 0
+}
+```
+
+## /libre-blog/菜单
+
+```text
+暂无描述
+```
+
+#### 公共Header参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 公共Query参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 公共Body参数
+
+| 参数名 | 示例值 | 参数描述 |
+| --- | --- | ---- |
+| 暂无参数 |
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+## /libre-blog/菜单/获取后台菜单
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/admin/menu
+
+#### 请求方式
+
+> GET
+
+#### Content-Type
+
+> none
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+#### 成功响应示例
+
+```javascript
+{
+	"menu": [
+		{
+			"children": [
+				{
+					"key": "userCenter",
+					"label": "个人中心"
+				}
+			],
+			"key": "console",
+			"label": "控制台"
+		},
+		{
+			"children": [
+				{
+					"key": "article",
+					"label": "文章"
+				},
+				{
+					"key": "user",
+					"label": "用户"
+				},
+				{
+					"key": "category",
+					"label": "分类"
+				},
+				{
+					"key": "tag",
+					"label": "标签"
+				}
+			],
+			"key": "manage",
+			"label": "管理"
+		},
+		{
+			"key": "index",
+			"label": "首页"
+		},
+		{
+			"key": "logout",
+			"label": "登出"
+		}
+	],
+	"status": 0
+}
+```
+
+## /libre-blog/菜单/获取前台菜单
+
+```text
+暂无描述
+```
+
+#### 接口状态
+
+> 开发中
+
+#### 接口URL
+
+> {{url}}/blog/menu
+
+#### 请求方式
+
+> GET
+
+#### Content-Type
+
+> none
+
+#### 预执行脚本
+
+```javascript
+暂无预执行脚本
+```
+
+#### 后执行脚本
+
+```javascript
+暂无后执行脚本
+```
+
+#### 成功响应示例
+
+```javascript
+{
+	"menu": [
+		{
+			"key": "index",
+			"label": "首页"
+		},
+		{
+			"key": "categories",
+			"label": "分类"
+		}
+	],
+	"status": 0
+}
 ```
