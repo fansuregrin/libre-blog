@@ -66,6 +66,16 @@ cmake ..
 make && sudo make install
 ```
 
+This project uses [`jwt-cpp`](https://github.com/Thalhammer/jwt-cpp) for token issuing and verification. So, you need to install this library.
+```shell
+git clone https://github.com/Thalhammer/jwt-cpp.git
+cd jwt-cpp
+mkdir build
+cd build
+cmake .. && make
+sudo make install
+```
+
 ### Build
 #### 1.Create database and data tables
 
