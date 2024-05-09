@@ -67,11 +67,11 @@ make && sudo make install
 ```
 
 ### Build
-1. Create database and data tables
+#### 1.Create database and data tables
 
 Please see [🛠️here](./sql/README.md)
 
-2. Generate database model code
+#### 2.Generate database model code
 
 ```shell
 git clone https://github.com/fansuregrin/libre-blog.git
@@ -79,7 +79,7 @@ cd libre-blog/models
 dg_ctl create model .
 ```
 
-3. Build Executable File
+#### 3.Build Executable File
 
 ```shell
 cd libre-blog/
