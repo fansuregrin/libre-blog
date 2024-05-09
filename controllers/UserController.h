@@ -26,9 +26,11 @@ public:
     ADD_METHOD_TO(UserController::userList, "/users/{page}", Get, "LoginFilter");
     ADD_METHOD_TO(UserController::updateGeneralInfo, "/user/update/general-info", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::updatePassword, "/user/update/password", Post, "LoginFilter", "JsonFilter");
+    ADD_METHOD_TO(UserController::getUser, "/user/{id}", Get, "LoginFilter");
     ADD_METHOD_TO(UserController::addUser, "/user/add", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::updateUser, "/user/update", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::deleteUsers, "/user/delete", Post, "LoginFilter", "JsonFilter");
+    ADD_METHOD_TO(UserController::roleList, "/roles", Get, "LoginFilter");
     ADD_METHOD_TO(UserController::getRole, "/user/role", Get, "LoginFilter");
     METHOD_LIST_END
 
@@ -47,6 +49,12 @@ public:
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
         User user
+    ) const;
+
+    void getUser(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        int id
     ) const;
 
     void addUser(
@@ -78,6 +86,11 @@ public:
     ) const;
 
     void deleteUsers(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback
+    ) const;
+
+    void roleList(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback
     ) const;

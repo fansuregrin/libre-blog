@@ -260,6 +260,44 @@ void UserController::updatePassword(
 }
 
 
+void UserController::getUser(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    int id
+) const {
+    Json::Value json;
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
+
+    auto db = app().getDbClient();
+    Mapper<User> mpUser(db);
+    try {
+        auto loginedUser = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        if (loginedUser.getValueOfRole() == 1) {
+            auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, id));
+            Json::Value user;
+            user["id"] = id;
+            user["username"] = userInDb.getValueOfUsername();
+            user["realname"] = userInDb.getValueOfRealname();
+            user["email"] = userInDb.getValueOfEmail();
+            auto role = userInDb.getRole(db);
+            user["role"]["id"] = role.getValueOfId();
+            user["role"]["name"] = role.getValueOfName();
+            json["user"] = user;
+            json["status"] = 0;
+        } else {
+            json["status"] = 4;
+            json["error"] = "没有权限";
+        }
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
 void UserController::addUser(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
@@ -360,6 +398,9 @@ void UserController::updateUser(
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
         return;
+    }
+    if (!user.getRole()) {
+        user.setRole(4);
     }
 
     auto token = req->getHeader("Authorization").substr(7);
@@ -470,6 +511,42 @@ void UserController::deleteUsers(
     callback(resp);
 }
 
+void UserController::roleList(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback
+) const {
+    Json::Value json;
+    auto token = req->getHeader("Authorization").substr(7);
+    auto decoded = jwt::decode<json_traits>(token);
+    int userId = decoded.get_payload_claim("uid").as_integer();
+
+    auto db = app().getDbClient();
+    Mapper<User> mpUser(db);
+    Mapper<Role> mpRole(db);
+    try {
+        auto loginedUser = mpUser.findOne(Criteria(User::Cols::_id, userId));
+        if (loginedUser.getValueOfRole() == 1) {
+            // 只有 administrator(id=1) 才能获取角色列表
+            auto roles = mpRole.findAll();
+            for (const auto &roleInDb : roles) {
+                Json::Value role;
+                role["id"] = roleInDb.getValueOfId();
+                role["name"] = roleInDb.getValueOfName();
+                json["roles"].append(role);
+            }
+            json["status"] = 0;
+        } else {
+            json["status"] = 4;
+            json["error"] = "没有权限";
+        }
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
 
 void UserController::getRole(
     const HttpRequestPtr& req,
