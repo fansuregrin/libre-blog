@@ -77,22 +77,27 @@ sudo make install
 ```
 
 ### Build
-#### 1.Create database and data tables
+#### 0.Clone this repository
+```bash
+git clone https://github.com/fansuregrin/libre-blog.git
+cd libre-blog
+```
+
+#### 1.Create database and tables
 
 Please see [🛠️here](./sql/README.md)
 
 #### 2.Generate database model code
+Edit `config.json` and `models/model.json`, then change the MySQL database connection configuration (such as *host*, *port*, *user*, *passwd*, and etc) to what you need.
 
 ```shell
-git clone https://github.com/fansuregrin/libre-blog.git
-cd libre-blog/models
+cd models
 dg_ctl create model .
 ```
 
 #### 3.Build Executable File
 
 ```shell
-cd libre-blog/
 mkdir build
 cd build
 cmake .. && make

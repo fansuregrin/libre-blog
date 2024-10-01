@@ -1,7 +1,13 @@
 # Database configuration
 
+Enter the `sql/` directory under the project:
+```bash
+cd ./sql
+```
+
 ```sql
 CREATE DATABASE libre_blog;
+USE libre_blog;
 source ./create_tables.sql;
 source ./gen_menus.sql;
 source ./gen_roles.sql;
