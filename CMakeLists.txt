@@ -31,6 +31,9 @@ add_executable(${PROJECT_NAME} main.cc)
 find_package(Drogon CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
 
+find_package(jwt-cpp CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE jwt-cpp::jwt-cpp)
+
 # ##############################################################################
 
 if (CMAKE_CXX_STANDARD LESS 17)
