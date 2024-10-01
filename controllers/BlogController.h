@@ -38,6 +38,7 @@ public:
     ADD_METHOD_TO(BlogController::updateCategory, "/blog/category/update", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::deleteCategories, "/blog/category/delete", Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(BlogController::articleListByTag, "/blog/tag/{slug}/{page}", Get);
+    ADD_METHOD_TO(BlogController::tagListAll, "/blog/tags", Get);
     ADD_METHOD_TO(BlogController::tagList, "/blog/tags/{page}", Get);
     ADD_METHOD_TO(BlogController::getTag, "/blog/tag/{id}", Get);
     ADD_METHOD_TO(BlogController::addTag, "/blog/tag/add", Post, "LoginFilter", "JsonFilter");
@@ -130,6 +131,11 @@ public:
         std::function<void (const HttpResponsePtr &)> &&callback,
         const std::string &slug,
         int page
+    ) const;
+
+    void tagListAll(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback
     ) const;
 
     void tagList(

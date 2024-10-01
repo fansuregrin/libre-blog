@@ -728,6 +728,34 @@ void BlogController::deleteCategories(
     callback(resp);
 }
 
+void BlogController::tagListAll(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback
+) const {
+    Json::Value json;
+
+    auto db = app().getDbClient();
+    Mapper<Tag> mpTag(db);
+    Mapper<ArticleTag> mpArticleTag(db);
+    try {
+        auto numTags = mpTag.count();
+        auto tags = mpTag.findAll();
+        for (const auto tagInDb : tags) {
+            Json::Value tag;
+            tag["name"] = tagInDb.getValueOfName();
+            tag["slug"] = tagInDb.getValueOfSlug();
+            json["tags"].append(tag);
+        }
+        json["status"] = 0;
+    } catch (const orm::DrogonDbException &ex) {
+        LOG_DEBUG << ex.base().what();
+        json["status"] = 2;
+    }
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
+    callback(resp);
+}
+
 void BlogController::tagList(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
