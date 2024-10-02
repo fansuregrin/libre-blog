@@ -38,7 +38,8 @@ void BlogController::articleList(
             for (const auto &tag : tags) {
                 article["tags"].append(tag.first.toJson());
             }
-            article["create_time"] = art.getValueOfCreateTime().toDbString();
+            article["create_time"] = art.getValueOfCreateTime()
+                .toCustomFormattedString("%Y-%m-%dT%H:%M:%SZ");
             article["excerpt"] = art.getValueOfExcerpt();
             json["articles"].append(article);
         }
@@ -101,7 +102,7 @@ void BlogController::articleListAdmin(
                 article["tags"].append(tag.first.getValueOfName());
             }
             article["create_time"] = art.getValueOfCreateTime()
-                .toCustomedFormattedString("%Y-%m-%d");
+                .toCustomFormattedString("%Y-%m-%dT%H:%M:%SZ");
             article["excerpt"] = art.getValueOfExcerpt();
             json["articles"].append(article);
         }
@@ -139,7 +140,8 @@ void BlogController::getArticle(
         for (const auto &tag : tags) {
             article["tags"].append(tag.first.toJson());
         }
-        article["create_time"] = art.getValueOfCreateTime().toDbString();
+        article["create_time"] = art.getValueOfCreateTime()
+            .toCustomFormattedString("%Y-%m-%dT%H:%M:%SZ");
         article["content"] = art.getValueOfContent();
         article["excerpt"] = art.getValueOfExcerpt();
         json["article"] = article;
@@ -436,7 +438,8 @@ void BlogController::articleListByCategory(
             Json::Value article;
             article["id"] = art.getValueOfId();
             article["title"] = art.getValueOfTitle();
-            article["create_time"] = art.getValueOfCreateTime().toDbString();
+            article["create_time"] = art.getValueOfCreateTime()
+                .toCustomFormattedString("%Y-%m-%dT%H:%M:%SZ");
             article["excerpt"] = art.getValueOfExcerpt();
             auto author = art.getUser(db);
             article["author"]["id"] = author.getValueOfId();
@@ -488,7 +491,8 @@ void BlogController::articleListByAuthor(
             Json::Value article;
             article["id"] = art.getValueOfId();
             article["title"] = art.getValueOfTitle();
-            article["create_time"] = art.getValueOfCreateTime().toDbString();
+            article["create_time"] = art.getValueOfCreateTime()
+                .toCustomFormattedString("%Y-%m-%dT%H:%M:%SZ");
             article["excerpt"] = art.getValueOfExcerpt();
             article["category"] = art.getCategory(db).toJson();
             auto tags = art.getTags(db);
