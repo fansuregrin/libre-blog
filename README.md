@@ -1,47 +1,47 @@
 # libre-blog
 
-**Libre-blog** is a blog system. This repository uses the [Drogon](https://github.com/drogonframework/drogon) framework to implement the **backend API** of libre-blog. The front-end implementation of libre-blog is [👉here](https://github.com/fansuregrin/libre-blog-frontend).
+**Libre-blog** is a blog system. This repository uses the [Drogon](https://github.com/drogonframework/drogon) framework to implement the **backend API** of libre-blog.
 
 ## API List
 - article
-    - `/blog/articles/{page}`
-    - `/blog/category/{slug}/{page}`
-    - `/blog/tag/{slug}/{page}`
-    - `/blog/user/{id}/{page}`
-    - `/blog/admin/articles/{page}`
-    - `/blog/article/{id}`
-    - `/blog/article/add`
-    - `/blog/article/update`
-    - `/blog/article/delete`
+    - Get `/articles/{page}`
+    - Get `/admin/articles/{page}`
+    - Get `/category/{slug}/{page}`
+    - Get `/tag/{slug}/{page}`
+    - Get `/user/{id}/{page}`
+    - Get `/article/{id}`
+    - Post `/admin/article`
+    - Put `/admin/article`
+    - Delete `/admin/article/`
 - category
-    - `/blog/categories`
-    - `/blog/category/{id}`
-    - `/blog/category/add`
-    - `/blog/category/update`
-    - `/blog/category/delete`
+    - Get `/categories`
+    - Get `/category/{id}`
+    - Post `/admin/category`
+    - Put `/admin/category`
+    - Delete `/admin/category`
 - tag
-    - `/blog/tags/{page}`
-    - `/blog/tag/{id}`
-    - `/blog/tag/add`
-    - `/blog/tag/update`
-    - `/blog/tag/delete`
+    - Get `/tags/{page}`
+    - Get `/tag/{id}`
+    - Post `/admin/tag`
+    - Put `/admin/tag`
+    - Delete `/admin/tag`
 - user
-    - `/login`
-    - `/register`
-    - `/user/center`
-    - `/user/update/general-info`
-    - `/user/update/password`
-    - `/users/{page}`
-    - `/user/{id}`
-    - `/user/add`
-    - `/user/update`
-    - `/user/delete`
-    - `/user/role`
+    - Post `/login`
+    - Post `/register`
+    - Get `/admin/user/center`
+    - Patch `/admin/user/general-info`
+    - Patch `/admin/user/password`
+    - Get `/admin/users/{page}`
+    - Get `/admin/user/{id}`
+    - Post `/admin/user`
+    - Put `/admin/user`
+    - Delete `/admin/user`
+    - Get `/admin/user/role`
 - role
-    - `/roles`
+    - Get `/roles`
 - menu
-    - `/blog/admin/menu`
-    - `/blog/menu`
+    - Get `/admin/menu`
+    - Get `/menu`
 
 **For more detailed API documentation, please see [👉here](./docs/libre-blog_api.md).**
 

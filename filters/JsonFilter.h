@@ -1,6 +1,7 @@
 #pragma once
 
 #include <drogon/HttpFilter.h>
+#include "../dtos/ApiResponse.h"
 
 using namespace drogon;
 

@@ -1,10 +1,15 @@
 #pragma once
 
 #include <drogon/HttpController.h>
-#include <../models/User.h>
-#include <../models/Role.h>
-#include <../models/Article.h>
-#include <../models/ArticleTag.h>
+#include "TransformRequest.h"
+#include "../models/User.h"
+#include "../models/Role.h"
+#include "../models/Article.h"
+#include "../models/ArticleTag.h"
+#include "../utils/Utils.h"
+#include "../dtos/ApiResponse.h"
+#include "../exceptions/PageException.h"
+#include "../exceptions/PermissionException.h"
 
 using namespace drogon;
 using drogon_model::libre_blog::User;
@@ -14,24 +19,21 @@ using drogon_model::libre_blog::ArticleTag;
 using orm::Mapper;
 using orm::Criteria;
 using orm::CompareOperator;
-using json_traits = jwt::traits::nlohmann_json;
-
 
 class UserController : public HttpController<UserController> {
 public:
     METHOD_LIST_BEGIN
-    ADD_METHOD_TO(UserController::login, "/login", Post);
-    ADD_METHOD_TO(UserController::userCenter, "/user/center", Get, "LoginFilter");
-    ADD_METHOD_TO(UserController::register_, "/user/register", Post, "JsonFilter");
-    ADD_METHOD_TO(UserController::userList, "/users/{page}", Get, "LoginFilter");
-    ADD_METHOD_TO(UserController::updateGeneralInfo, "/user/update/general-info", Post, "LoginFilter", "JsonFilter");
-    ADD_METHOD_TO(UserController::updatePassword, "/user/update/password", Post, "LoginFilter", "JsonFilter");
-    ADD_METHOD_TO(UserController::getUser, "/user/{id}", Get, "LoginFilter");
-    ADD_METHOD_TO(UserController::addUser, "/user/add", Post, "LoginFilter", "JsonFilter");
-    ADD_METHOD_TO(UserController::updateUser, "/user/update", Post, "LoginFilter", "JsonFilter");
-    ADD_METHOD_TO(UserController::deleteUsers, "/user/delete", Post, "LoginFilter", "JsonFilter");
-    ADD_METHOD_TO(UserController::roleList, "/roles", Get, "LoginFilter");
-    ADD_METHOD_TO(UserController::getRole, "/user/role", Get, "LoginFilter");
+    ADD_METHOD_TO(UserController::login, "/login", HttpMethod::Post);
+    ADD_METHOD_TO(UserController::register_, "/register", HttpMethod::Post, "JsonFilter");
+    ADD_METHOD_TO(UserController::userCenter, "/admin/user/center", HttpMethod::Get, "LoginFilter");
+    ADD_METHOD_TO(UserController::userList, "/admin/users/{page}", HttpMethod::Get, "LoginFilter");
+    ADD_METHOD_TO(UserController::updateGeneralInfo, "/admin/user/general-info", HttpMethod::Patch, "LoginFilter", "JsonFilter");
+    ADD_METHOD_TO(UserController::updatePassword, "/admin/user/password", HttpMethod::Patch, "LoginFilter", "JsonFilter");
+    ADD_METHOD_TO(UserController::getUser, "/admin/user/{id}", HttpMethod::Get, "LoginFilter");
+    ADD_METHOD_TO(UserController::addUser, "/admin/user", HttpMethod::Post, "LoginFilter", "JsonFilter");
+    ADD_METHOD_TO(UserController::updateUser, "/admin/user", HttpMethod::Put, "LoginFilter", "JsonFilter");
+    ADD_METHOD_TO(UserController::deleteUsers, "/admin/user", HttpMethod::Delete, "LoginFilter", "JsonFilter");
+    ADD_METHOD_TO(UserController::getRole, "/admin/user/role", HttpMethod::Get, "LoginFilter");
     METHOD_LIST_END
 
     void login(
@@ -76,7 +78,8 @@ public:
 
     void updatePassword(
         const HttpRequestPtr& req,
-        std::function<void (const HttpResponsePtr &)> &&callback
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        Password password
     ) const;
 
     void updateUser(
@@ -90,38 +93,8 @@ public:
         std::function<void (const HttpResponsePtr &)> &&callback
     ) const;
 
-    void roleList(
-        const HttpRequestPtr& req,
-        std::function<void (const HttpResponsePtr &)> &&callback
-    ) const;
-
     void getRole(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback
     ) const;
 };
-
-namespace drogon {
-template <>
-inline User fromRequest(const HttpRequest &req) {
-    auto jsonPtr = req.getJsonObject();
-    if (jsonPtr == nullptr) {
-        throw std::invalid_argument("请求体格式错误, 请使用json");
-    }
-    auto &json = *jsonPtr;
-    if (!json.isMember("username") || 
-    json["username"].type() != Json::stringValue) {
-        throw std::invalid_argument("缺少必备字段: username, 或者类型错误");
-    }
-    if (!json.isMember("password") || 
-    json["password"].type() != Json::stringValue) {
-        throw std::invalid_argument("缺少必备字段: password, 或者类型错误");
-    }
-    User user;
-    user.updateByJson(json);
-    if (user.getValueOfRealname().empty()) {
-        user.setRealname(user.getValueOfUsername());
-    }
-    return user;
-}
-}

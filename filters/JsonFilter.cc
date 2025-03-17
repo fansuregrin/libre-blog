@@ -11,9 +11,9 @@ void JsonFilter::doFilter(
         fccb();
         return;
     }
-    Json::Value json;
-    json["status"] = 2;
-    json["error"] = "请求体格式错误, 请使用json";
-    auto resp = HttpResponse::newHttpJsonResponse(json);
+    auto resp = HttpResponse::newHttpJsonResponse(
+        ApiResponse::error(1, "请求体格式错误, 请使用json").toJson()
+    );
+    resp->setStatusCode(HttpStatusCode::k400BadRequest);
     fcb(resp);
 }

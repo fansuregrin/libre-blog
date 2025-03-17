@@ -13,8 +13,7 @@ CREATE TABLE `role` (
   `menu` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
-  KEY `idx_menu` (`menu`),
-  CONSTRAINT `fk_role_menu_to_menu_id` FOREIGN KEY (`menu`) REFERENCES `menu` (`id`)
+  KEY `idx_menu` (`menu`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `user` (
@@ -28,8 +27,7 @@ CREATE TABLE `user` (
   `role` int(11) NOT NULL DEFAULT 4,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
-  KEY `idx_role` (`role`),
-  CONSTRAINT `fk_user_role_to_role_id` FOREIGN KEY (`role`) REFERENCES `role` (`id`)
+  KEY `idx_role` (`role`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `tag` (
@@ -61,9 +59,7 @@ CREATE TABLE `article` (
   PRIMARY KEY (`id`),
   KEY `idx_create_time` (`create_time`),
   KEY `idx_author` (`author`),
-  KEY `idx_category` (`category`),
-  CONSTRAINT `fk_article_author_to_author_id` FOREIGN KEY (`author`) REFERENCES `user` (`id`),
-  CONSTRAINT `fk_article_category_to_category_id` FOREIGN KEY (`category`) REFERENCES `category` (`id`)
+  KEY `idx_category` (`category`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `article_tag` (
@@ -71,9 +67,7 @@ CREATE TABLE `article_tag` (
   `tag` int(11) NOT NULL,
   PRIMARY KEY (`article`,`tag`),
   KEY `article` (`article`),
-  KEY `tag` (`tag`),
-  CONSTRAINT `article_tag_ibfk_1` FOREIGN KEY (`article`) REFERENCES `article` (`id`),
-  CONSTRAINT `article_tag_ibfk_2` FOREIGN KEY (`tag`) REFERENCES `tag` (`id`)
+  KEY `tag` (`tag`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `option` (

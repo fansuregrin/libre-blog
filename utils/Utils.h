@@ -4,9 +4,9 @@
 #include <regex>
 #include <trantor/utils/Logger.h>
 #include <jwt-cpp/jwt.h>
-#include <jwt-cpp/traits/nlohmann-json/traits.h>
+#include <jwt-cpp/traits/open-source-parsers-jsoncpp/traits.h>
 
-using json_traits = jwt::traits::nlohmann_json;
+using json_traits = jwt::traits::open_source_parsers_jsoncpp;
 
 const std::string es256k_priv_key = R"(-----BEGIN EC PRIVATE KEY-----
 MHQCAQEEII+btqvqU7jdCmlceokNXspmSnhrqbVcNO/gPaNnG9dSoAcGBSuBBAAK
@@ -23,7 +23,6 @@ const auto emailPattern = std::regex(
     R"(^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*@(\w+)(\.(\w+))+$)"
 );
 
-bool verifyUserToken(const std::string &token);
 bool checkEmail(const std::string &email);
 bool checkUsername(const std::string &username);
 bool checkPassword(const std::string &password);
