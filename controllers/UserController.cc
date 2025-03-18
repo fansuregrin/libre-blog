@@ -70,14 +70,14 @@ void UserController::register_(
     ApiResponse respBody;
     bool valid = true;
 
-    // check password
-    if (!checkPassword(user.getValueOfPassword())) {
-        respBody.setCodeAndMsg(1, "密码不合法");
+    // check username
+    if (!checkUsername(user.getValueOfUsername())) {
+        respBody.setCodeAndMsg(1, "用户名不合法");
         valid = false;
     }
-    // check username
-    else if (!checkUsername(user.getValueOfUsername())) {
-        respBody.setCodeAndMsg(1, "用户名不合法");
+    // check password
+    else if (!checkPassword(user.getValueOfPassword())) {
+        respBody.setCodeAndMsg(1, "密码不合法");
         valid = false;
     }
     // check email 

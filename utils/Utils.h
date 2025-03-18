@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#pragma once
+
 #include <string>
 #include <regex>
 #include <trantor/utils/Logger.h>
@@ -23,9 +23,10 @@ const auto emailPattern = std::regex(
     R"(^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*@(\w+)(\.(\w+))+$)"
 );
 
+const auto passwordPattern = std::regex(
+    R"(^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])(?!.*\s).{6,20}$)"
+);
+
 bool checkEmail(const std::string &email);
 bool checkUsername(const std::string &username);
 bool checkPassword(const std::string &password);
-
-
-#endif

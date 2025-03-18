@@ -7,7 +7,7 @@ bool checkEmail(const std::string &email) {
 }
 
 bool checkUsername(const std::string &username) {
-    if (username.size() < 4) return false;
+    if (username.size() < 4 || username.size() > 16) return false;
     for (const char &c : username) {
         if (std::isspace(c)) {
             return false;
@@ -17,11 +17,7 @@ bool checkUsername(const std::string &username) {
 }
 
 bool checkPassword(const std::string &password) {
-    if (password.size() < 6) return false;
-    for (const auto &ch:password) {
-        if (std::isspace(ch)) {
-            return false;
-        }
-    }
-    return true;
+    if (password.empty()) return false;
+    std::smatch res;
+    return std::regex_match(password, res, passwordPattern);
 }
