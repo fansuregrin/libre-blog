@@ -1,6 +1,5 @@
 #include "ExceptionHandler.h"
 #include "../dtos/ApiResponse.h"
-#include "../exceptions/PageException.h"
 #include "../exceptions/PermissionException.h"
 
 using namespace drogon;
@@ -19,14 +18,11 @@ ExceptionHandler exceptionHandler = [] (
     if (dbEx) {
         respBody.setCodeAndMsg(1, "数据操作出错");
         resp->setStatusCode(HttpStatusCode::k400BadRequest);
-    } else if (typeid(ex) == typeid(PageException)) {
-        respBody.setCodeAndMsg(1, "无效的页码");
-        resp->setStatusCode(HttpStatusCode::k400BadRequest);
     } else if (typeid(ex) == typeid(PermissionException)) {
         respBody.setCodeAndMsg(1, "没有权限");
         resp->setStatusCode(HttpStatusCode::k403Forbidden);
     } else if (typeid(ex) == typeid(std::invalid_argument) ||
-    typeid(ex) == typeid(std::runtime_error)) {
+        typeid(ex) == typeid(std::runtime_error)) {
         respBody.setCodeAndMsg(1, ex.what());
         resp->setStatusCode(HttpStatusCode::k400BadRequest);
     } else {

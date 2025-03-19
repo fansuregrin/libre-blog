@@ -4,11 +4,11 @@
 
 ## API List
 - article
-    - Get `/articles/{page}`
-    - Get `/admin/articles/{page}`
-    - Get `/category/{slug}/{page}`
-    - Get `/tag/{slug}/{page}`
-    - Get `/user/{id}/{page}`
+    - Get `/articles`
+    - Get `/admin/articles`
+    - Get `/articles/category/{slug}`
+    - Get `/articles/tag/{slug}`
+    - Get `/articles/user/{id}`
     - Get `/article/{id}`
     - Post `/admin/article`
     - Put `/admin/article`
@@ -20,7 +20,7 @@
     - Put `/admin/category`
     - Delete `/admin/category`
 - tag
-    - Get `/tags/{page}`
+    - Get `/tags`
     - Get `/tag/{id}`
     - Post `/admin/tag`
     - Put `/admin/tag`
@@ -31,7 +31,7 @@
     - Get `/admin/user/center`
     - Patch `/admin/user/general-info`
     - Patch `/admin/user/password`
-    - Get `/admin/users/{page}`
+    - Get `/admin/users`
     - Get `/admin/user/{id}`
     - Post `/admin/user`
     - Put `/admin/user`

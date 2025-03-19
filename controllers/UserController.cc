@@ -119,24 +119,19 @@ void UserController::register_(
 
 void UserController::userList(
     const HttpRequestPtr& req,
-    std::function<void (const HttpResponsePtr &)> &&callback,
-    int page
+    std::function<void (const HttpResponsePtr &)> &&callback
 ) const {
-    if (page < 1) {
-        throw PageException();
-    }
-    
     int userId = req->getAttributes()->get<int>("uid");
     auto db = app().getDbClient();
     Mapper<User> mpUser(db);
     Json::Value data;
+    int page = req->getAttributes()->get<int>("page");
+    int pageSize = req->getAttributes()->get<int>("pageSize");
     auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
     if (userInDb.getValueOfRole() <= 1) {
         // 只有 administrator(id=1) 才有获取用户列表的权限
-        int perPage = 10;
-        auto numUsers = mpUser.count();
-        data["num_pages"] = numUsers / perPage + (numUsers%perPage?1:0);
-        auto users = mpUser.paginate(page, perPage).findAll();
+        data["total"] = mpUser.count();
+        auto users = mpUser.paginate(page, pageSize).findAll();
         for (const auto &user : users) {
             Json::Value userItem;
             userItem["id"] = user.getValueOfId();

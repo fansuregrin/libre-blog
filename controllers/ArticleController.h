@@ -10,7 +10,6 @@
 #include "../models/ArticleTag.h"
 #include "../utils/Utils.h"
 #include "../dtos/ApiResponse.h"
-#include "../exceptions/PageException.h"
 #include "../exceptions/PermissionException.h"
 
 using namespace drogon;
@@ -28,11 +27,11 @@ using drogon_model::libre_blog::ArticleTag;
 class ArticleController : public HttpController<ArticleController> {
 public:
     METHOD_LIST_BEGIN
-    ADD_METHOD_TO(ArticleController::articleList, "/articles/{page}", HttpMethod::Get);
-    ADD_METHOD_TO(ArticleController::articleListAdmin, "/admin/articles/{page}", HttpMethod::Get, "LoginFilter");
-    ADD_METHOD_TO(ArticleController::articleListByCategory, "/category/{slug}/{page}", HttpMethod::Get);
-    ADD_METHOD_TO(ArticleController::articleListByTag, "/tag/{slug}/{page}", HttpMethod::Get);
-    ADD_METHOD_TO(ArticleController::articleListByAuthor, "/user/{id}/{page}", HttpMethod::Get);
+    ADD_METHOD_TO(ArticleController::articleList, "/articles", HttpMethod::Get, "PaginationFilter");
+    ADD_METHOD_TO(ArticleController::articleListAdmin, "/admin/articles", HttpMethod::Get, "LoginFilter", "PaginationFilter");
+    ADD_METHOD_TO(ArticleController::articleListByCategory, "/articles/category/{slug}", HttpMethod::Get, "PaginationFilter");
+    ADD_METHOD_TO(ArticleController::articleListByTag, "/articles/tag/{slug}", HttpMethod::Get, "PaginationFilter");
+    ADD_METHOD_TO(ArticleController::articleListByAuthor, "/articles/user/{id}", HttpMethod::Get, "PaginationFilter");
     ADD_METHOD_TO(ArticleController::getArticle, "/article/{id}", HttpMethod::Get);
     ADD_METHOD_TO(ArticleController::addArticle, "/admin/article", HttpMethod::Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(ArticleController::updateArticle, "/admin/article", HttpMethod::Put, "LoginFilter", "JsonFilter");
@@ -41,35 +40,30 @@ public:
 
     void articleList(
         const HttpRequestPtr& req,
-        std::function<void (const HttpResponsePtr &)> &&callback,
-        int page = 1
+        std::function<void (const HttpResponsePtr &)> &&callback
     ) const;
 
     void articleListAdmin(
         const HttpRequestPtr& req,
-        std::function<void (const HttpResponsePtr &)> &&callback,
-        int page = 1
+        std::function<void (const HttpResponsePtr &)> &&callback
     ) const;
 
     void articleListByCategory(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
-        const std::string &slug,
-        int page = 1
+        const std::string &slug
     ) const;
 
     void articleListByAuthor(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
-        int id,
-        int page = 1
+        int id
     ) const;
 
     void articleListByTag(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
-        const std::string &slug,
-        int page = 1
+        const std::string &slug
     ) const;
 
     void getArticle(

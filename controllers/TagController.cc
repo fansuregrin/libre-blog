@@ -24,21 +24,18 @@ void TagController::getAllTags(
 
 void TagController::tagList(
     const HttpRequestPtr& req,
-    std::function<void (const HttpResponsePtr &)> &&callback,
-    int page
+    std::function<void (const HttpResponsePtr &)> &&callback
 ) const {
-    if (page < 1) {
-        throw PageException();
-    }
-
     auto db = app().getDbClient();
     Mapper<Tag> mpTag(db);
     Mapper<ArticleTag> mpArticleTag(db);
     Json::Value data;
-    auto numTags = mpTag.count();
-    int perPage = 10;
-    data["num_pages"] = numTags / perPage + (numTags%perPage?1:0);
-    auto tags = mpTag.paginate(page, perPage).findAll();
+    data["total"] = mpTag.count();
+
+    int page = req->getAttributes()->get<int>("page");
+    int pageSize = req->getAttributes()->get<int>("pageSize");
+    
+    auto tags = mpTag.paginate(page, pageSize).findAll();
     for (const auto tagInDb : tags) {
         Json::Value tag;
         tag["id"] = tagInDb.getValueOfId();

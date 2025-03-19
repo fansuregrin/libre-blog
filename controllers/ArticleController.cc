@@ -2,22 +2,19 @@
 
 void ArticleController::articleList(
     const HttpRequestPtr& req,
-    std::function<void (const HttpResponsePtr &)> &&callback,
-    int page
-) const {    
-    if (page < 1) {
-        throw PageException();
-    }
-
+    std::function<void (const HttpResponsePtr &)> &&callback
+) const {
     Json::Value data;
     auto db = drogon::app().getDbClient();
     Mapper<Article> mpArticle(db);
-    size_t perPage = 10;
-    auto numArticles = mpArticle.count();
+    int page = req->getAttributes()->get<int>("page");
+    int pageSize = req->getAttributes()->get<int>("pageSize");
+
+    data["total"] = mpArticle.count();
     auto articles = mpArticle
         .orderBy(Article::Cols::_create_time, orm::SortOrder::DESC)
-        .paginate(page, perPage).findAll();
-    data["num_pages"] = numArticles / perPage + (numArticles%perPage?1:0);
+        .paginate(page, pageSize).findAll();
+    
     for (const auto &art : articles) {
         Json::Value article;
         article["id"] = art.getValueOfId();
@@ -35,6 +32,7 @@ void ArticleController::articleList(
         article["excerpt"] = art.getValueOfExcerpt();
         data["articles"].append(article);
     }
+    
     auto resp = HttpResponse::newHttpJsonResponse(
         ApiResponse::success(data).toJson()
     );
@@ -43,19 +41,17 @@ void ArticleController::articleList(
 
 void ArticleController::articleListAdmin(
     const HttpRequestPtr& req,
-    std::function<void (const HttpResponsePtr &)> &&callback,
-    int page
+    std::function<void (const HttpResponsePtr &)> &&callback
 ) const {
-    if (page < 1) {
-        throw PageException();
-    }
-        
     int userId = req->getAttributes()->get<int>("uid");
     auto db = drogon::app().getDbClient();
     Mapper<User> mpUser(db);
     Mapper<Article> mpArticle(db);
-    size_t perPage = 10;
+
     Json::Value data;
+
+    int page = req->getAttributes()->get<int>("page");
+    int pageSize = req->getAttributes()->get<int>("pageSize");
 
     auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
     auto roleId = userInDb.getValueOfRole();
@@ -65,18 +61,18 @@ void ArticleController::articleListAdmin(
     if (roleId <= 2) {
         numArticles = mpArticle.count();
         articles = mpArticle.orderBy(Article::Cols::_create_time,
-            orm::SortOrder::DESC).paginate(page, perPage).findAll();
+            orm::SortOrder::DESC).paginate(page, pageSize).findAll();
     } else if (roleId == 3) {
         numArticles = mpArticle.count(Criteria(Article::Cols::_author, userId));
         articles = mpArticle
             .orderBy(Article::Cols::_create_time,SortOrder::DESC)
-            .paginate(page, perPage)
+            .paginate(page, pageSize)
             .findBy(Criteria(Article::Cols::_author, userId));
     } else {
         throw std::runtime_error("无效的 role id");
     }
     
-    data["num_pages"] = numArticles / perPage + (numArticles%perPage?1:0);
+    data["total"] = numArticles;
     for (const auto &art : articles) {
         Json::Value article;
         article["id"] = art.getValueOfId();
@@ -101,28 +97,23 @@ void ArticleController::articleListAdmin(
 void ArticleController::articleListByCategory(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
-    const std::string &slug,
-    int page
+    const std::string &slug
 ) const {
-    if (page < 1) {
-        throw PageException();
-    }
-    
     Json::Value data;
-    size_t perPage = 10;
     auto db = app().getDbClient();
     Mapper<Category> mpCategory(db);
     Mapper<Article> mpArticle(db);
 
+    int page = req->getAttributes()->get<int>("page");
+    int pageSize = req->getAttributes()->get<int>("pageSize");
+
     auto cat = mpCategory.findOne(Criteria(Category::Cols::_slug, slug));
     data["category"] = cat.toJson();
-    auto numArticles = mpArticle.count(
+    data["total"] = mpArticle.count(
         Criteria(Article::Cols::_category, cat.getValueOfId()));
-    auto num_pages = numArticles / perPage + (numArticles%perPage?1:0);
-    data["num_pages"] = num_pages;
     auto articles = mpArticle
         .orderBy(Article::Cols::_create_time, SortOrder::DESC)
-        .paginate(page, perPage)
+        .paginate(page, pageSize)
         .findBy(Criteria(Article::Cols::_category, cat.getValueOfId()));
     for (const auto &art : articles) {
         Json::Value article;
@@ -149,33 +140,23 @@ void ArticleController::articleListByCategory(
 void ArticleController::articleListByAuthor(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
-    int id,
-    int page
+    int id
 ) const {
-    if (page < 1) {
-        auto resp = HttpResponse::newHttpJsonResponse(
-            ApiResponse::error(1, "页码不合法").toJson()
-        );
-        resp->setStatusCode(HttpStatusCode::k400BadRequest);
-        callback(resp);
-        return;
-    }
-        
     Json::Value data;
-    size_t perPage = 10;
     auto db = app().getDbClient();
     Mapper<User> mpUser(db);
     Mapper<Article> mpArticle(db);
 
+    int page = req->getAttributes()->get<int>("page");
+    int pageSize = req->getAttributes()->get<int>("pageSize");
+
     auto author = mpUser.findOne(Criteria(User::Cols::_id, id));
     data["author"]["id"] = author.getValueOfId();
     data["author"]["realname"] = author.getValueOfRealname();
-    auto numArticles = mpArticle.count(
+    data["total"] = mpArticle.count(
         Criteria(Article::Cols::_author, author.getValueOfId()));
-    auto numPages = numArticles / perPage + (numArticles%perPage?1:0);
-    data["num_pages"] = numPages;
     auto articles = mpArticle.orderBy(Article::Cols::_create_time, SortOrder::DESC)
-        .paginate(page, perPage)
+        .paginate(page, pageSize)
         .findBy(Criteria(Article::Cols::_author, author.getValueOfId()));
     for (const auto &art : articles) {
         Json::Value article;
@@ -200,26 +181,21 @@ void ArticleController::articleListByAuthor(
 void ArticleController::articleListByTag(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
-    const std::string &slug,
-    int page
+    const std::string &slug
 ) const {
-    if (page < 1) {
-        throw PageException();
-    }
-
     Json::Value data;
-    size_t perPage = 10;
     auto db = app().getDbClient();
     Mapper<Tag> mpTag(db);
     Mapper<Article> mpArticle(db);
     Mapper<ArticleTag> mpArticleTag(db);
 
+    int page = req->getAttributes()->get<int>("page");
+    int pageSize = req->getAttributes()->get<int>("pageSize");
+
     auto tag = mpTag.findOne(Criteria(Tag::Cols::_slug, slug));
     auto tagId = tag.getValueOfId();
     data["tag"] = tag.toJson();
-    auto numArticles = mpArticleTag.count(Criteria(ArticleTag::Cols::_tag, tagId));
-    auto numPages = numArticles / perPage + (numArticles%perPage?1:0);
-    data["num_pages"] = numPages;
+    data["total"] = mpArticleTag.count(Criteria(ArticleTag::Cols::_tag, tagId));
     auto res = db->execSqlSync(
         "SELECT "
         "art.id,art.title,art.create_time,art.excerpt,"
@@ -231,7 +207,7 @@ void ArticleController::articleListByTag(
         "JOIN category cat ON art.category = cat.id "
         "WHERE article_tag.tag = ? "
         "ORDER BY art.create_time DESC LIMIT ?,?;",
-        tagId, (page-1)*perPage, perPage
+        tagId, (page-1)*pageSize, pageSize
     );
     for (const auto &row : res) {
         Json::Value art;

@@ -8,7 +8,6 @@
 #include "../models/ArticleTag.h"
 #include "../utils/Utils.h"
 #include "../dtos/ApiResponse.h"
-#include "../exceptions/PageException.h"
 #include "../exceptions/PermissionException.h"
 
 using namespace drogon;
@@ -26,7 +25,7 @@ public:
     ADD_METHOD_TO(UserController::login, "/login", HttpMethod::Post);
     ADD_METHOD_TO(UserController::register_, "/register", HttpMethod::Post, "JsonFilter");
     ADD_METHOD_TO(UserController::userCenter, "/admin/user/center", HttpMethod::Get, "LoginFilter");
-    ADD_METHOD_TO(UserController::userList, "/admin/users/{page}", HttpMethod::Get, "LoginFilter");
+    ADD_METHOD_TO(UserController::userList, "/admin/users", HttpMethod::Get, "LoginFilter", "PaginationFilter");
     ADD_METHOD_TO(UserController::updateGeneralInfo, "/admin/user/general-info", HttpMethod::Patch, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::updatePassword, "/admin/user/password", HttpMethod::Patch, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::getUser, "/admin/user/{id}", HttpMethod::Get, "LoginFilter");
@@ -67,8 +66,7 @@ public:
 
     void userList(
         const HttpRequestPtr& req,
-        std::function<void (const HttpResponsePtr &)> &&callback,
-        int page
+        std::function<void (const HttpResponsePtr &)> &&callback
     ) const;
 
     void updateGeneralInfo(

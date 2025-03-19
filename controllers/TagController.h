@@ -7,7 +7,6 @@
 #include "../models/ArticleTag.h"
 #include "../utils/Utils.h"
 #include "../dtos/ApiResponse.h"
-#include "../exceptions/PageException.h"
 #include "../exceptions/PermissionException.h"
 
 using namespace drogon;
@@ -23,8 +22,8 @@ using drogon_model::libre_blog::ArticleTag;
 class TagController : public HttpController<TagController> {
 public:
     METHOD_LIST_BEGIN
-    ADD_METHOD_TO(TagController::getAllTags, "/tags", HttpMethod::Get);
-    ADD_METHOD_TO(TagController::tagList, "/tags/{page}", HttpMethod::Get);
+    ADD_METHOD_TO(TagController::getAllTags, "/tags/all", HttpMethod::Get);
+    ADD_METHOD_TO(TagController::tagList, "/tags", HttpMethod::Get, "PaginationFilter");
     ADD_METHOD_TO(TagController::getTag, "/tag/{id}", HttpMethod::Get);
     ADD_METHOD_TO(TagController::addTag, "/admin/tag", HttpMethod::Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(TagController::updateTag, "/admin/tag", HttpMethod::Put, "LoginFilter", "JsonFilter");
@@ -38,8 +37,7 @@ public:
 
     void tagList(
         const HttpRequestPtr& req,
-        std::function<void (const HttpResponsePtr &)> &&callback,
-        int page
+        std::function<void (const HttpResponsePtr &)> &&callback
     ) const;
 
     void getTag(
