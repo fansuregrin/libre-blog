@@ -1,37 +1,75 @@
 #include "ArticleController.h"
 
+const std::string ArticleController::articleListSql = 
+R"(SELECT a.id, a.title, a.excerpt, a.create_time,
+    u.id AS user_id, u.username AS user_username, u.realname AS user_realname,
+    c.id AS category_id, c.slug AS category_slug, c.name AS category_name,
+    t.id AS tag_id, t.slug AS tag_slug, t.name AS tag_name
+FROM (SELECT id FROM article ORDER BY create_time DESC LIMIT ?,?) sub
+JOIN article a ON sub.id = a.id
+LEFT JOIN category c ON a.category = c.id
+LEFT JOIN user u ON a.author = u.id
+LEFT JOIN article_tag at ON a.id = at.article
+LEFT JOIN tag t ON at.tag = t.id;)";
+const std::string ArticleController::articleCountSql = 
+"SELECT COUNT(*) FROM article";
+const std::string ArticleController::articleListByUserSql =
+R"(SELECT a.id, a.title, a.excerpt, a.create_time,
+    u.id AS user_id, u.username AS user_username, u.realname AS user_realname,
+    c.id AS category_id, c.slug AS category_slug, c.name AS category_name,
+    t.id AS tag_id, t.slug AS tag_slug, t.name tag_name
+FROM (SELECT id FROM article WHERE author = ? ORDER BY create_time DESC LIMIT ?,?) sub
+JOIN article a ON sub.id = a.id
+LEFT JOIN category c ON a.category = c.id
+JOIN user u ON a.author = u.id
+LEFT JOIN article_tag at ON a.id = at.article
+LEFT JOIN tag t ON at.tag = t.id;)";
+const std::string ArticleController::articleCountByUserSql = 
+"SELECT COUNT(*) FROM article WHERE author = ?";
+const std::string ArticleController::articleListByCategorySql =
+R"(SELECT a.id, a.title, a.excerpt, a.create_time,
+    u.id AS user_id, u.username AS user_username, u.realname AS user_realname,
+    c.id AS category_id, c.slug AS category_slug, c.name AS category_name,
+    t.id AS tag_id, t.slug AS tag_slug, t.name AS tag_name
+FROM (SELECT a1.id FROM article a1 LEFT JOIN category c1 ON a1.category = c1.id
+    WHERE c1.slug = ? ORDER BY a1.create_time DESC LIMIT ?,?) sub
+JOIN article a ON sub.id = a.id
+JOIN category c ON a.category = c.id
+LEFT JOIN user u ON a.author = u.id
+LEFT JOIN article_tag at ON a.id = at.article
+LEFT JOIN tag t ON at.tag = t.id;)";
+const std::string ArticleController::articleCountByCategorySql =
+"SELECT COUNT(*) FROM article a JOIN category c ON a.category = c.id WHERE c.slug = ?";
+const std::string ArticleController::articleListByTagSql =
+R"(SELECT a.id, a.title, a.excerpt, a.create_time,
+    u.id AS user_id, u.username AS user_username, u.realname AS user_realname,
+    c.id AS category_id, c.slug AS category_slug, c.name AS category_name,
+    t.id AS tag_id, t.slug AS tag_slug, t.name AS tag_name
+FROM (SELECT a1.id FROM article a1
+    JOIN article_tag at1 ON a1.id = at1.article
+    JOIN tag t1 ON at1.tag = t1.id WHERE t1.slug = ?
+    ORDER BY a1.create_time DESC LIMIT ?,?) sub
+JOIN article a ON sub.id = a.id
+LEFT JOIN category c ON a.category = c.id
+LEFT JOIN user u ON a.author = u.id
+LEFT JOIN article_tag at ON a.id = at.article
+LEFT JOIN tag t ON at.tag = t.id;)";
+const std::string ArticleController::articleCountByTagSql =
+R"(SELECT COUNT(*) FROM article a JOIN article_tag at ON a.id = at.article
+JOIN tag t ON at.tag = t.id WHERE t.slug = ?)";
+
 void ArticleController::articleList(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback
 ) const {
     Json::Value data;
     auto db = drogon::app().getDbClient();
-    Mapper<Article> mpArticle(db);
     int page = req->getAttributes()->get<int>("page");
     int pageSize = req->getAttributes()->get<int>("pageSize");
 
-    data["total"] = mpArticle.count();
-    auto articles = mpArticle
-        .orderBy(Article::Cols::_create_time, orm::SortOrder::DESC)
-        .paginate(page, pageSize).findAll();
-    
-    for (const auto &art : articles) {
-        Json::Value article;
-        article["id"] = art.getValueOfId();
-        article["title"] = art.getValueOfTitle();
-        auto author = art.getUser(db);
-        article["author"]["id"] = author.getValueOfId();
-        article["author"]["realname"] = author.getValueOfRealname();
-        article["category"] = art.getCategory(db).toJson();
-        auto tags = art.getTags(db);
-        for (const auto &tag : tags) {
-            article["tags"].append(tag.first.toJson());
-        }
-        article["create_time"] = art.getValueOfCreateTime()
-            .toCustomFormattedString("%Y-%m-%dT%H:%M:%SZ");
-        article["excerpt"] = art.getValueOfExcerpt();
-        data["articles"].append(article);
-    }
+    data["total"] = db->execSqlSync(articleCountSql)[0][0].as<int>();
+    auto result = db->execSqlSync(articleListSql, (page-1)*pageSize, pageSize);
+    data["articles"] = resultToArticles(result);
     
     auto resp = HttpResponse::newHttpJsonResponse(
         ApiResponse::success(data).toJson()
@@ -46,51 +84,29 @@ void ArticleController::articleListAdmin(
     int userId = req->getAttributes()->get<int>("uid");
     auto db = drogon::app().getDbClient();
     Mapper<User> mpUser(db);
-    Mapper<Article> mpArticle(db);
 
     Json::Value data;
-
     int page = req->getAttributes()->get<int>("page");
     int pageSize = req->getAttributes()->get<int>("pageSize");
-
     auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
     auto roleId = userInDb.getValueOfRole();
-    std::vector<Article> articles;
-    int numArticles = 0;
     
     if (roleId <= 2) {
-        numArticles = mpArticle.count();
-        articles = mpArticle.orderBy(Article::Cols::_create_time,
-            orm::SortOrder::DESC).paginate(page, pageSize).findAll();
+        data["total"] = db->execSqlSync(articleCountSql)[0][0].as<int>();
+        auto result = db->execSqlSync(articleListSql, (page-1)*pageSize, pageSize);
+        data["articles"] = resultToArticles(result);
     } else if (roleId == 3) {
-        numArticles = mpArticle.count(Criteria(Article::Cols::_author, userId));
-        articles = mpArticle
-            .orderBy(Article::Cols::_create_time,SortOrder::DESC)
-            .paginate(page, pageSize)
-            .findBy(Criteria(Article::Cols::_author, userId));
+        data["total"] = db->execSqlSync(articleCountByUserSql, userId)[0][0].as<int>();
+        auto result = db->execSqlSync(articleListByUserSql, 
+            userId, (page-1)*pageSize, pageSize);
+        data["articles"] = resultToArticles(result);
     } else {
         throw std::runtime_error("无效的 role id");
     }
-    
-    data["total"] = numArticles;
-    for (const auto &art : articles) {
-        Json::Value article;
-        article["id"] = art.getValueOfId();
-        article["title"] = art.getValueOfTitle();
-        article["author"] = *art.getAuthor();
-        article["author_name"] = art.getUser(db).getValueOfRealname();
-        article["category"] = *art.getCategory();
-        article["category_name"] = art.getCategory(db).getValueOfName();
-        auto tags = art.getTags(db);
-        for (const auto &tag : tags) {
-            article["tags"].append(tag.first.getValueOfName());
-        }
-        article["create_time"] = art.getValueOfCreateTime()
-            .toCustomFormattedString("%Y-%m-%dT%H:%M:%SZ");
-        article["excerpt"] = art.getValueOfExcerpt();
-        data["articles"].append(article);
-    }
-    auto resp = HttpResponse::newHttpJsonResponse(ApiResponse::success(data).toJson());
+
+    auto resp = HttpResponse::newHttpJsonResponse(
+        ApiResponse::success(data).toJson()
+    );
     callback(resp);
 }
 
@@ -101,36 +117,14 @@ void ArticleController::articleListByCategory(
 ) const {
     Json::Value data;
     auto db = app().getDbClient();
-    Mapper<Category> mpCategory(db);
-    Mapper<Article> mpArticle(db);
-
     int page = req->getAttributes()->get<int>("page");
     int pageSize = req->getAttributes()->get<int>("pageSize");
 
-    auto cat = mpCategory.findOne(Criteria(Category::Cols::_slug, slug));
-    data["category"] = cat.toJson();
-    data["total"] = mpArticle.count(
-        Criteria(Article::Cols::_category, cat.getValueOfId()));
-    auto articles = mpArticle
-        .orderBy(Article::Cols::_create_time, SortOrder::DESC)
-        .paginate(page, pageSize)
-        .findBy(Criteria(Article::Cols::_category, cat.getValueOfId()));
-    for (const auto &art : articles) {
-        Json::Value article;
-        article["id"] = art.getValueOfId();
-        article["title"] = art.getValueOfTitle();
-        article["create_time"] = art.getValueOfCreateTime()
-            .toCustomFormattedString("%Y-%m-%dT%H:%M:%SZ");
-        article["excerpt"] = art.getValueOfExcerpt();
-        auto author = art.getUser(db);
-        article["author"]["id"] = author.getValueOfId();
-        article["author"]["realname"] = author.getValueOfRealname();
-        auto tags = art.getTags(db);
-        for (const auto &tag : tags) {
-            article["tags"].append(tag.first.toJson());
-        }
-        data["articles"].append(article);
-    }
+    data["total"] = db->execSqlSync(articleCountByCategorySql, slug)[0][0].as<int>();
+    auto result = db->execSqlSync(articleListByCategorySql, slug,
+        (page-1)*pageSize, pageSize);
+    data["articles"] = resultToArticles(result);
+
     auto resp = HttpResponse::newHttpJsonResponse(
         ApiResponse::success(data).toJson()
     );
@@ -144,34 +138,14 @@ void ArticleController::articleListByAuthor(
 ) const {
     Json::Value data;
     auto db = app().getDbClient();
-    Mapper<User> mpUser(db);
-    Mapper<Article> mpArticle(db);
-
     int page = req->getAttributes()->get<int>("page");
     int pageSize = req->getAttributes()->get<int>("pageSize");
 
-    auto author = mpUser.findOne(Criteria(User::Cols::_id, id));
-    data["author"]["id"] = author.getValueOfId();
-    data["author"]["realname"] = author.getValueOfRealname();
-    data["total"] = mpArticle.count(
-        Criteria(Article::Cols::_author, author.getValueOfId()));
-    auto articles = mpArticle.orderBy(Article::Cols::_create_time, SortOrder::DESC)
-        .paginate(page, pageSize)
-        .findBy(Criteria(Article::Cols::_author, author.getValueOfId()));
-    for (const auto &art : articles) {
-        Json::Value article;
-        article["id"] = art.getValueOfId();
-        article["title"] = art.getValueOfTitle();
-        article["create_time"] = art.getValueOfCreateTime()
-            .toCustomFormattedString("%Y-%m-%dT%H:%M:%SZ");
-        article["excerpt"] = art.getValueOfExcerpt();
-        article["category"] = art.getCategory(db).toJson();
-        auto tags = art.getTags(db);
-        for (const auto &tag : tags) {
-            article["tags"].append(tag.first.toJson());
-        }
-        data["articles"].append(article);
-    }
+    data["total"] = db->execSqlSync(articleCountByUserSql, id)[0][0].as<int>();
+    auto result = db->execSqlSync(articleListByUserSql, id,
+        (page-1)*pageSize, pageSize);
+    data["articles"] = resultToArticles(result);
+
     auto resp = HttpResponse::newHttpJsonResponse(
         ApiResponse::success(data).toJson()
     );
@@ -185,56 +159,13 @@ void ArticleController::articleListByTag(
 ) const {
     Json::Value data;
     auto db = app().getDbClient();
-    Mapper<Tag> mpTag(db);
-    Mapper<Article> mpArticle(db);
-    Mapper<ArticleTag> mpArticleTag(db);
-
     int page = req->getAttributes()->get<int>("page");
     int pageSize = req->getAttributes()->get<int>("pageSize");
 
-    auto tag = mpTag.findOne(Criteria(Tag::Cols::_slug, slug));
-    auto tagId = tag.getValueOfId();
-    data["tag"] = tag.toJson();
-    data["total"] = mpArticleTag.count(Criteria(ArticleTag::Cols::_tag, tagId));
-    auto res = db->execSqlSync(
-        "SELECT "
-        "art.id,art.title,art.create_time,art.excerpt,"
-        "art.author as author_id,user.realname as author_name,"
-        "art.category as cat_id,cat.slug as cat_slug,cat.name as cat_name "
-        "FROM article art "
-        "JOIN article_tag ON art.id = article_tag.article "
-        "JOIN user ON art.author = user.id "
-        "JOIN category cat ON art.category = cat.id "
-        "WHERE article_tag.tag = ? "
-        "ORDER BY art.create_time DESC LIMIT ?,?;",
-        tagId, (page-1)*pageSize, pageSize
-    );
-    for (const auto &row : res) {
-        Json::Value art;
-        auto artId = row["id"].as<int>();
-        art["id"] = artId;
-        art["title"] = row["title"].as<std::string>();
-        art["create_time"] = row["create_time"].as<std::string>();
-        art["excerpt"] = row["excerpt"].as<std::string>();
-        art["author"]["id"] = row["author_id"].as<int>();
-        art["author"]["realname"] = row["author_name"].as<std::string>();
-        art["category"]["id"] = row["cat_id"].as<int>();
-        art["category"]["name"] = row["cat_name"].as<std::string>();
-        art["category"]["slug"] = row["cat_slug"].as<std::string>();
-        auto tagsRes = db->execSqlSync(
-            "SELECT tag.id,tag.slug,tag.name FROM tag "
-            "JOIN article_tag ON tag.id = article_tag.tag "
-            "WHERE article_tag.article = ?;", artId
-        );
-        for (const auto &tagRow : tagsRes) {
-            Json::Value tagItem;
-            tagItem["id"] = tagRow["id"].as<int>();
-            tagItem["name"] = tagRow["name"].as<std::string>();
-            tagItem["slug"] = tagRow["slug"].as<std::string>();
-            art["tags"].append(tagItem);
-        }
-        data["articles"].append(art);
-    }
+    data["total"] = db->execSqlSync(articleCountByTagSql, slug)[0][0].as<int>();
+    auto result = db->execSqlSync(articleListByTagSql, slug, (page-1)*pageSize, pageSize);
+    data["articles"] = resultToArticles(result);
+
     auto resp = HttpResponse::newHttpJsonResponse(
         ApiResponse::success(data).toJson()
     );
@@ -467,4 +398,37 @@ void ArticleController::deleteArticles(
     );
     resp->setStatusCode(HttpStatusCode::k204NoContent);
     callback(resp);
+}
+
+Json::Value ArticleController::resultToArticles(const Result &result) {
+    Json::Value articles;
+    std::unordered_map<int, Json::Value> articlesMap;
+    for (const auto &row : result) {
+        int id = row["id"].as<int>();
+        if (articlesMap.find(id) == articlesMap.end()) {
+            Json::Value article;
+            article["id"] = id;
+            article["title"]= row["title"].as<std::string>();
+            article["excerpt"] = row["excerpt"].as<std::string>();
+            article["create_time"] = row["create_time"].as<std::string>();
+            article["author"]["id"] = row["user_id"].as<int>();
+            article["author"]["username"] = row["user_username"].as<std::string>();
+            article["author"]["realname"] = row["user_realname"].as<std::string>();
+            article["category"]["id"] = row["category_id"].as<int>();
+            article["category"]["slug"] = row["category_slug"].as<std::string>();
+            article["category"]["name"] = row["category_name"].as<std::string>();
+            articlesMap[id] = article;
+        }
+        if (!row["tag_id"].isNull()) {
+            Json::Value tag;
+            tag["id"] = row["tag_id"].as<int>();
+            tag["slug"] = row["tag_slug"].as<std::string>();
+            tag["name"] = row["tag_name"].as<std::string>();
+            articlesMap[id]["tags"].append(tag);
+        }
+    }
+    for (const auto &p : articlesMap) {
+        articles.append(p.second);
+    }
+    return articles;
 }

@@ -36,6 +36,21 @@ void CategoryController::getCategory(
     callback(resp);
 }
 
+void CategoryController::getCategoryBySlug(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    std::string slug
+) const {
+    auto db = app().getDbClient();
+    Mapper<Category> mpCategory(db);
+    auto catInDb = mpCategory.findOne(Criteria(Category::Cols::_slug, slug));
+    Json::Value data = catInDb.toJson();
+    auto resp = HttpResponse::newHttpJsonResponse(
+        ApiResponse::success(data).toJson()
+    );
+    callback(resp);
+}
+
 void CategoryController::addCategory(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback

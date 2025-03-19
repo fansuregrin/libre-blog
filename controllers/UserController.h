@@ -28,7 +28,7 @@ public:
     ADD_METHOD_TO(UserController::userList, "/admin/users", HttpMethod::Get, "LoginFilter", "PaginationFilter");
     ADD_METHOD_TO(UserController::updateGeneralInfo, "/admin/user/general-info", HttpMethod::Patch, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::updatePassword, "/admin/user/password", HttpMethod::Patch, "LoginFilter", "JsonFilter");
-    ADD_METHOD_TO(UserController::getUser, "/admin/user/{id}", HttpMethod::Get, "LoginFilter");
+    ADD_METHOD_TO(UserController::getUser, "/user/{id}", HttpMethod::Get);
     ADD_METHOD_TO(UserController::addUser, "/admin/user", HttpMethod::Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::updateUser, "/admin/user", HttpMethod::Put, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::deleteUsers, "/admin/user", HttpMethod::Delete, "LoginFilter", "JsonFilter");

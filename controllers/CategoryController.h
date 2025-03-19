@@ -25,6 +25,7 @@ public:
     METHOD_LIST_BEGIN
     ADD_METHOD_TO(CategoryController::getAllCategories, "/categories", HttpMethod::Get);
     ADD_METHOD_TO(CategoryController::getCategory, "/category/{id}", HttpMethod::Get);
+    ADD_METHOD_TO(CategoryController::getCategoryBySlug, "/category/{slug}", HttpMethod::Get); 
     ADD_METHOD_TO(CategoryController::addCategory, "/admin/category", HttpMethod::Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(CategoryController::updateCategory, "/admin/category", HttpMethod::Put, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(CategoryController::deleteCategories, "/admin/category", HttpMethod::Delete, "LoginFilter", "JsonFilter");
@@ -39,6 +40,12 @@ public:
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
         int id
+    ) const;
+
+    void getCategoryBySlug(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        std::string slug
     ) const;
 
     void addCategory(

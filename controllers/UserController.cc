@@ -240,27 +240,22 @@ void UserController::getUser(
     std::function<void (const HttpResponsePtr &)> &&callback,
     int id
 ) const {
-    int userId = req->getAttributes()->get<int>("uid");
     auto db = app().getDbClient();
     Mapper<User> mpUser(db);
-    auto loginedUser = mpUser.findOne(Criteria(User::Cols::_id, userId));
-    if (loginedUser.getValueOfRole() == 1) {
-        auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, id));
-        Json::Value user;
-        user["id"] = id;
-        user["username"] = userInDb.getValueOfUsername();
-        user["realname"] = userInDb.getValueOfRealname();
-        user["email"] = userInDb.getValueOfEmail();
-        auto role = userInDb.getRole(db);
-        user["role"]["id"] = role.getValueOfId();
-        user["role"]["name"] = role.getValueOfName();
-        auto resp = HttpResponse::newHttpJsonResponse(
-            ApiResponse::success(user).toJson()
-        );
-        callback(resp);
-    } else {
-        throw PermissionException();
-    }
+
+    auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, id));
+    Json::Value user;
+    user["id"] = id;
+    user["username"] = userInDb.getValueOfUsername();
+    user["realname"] = userInDb.getValueOfRealname();
+    user["email"] = userInDb.getValueOfEmail();
+    auto role = userInDb.getRole(db);
+    user["role"]["id"] = role.getValueOfId();
+    user["role"]["name"] = role.getValueOfName();
+    auto resp = HttpResponse::newHttpJsonResponse(
+        ApiResponse::success(user).toJson()
+    );
+    callback(resp);
 }
 
 void UserController::addUser(

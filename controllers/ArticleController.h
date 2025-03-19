@@ -13,6 +13,7 @@
 #include "../exceptions/PermissionException.h"
 
 using namespace drogon;
+using orm::Result;
 using orm::Mapper;
 using orm::Criteria;
 using orm::CompareOperator;
@@ -89,4 +90,15 @@ public:
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback
     ) const;
+private:
+    static const std::string articleListSql;
+    static const std::string articleCountSql;
+    static const std::string articleListByUserSql;
+    static const std::string articleCountByUserSql;
+    static const std::string articleListByCategorySql;
+    static const std::string articleCountByCategorySql;
+    static const std::string articleListByTagSql;
+    static const std::string articleCountByTagSql;
+
+    static Json::Value resultToArticles(const Result &result);
 };
