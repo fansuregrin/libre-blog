@@ -2,28 +2,13 @@
 
 #include <drogon/drogon.h>
 #include "TransformRequest.h"
-#include "../models/User.h"
-#include "../models/Role.h"
-#include "../models/Category.h"
-#include "../models/Article.h"
-#include "../models/Tag.h"
-#include "../models/ArticleTag.h"
 #include "../utils/Utils.h"
 #include "../dtos/ApiResponse.h"
 #include "../exceptions/PermissionException.h"
+#include "../dtos/Article.h"
 
 using namespace drogon;
 using orm::Result;
-using orm::Mapper;
-using orm::Criteria;
-using orm::CompareOperator;
-using orm::SortOrder;
-using drogon_model::libre_blog::Article;
-using drogon_model::libre_blog::User;
-using drogon_model::libre_blog::Role;
-using drogon_model::libre_blog::Category;
-using drogon_model::libre_blog::Tag;
-using drogon_model::libre_blog::ArticleTag;
 
 class ArticleController : public HttpController<ArticleController> {
 public:
@@ -76,14 +61,13 @@ public:
     void addArticle(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
-        const std::vector<std::string> &tags
+        Article article
     ) const;
 
     void updateArticle(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
-        const Article &article,
-        const std::vector<std::string> &tags
+        Article article
     ) const;
 
     void deleteArticles(
@@ -99,6 +83,9 @@ private:
     static const std::string articleCountByCategorySql;
     static const std::string articleListByTagSql;
     static const std::string articleCountByTagSql;
+    static const std::string articleGetSql;
+    static const std::string articleInsertSql;
 
     static Json::Value resultToArticles(const Result &result);
+    static Json::Value resultToArticle(const Result &result);
 };

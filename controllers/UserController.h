@@ -2,22 +2,14 @@
 
 #include <drogon/HttpController.h>
 #include "TransformRequest.h"
-#include "../models/User.h"
-#include "../models/Role.h"
-#include "../models/Article.h"
-#include "../models/ArticleTag.h"
 #include "../utils/Utils.h"
+#include "../dtos/User.h"
+#include "../dtos/Role.h"
 #include "../dtos/ApiResponse.h"
+#include "../mappers/UserMapper.h"
 #include "../exceptions/PermissionException.h"
 
 using namespace drogon;
-using drogon_model::libre_blog::User;
-using drogon_model::libre_blog::Role;
-using drogon_model::libre_blog::Article;
-using drogon_model::libre_blog::ArticleTag;
-using orm::Mapper;
-using orm::Criteria;
-using orm::CompareOperator;
 
 class UserController : public HttpController<UserController> {
 public:
@@ -32,7 +24,6 @@ public:
     ADD_METHOD_TO(UserController::addUser, "/admin/user", HttpMethod::Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::updateUser, "/admin/user", HttpMethod::Put, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(UserController::deleteUsers, "/admin/user", HttpMethod::Delete, "LoginFilter", "JsonFilter");
-    ADD_METHOD_TO(UserController::getRole, "/admin/user/role", HttpMethod::Get, "LoginFilter");
     METHOD_LIST_END
 
     void login(
@@ -71,7 +62,8 @@ public:
 
     void updateGeneralInfo(
         const HttpRequestPtr& req,
-        std::function<void (const HttpResponsePtr &)> &&callback
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        User user
     ) const;
 
     void updatePassword(
@@ -87,11 +79,6 @@ public:
     ) const;
 
     void deleteUsers(
-        const HttpRequestPtr& req,
-        std::function<void (const HttpResponsePtr &)> &&callback
-    ) const;
-
-    void getRole(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback
     ) const;

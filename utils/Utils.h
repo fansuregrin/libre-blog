@@ -2,8 +2,10 @@
 
 #include <string>
 #include <regex>
-#include <trantor/utils/Logger.h>
-#include <jwt-cpp/jwt.h>
+#include <sstream>
+#include <vector>
+#include <drogon/utils/Utilities.h>
+#include <json/json.h>
 #include <jwt-cpp/traits/open-source-parsers-jsoncpp/traits.h>
 
 using json_traits = jwt::traits::open_source_parsers_jsoncpp;
@@ -30,3 +32,36 @@ const auto passwordPattern = std::regex(
 bool checkEmail(const std::string &email);
 bool checkUsername(const std::string &username);
 bool checkPassword(const std::string &password);
+std::string encodePassword(const std::string &rawPassword);
+bool verfiyPassword(const std::string &rawPassword, 
+    const std::string &encodedPassword);
+
+template <typename T>
+std::string join(
+    const std::vector<T> &v, 
+    const std::string &open, 
+    const std::string &close, 
+    const std::string &sep
+) {
+    int n = v.size();
+    if (n < 1) return "";
+    std::ostringstream oss;
+    oss << open;
+    for (int i=0; i<n; ++i) {
+        if (i > 0) {
+            oss << sep;
+        }
+        oss << v[i];
+    }
+    oss << close;
+    return oss.str();
+}
+
+template <typename T>
+Json::Value toJson(const std::vector<T> &v) {
+    Json::Value r;
+    for (const auto &e : v) {
+        r.append(e.toJson());
+    }
+    return r;
+}

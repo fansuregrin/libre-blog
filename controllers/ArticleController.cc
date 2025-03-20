@@ -57,6 +57,20 @@ LEFT JOIN tag t ON at.tag = t.id;)";
 const std::string ArticleController::articleCountByTagSql =
 R"(SELECT COUNT(*) FROM article a JOIN article_tag at ON a.id = at.article
 JOIN tag t ON at.tag = t.id WHERE t.slug = ?)";
+const std::string ArticleController::articleGetSql = 
+R"(SELECT a.id, a.title, a.excerpt, a.content, a.create_time,
+    u.id AS user_id, u.username AS user_username, u.realname AS user_realname,
+    c.id AS category_id, c.slug AS category_slug, c.name AS category_name,
+    t.id AS tag_id, t.slug AS tag_slug, t.name AS tag_name
+FROM article a
+LEFT JOIN user u ON a.author = u.id
+LEFT JOIN category c ON a.category = c.id
+LEFT JOIN article_tag at ON a.id = at.article
+LEFT JOIN tag t ON at.tag = t.id
+WHERE a.id = ?;)";
+const std::string ArticleController::articleInsertSql = 
+R"(INSERT INTO article (title, author, category, create_time, content, excerpt) 
+VALUE (?, ?, ?, ?, ?, ?);)";
 
 void ArticleController::articleList(
     const HttpRequestPtr& req,
@@ -83,14 +97,13 @@ void ArticleController::articleListAdmin(
 ) const {
     int userId = req->getAttributes()->get<int>("uid");
     auto db = drogon::app().getDbClient();
-    Mapper<User> mpUser(db);
 
     Json::Value data;
     int page = req->getAttributes()->get<int>("page");
     int pageSize = req->getAttributes()->get<int>("pageSize");
-    auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
-    auto roleId = userInDb.getValueOfRole();
-    
+
+    auto roleId = db->execSqlSync("SELECT role FROM user WHERE id = ?", userId)
+        [0][0].as<int>();
     if (roleId <= 2) {
         data["total"] = db->execSqlSync(articleCountSql)[0][0].as<int>();
         auto result = db->execSqlSync(articleListSql, (page-1)*pageSize, pageSize);
@@ -178,25 +191,7 @@ void ArticleController::getArticle(
     int id
 ) const {
     auto db = app().getDbClient();
-    Mapper<Article> mpArticle(db);
-    auto art = mpArticle.findOne({Article::Cols::_id, id});
-    Json::Value article;
-    article["id"] = art.getValueOfId();
-    article["title"] = art.getValueOfTitle();
-    Json::Value author;
-    auto authorInDb = art.getUser(db);
-    author["id"] = authorInDb.getValueOfId();
-    author["realname"] = authorInDb.getValueOfRealname();
-    article["author"] = author;
-    article["category"] = art.getCategory(db).toJson();
-    auto tags = art.getTags(db);
-    for (const auto &tag : tags) {
-        article["tags"].append(tag.first.toJson());
-    }
-    article["create_time"] = art.getValueOfCreateTime()
-        .toCustomFormattedString("%Y-%m-%dT%H:%M:%SZ");
-    article["content"] = art.getValueOfContent();
-    article["excerpt"] = art.getValueOfExcerpt();
+    Json::Value article = resultToArticle(db->execSqlSync(articleGetSql, id));   
     auto resp = HttpResponse::newHttpJsonResponse(
         ApiResponse::success(article).toJson());
     callback(resp);
@@ -205,46 +200,40 @@ void ArticleController::getArticle(
 void ArticleController::addArticle(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
-    const std::vector<std::string> &tags
+    Article article
 ) const {
     int userId = req->getAttributes()->get<int>("uid");
     auto db = app().getDbClient();
-    Mapper<Article> mpArticle(db);
-    Mapper<Tag> mpTag(db);
-    Mapper<ArticleTag> mpArticleTag(db);
-    Mapper<User> mpUser(db);
     
-    auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
-    if (userInDb.getValueOfRole() <= 3) {
+    int roleId= db->execSqlSync("SELECT role FROM user WHERE id = ?", userId)
+        [0][0].as<int>();
+    if (roleId > 0 && roleId <= 3) {
         // administrator(id=1),editor(id=2),contributor(id=3)有新增文章的权限
-        Article art;
-        art.updateByJson(*req->getJsonObject());
-        art.setAuthor(userId);
-        if (art.getCategory() == nullptr) {
-            art.setCategory(1);
+        const auto &reqData = *req->getJsonObject();
+        
+        // 插入文章
+        if (article.categoryId < 1) {
+            article.categoryId = 1;
         }
-        mpArticle.insert(art);
+        auto result = db->execSqlSync(articleInsertSql, 
+            article.title, article.authorId, article.categoryId,
+            article.createTime, article.content, article.excerpt);
         
         // 依次处理前端传过来的每一个tag
-        for (const auto &tagName : tags) {
-            Tag tag;
-            // 查询表Tag中有没有指定name字段的tag
-            auto cnt = mpTag.count(Criteria(Tag::Cols::_name, tagName));
-            if (cnt <= 0) {
-                // 如果没有，则需要向表Tag中插入新的tag
-                tag.setName(tagName);
-                tag.setSlug(tagName);
-                mpTag.insert(tag);
+        for (auto &tag : article.tags) {
+            auto result = db->execSqlSync(
+                "SELECT id FROM tag WHERE name = ?", tag.name);
+            if (result.empty()) {
+                auto r = db->execSqlSync(
+                    "INSERT INTO tag (slug, name) VALUE (?, ?)", tag.name, tag.name);
+                tag.id = r.insertId();
             } else {
-                // 如果有，则需要从表Tag中获取这个tag
-                tag = mpTag.findOne(Criteria(Tag::Cols::_name, tagName));
+                tag.id = result[0][0].as<int>();
             }
-            // 然后，向表ArticleTag中插入此tag和article的对应关系
-            ArticleTag artTag;
-            artTag.setArticle(art.getValueOfId());
-            artTag.setTag(tag.getValueOfId());
-            mpArticleTag.insert(artTag);
+            db->execSqlSync("INSERT INTO article_tag (article, tag) VALUE (?, ?)",
+                article.id, tag.id);
         }
+        
         auto resp = HttpResponse::newHttpJsonResponse(
             ApiResponse::success().toJson()
         );
@@ -257,71 +246,58 @@ void ArticleController::addArticle(
 void ArticleController::updateArticle(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
-    const Article &article,
-    const std::vector<std::string> &tags
+    Article article
 ) const {
     bool hasPermission = false;
     int userId = req->getAttributes()->get<int>("uid");
     auto db = app().getDbClient();
-    Mapper<Article> mpArticle(db);
-    Mapper<Tag> mpTag(db);
-    Mapper<ArticleTag> mpArticleTag(db);
-    Mapper<User> mpUser(db);
     
-    auto artInDb = mpArticle.findOne({Article::Cols::_id, article.getValueOfId()});
-    auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
-    auto roleId = userInDb.getValueOfRole();
+    auto authorId = db->execSqlSync("SELECT author FROM article WHERE id = ?", article.id)
+        [0][0].as<int>();
+    auto roleId = db->execSqlSync("SELECT role FROM user WHERE id = ?", userId)
+        [0][0].as<int>();
     if (roleId <= 2) {
         // administrator 和 editor 有更新任意文章的权限
         hasPermission = true;
     } else if (roleId == 3) {
         // contributor 只能更新自己写的文章
-        hasPermission = (userId == artInDb.getValueOfAuthor());
+        hasPermission = (userId == authorId);
     }
 
     if (hasPermission) {
-        mpArticle.updateBy(
-            {Article::Cols::_title, Article::Cols::_category,
-                Article::Cols::_excerpt, Article::Cols::_content},
-            {Article::Cols::_id, article.getValueOfId()},
-            article.getValueOfTitle(), article.getValueOfCategory(),
-            article.getValueOfExcerpt(), article.getValueOfContent()
-        );
-        // 清除article对应的所有旧的tag
-        mpArticleTag.deleteBy(
-            Criteria(ArticleTag::Cols::_article, CompareOperator::EQ, article.getValueOfId()));
-        // 依次处理前端传过来的每一个tag
-        for (const auto &tagName : tags) {
-            // 查询表Tag中有没有指定name字段的tag
-            auto cnt = mpTag.count(Criteria(Tag::Cols::_name, CompareOperator::EQ, tagName));
-            if (cnt <= 0) {
-                // 如果没有，则需要向表Tag中插入新的tag
-                Tag tag;
-                tag.setName(tagName);
-                tag.setSlug(tagName);
-                mpTag.insert(tag);
-                // 然后，向表ArticleTag中插入此tag和article的对应关系
-                ArticleTag artTag;
-                artTag.setArticle(article.getValueOfId());
-                artTag.setTag(tag.getValueOfId());
-                mpArticleTag.insert(artTag);
-            } else {
-                // 如果有，则需要从表Tag中获取这个tag的id
-                auto tagInDb = mpTag.findOne(Criteria(Tag::Cols::_name, CompareOperator::EQ, tagName));
-                // 再查询表ArticleTag中有没有这个tag和article的对应关系
-                auto existCnt = mpArticleTag.count(
-                    Criteria(ArticleTag::Cols::_article, CompareOperator::EQ, article.getValueOfId()) &&
-                    Criteria(ArticleTag::Cols::_tag, CompareOperator::EQ, tagInDb.getValueOfId())
-                );
-                if (existCnt <= 0) {
-                    // 如果没有，则向表ArticleTag中插入此tag和article的对应关系
-                    ArticleTag artTag;
-                    artTag.setArticle(article.getValueOfId());
-                    artTag.setTag(tagInDb.getValueOfId());
-                    mpArticleTag.insert(artTag);
-                }
-            }
+        // 更新文章
+        std::vector<std::string> fields;
+        fields.emplace_back("title = " + article.title);
+        fields.emplace_back("excerpt = " + article.excerpt);
+        fields.emplace_back("content = " + article.content);
+        if (article.authorId > 0) {
+            fields.emplace_back("author = " + std::to_string(article.authorId));
         }
+        if (article.categoryId > 0) {
+            fields.emplace_back("category = " + std::to_string(article.categoryId));
+        }
+        std::string updateSql = "UPDATE article SET " + join(fields, "", "", ",")
+            + " WHERE id = ?";
+        db->execSqlSync(updateSql, article.id);
+
+        // 清除 article 对应的所有旧的 tag
+        db->execSqlSync("DELETE FROM article_tag WHERE article = ?", article.id);
+        
+        // 依次处理前端传过来的每一个tag
+        for (auto &tag : article.tags) {
+            auto result = db->execSqlSync(
+                "SELECT id FROM tag WHERE name = ?", tag.name);
+            if (result.empty()) {
+                auto r = db->execSqlSync(
+                    "INSERT INTO tag (slug, name) VALUE (?, ?)", tag.name, tag.name);
+                tag.id = r.insertId();
+            } else {
+                tag.id = result[0][0].as<int>();
+            }
+            db->execSqlSync("INSERT INTO article_tag (article, tag) VALUE (?, ?)",
+                article.id, tag.id);
+        }
+        
         auto resp = HttpResponse::newHttpJsonResponse(
             ApiResponse::success().toJson()
         );
@@ -345,54 +321,42 @@ void ArticleController::deleteArticles(
     }
     
     int userId = req->getAttributes()->get<int>("uid");
+    
     std::vector<int> idList;
     for (const auto &id : reqJson["ids"]) {
         idList.emplace_back(id.asInt());
     }
+    auto idListSql = join(idList, "(", ")", ",");
 
     auto db = app().getDbClient();
-    Mapper<Article> mpArticle(db);
-    Mapper<ArticleTag> mpArticleTag(db);
-    Mapper<User> mpUser(db);
 
-    auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
-    auto roleId = userInDb.getValueOfRole();
+    auto roleId = db->execSqlSync("SELECT role FROM user WHERE id = ?", userId)
+        [0][0].as<int>();
     if (roleId >= 4) {
         throw PermissionException();
     } else if (roleId == 3) {
         // contributor(id=3) 只能删除自己写的文章
-        auto articles = mpArticle.findBy(
-            Criteria(Article::Cols::_id, CompareOperator::In, idList) &&
-            Criteria(Article::Cols::_author, userId));
-        std::vector<int> ids;
-        for (const auto &art : articles) {
-            ids.emplace_back(art.getValueOfId());
+        auto res = db->execSqlSync("SELECT id FROM article WHERE id IN ? AND author = ?",
+            idListSql, userId);
+        idList.clear();
+        for (const auto &row : res) {
+            idList.emplace_back(row[0].as<int>());
         }
-        if (!ids.empty()) {
-            // 在删除文章之前需要删除文章与标签的关系
-            mpArticleTag.deleteBy(
-                Criteria(ArticleTag::Cols::_article, CompareOperator::In, ids)
-            );
-            // 删除article和tag的关系后，才能删除文章
-            mpArticle.deleteBy(
-                Criteria(Article::Cols::_id, CompareOperator::In, ids)
-            );
-        }  
+        if (!idList.empty()) {
+            idListSql = join(idList, "(", ")", ",");
+            db->execSqlSync("DELETE FROM article WHERE id IN ?", idListSql);
+            db->execSqlSync("DELETE FROM article_tag WHERE article IN ?", idListSql);
+        }
     } else if (roleId == 1 || roleId == 2) {
         // administrator(id=1) 和 editor(id=2) 有删除任意文章的权限
-        if (!idList.empty()) {
-            // 在删除文章之前需要删除文章与标签的关系
-            mpArticleTag.deleteBy(
-                Criteria(ArticleTag::Cols::_article, CompareOperator::In, idList)
-            );
-            // 删除article和tag的关系后，才能删除文章
-            mpArticle.deleteBy(
-                Criteria(Article::Cols::_id, CompareOperator::In, idList)
-            );
+        if (!idListSql.empty()) {
+            db->execSqlSync("DELETE FROM article WHERE id IN ?", idListSql);
+            db->execSqlSync("DELETE FROM article_tag WHERE article IN ?", idListSql);
         }
     } else {
         throw std::runtime_error("无效的 role id");
     }
+
     auto resp = HttpResponse::newHttpJsonResponse(
         ApiResponse::success().toJson()
     );
@@ -431,4 +395,33 @@ Json::Value ArticleController::resultToArticles(const Result &result) {
         articles.append(p.second);
     }
     return articles;
+}
+
+Json::Value ArticleController::resultToArticle(const Result &result) {
+    Json::Value article;
+    bool first = true;
+    for (const auto &row : result) {
+        if (first) {
+            first = false;
+            article["id"] = row["id"].as<int>();
+            article["title"] = row["title"].as<std::string>();
+            article["excerpt"] = row["excerpt"].as<std::string>();
+            article["content"] = row["content"].as<std::string>();
+            article["create_time"] = row["create_time"].as<std::string>();
+            article["author"]["id"] = row["user_id"].as<int>();
+            article["author"]["username"] = row["user_username"].as<std::string>();
+            article["author"]["realname"] = row["user_realname"].as<std::string>();
+            article["category"]["id"] = row["category_id"].as<int>();
+            article["category"]["slug"] = row["category_slug"].as<std::string>();
+            article["category"]["name"] = row["category_name"].as<std::string>();
+        }
+        if (!row["tag_id"].isNull()) {
+            Json::Value tag;
+            tag["id"] = row["tag_id"].as<int>();
+            tag["slug"] = row["tag_slug"].as<std::string>();
+            tag["name"] = row["tag_name"].as<std::string>();
+            article["tags"].append(tag);
+        }
+    }
+    return article;
 }

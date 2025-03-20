@@ -1,10 +1,29 @@
 #define DROGON_TEST_MAIN
 #include <drogon/drogon_test.h>
 #include <drogon/drogon.h>
+#include "../utils/Utils.h"
 
-DROGON_TEST(BasicTest)
+DROGON_TEST(Md5Test)
 {
-    // Add your tests here
+    auto e1 = drogon::utils::getMd5("123");
+    auto e2 = drogon::utils::getMd5("something111");
+    std::cout << e1 << ", len: " << e1.size() << std::endl;
+    std::cout << e2 << ", len: " << e2.size() << std::endl;
+}
+
+DROGON_TEST(Sha256Test)
+{
+    auto e1 = drogon::utils::getSha256("123");
+    auto e2 = drogon::utils::getSha256("something111");
+    std::cout << e1 << ", len: " << e1.size() << std::endl;
+    std::cout << e2 << ", len: " << e2.size() << std::endl;
+}
+
+DROGON_TEST(PasswordTest) {
+    std::string p = "Pw123#";
+    auto e = encodePassword(p);
+    std::cout << "Pw123# => " << e << std::endl;
+    assert(verfiyPassword(p, e));
 }
 
 int main(int argc, char** argv) 

@@ -4,17 +4,8 @@ void CategoryController::getAllCategories(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback
 ) const {
-    Mapper<Category> mp(app().getDbClient());
-    auto categoires = mp.findBy(
-        Criteria(Category::Cols::_id, CompareOperator::GT, 1));
-    Json::Value data;
-    for (const auto &cat : categoires) {
-        Json::Value item;
-        item["name"] = cat.getValueOfName();
-        item["id"] = cat.getValueOfId();
-        item["slug"] = cat.getValueOfSlug();
-        data.append(item);
-    }
+    auto categories = CategoryMapper::selectAll();
+    Json::Value data = toJson(categories);
     auto resp = HttpResponse::newHttpJsonResponse(
         ApiResponse::success(data).toJson()
     );
@@ -26,10 +17,8 @@ void CategoryController::getCategory(
     std::function<void (const HttpResponsePtr &)> &&callback,
     int id
 ) const {
-    auto db = app().getDbClient();
-    Mapper<Category> mpCategory(db);
-    auto catInDb = mpCategory.findOne(Criteria(Category::Cols::_id, id));
-    Json::Value data = catInDb.toJson();
+    auto category = CategoryMapper::select(id);
+    Json::Value data = category ? category->toJson() : Json::nullValue;
     auto resp = HttpResponse::newHttpJsonResponse(
         ApiResponse::success(data).toJson()
     );
@@ -39,12 +28,14 @@ void CategoryController::getCategory(
 void CategoryController::getCategoryBySlug(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
-    std::string slug
+    const std::string &slug
 ) const {
     auto db = app().getDbClient();
-    Mapper<Category> mpCategory(db);
-    auto catInDb = mpCategory.findOne(Criteria(Category::Cols::_slug, slug));
-    Json::Value data = catInDb.toJson();
+    auto row = db->execSqlSync("SELECT id,slug,name FROM category WHERE slug = ?", slug)[0];
+    Json::Value data;
+    data["id"] = row["id"].as<int>();
+    data["slug"] = row["slug"].as<std::string>();
+    data["name"] = row["name"].as<std::string>();
     auto resp = HttpResponse::newHttpJsonResponse(
         ApiResponse::success(data).toJson()
     );
@@ -53,30 +44,19 @@ void CategoryController::getCategoryBySlug(
 
 void CategoryController::addCategory(
     const HttpRequestPtr& req,
-    std::function<void (const HttpResponsePtr &)> &&callback
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    Category category
 ) const {
     int userId = req->getAttributes()->get<int>("uid");
-
     auto db = app().getDbClient();
-    Mapper<Category> mpCategory(db);
-    Mapper<User> mpUser(db);
-    Mapper<Role> mpRole(db);
 
-    auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
-    if (userInDb.getValueOfRole() <= 2) {
+    auto roleId = db->execSqlSync("SELECT role FROM user WHERE id = ?", userId)
+        [0][0].as<int>();
+    if (roleId <= 2) {
         // 只有 administrator(id=1) 和 editor(id=2) 才有新增分类的权限
-        auto &reqJson = *req->getJsonObject();
-        if (!reqJson.isMember("name") || 
-        reqJson["name"].type() != Json::stringValue) {
-            throw std::invalid_argument("缺少必备字段: name, 或者类型错误");
-        }
-        if (!reqJson.isMember("slug") || 
-        reqJson["slug"].type() != Json::stringValue) {
-            throw std::invalid_argument("缺少必备字段: slug, 或者类型错误");
-        }
-
-        Category cat(reqJson);
-        mpCategory.insert(cat);
+        db->execSqlSync("INSERT INTO category (slug, name) VALUE (?, ?)",
+            category.slug, category.name);
+        
         auto resp = HttpResponse::newHttpJsonResponse(
             ApiResponse::success().toJson()
         );
@@ -89,18 +69,16 @@ void CategoryController::addCategory(
 void CategoryController::updateCategory(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback,
-    const Category &cat
+    Category category
 ) const {
     int userId = req->getAttributes()->get<int>("uid");
-
     auto db = app().getDbClient();
-    Mapper<User> mpUser(db);
-    Mapper<Category> mpCategory(db);
-
-    auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
-    if (userInDb.getValueOfRole() <= 2) {
+    auto roleId = db->execSqlSync("SELECT role FROM user WHERE id = ?", userId)
+        [0][0].as<int>();
+    if (roleId <= 2) {
         // 只有 administrator(id=1) 和 editor(id=2) 有更新分类的权限
-        mpCategory.update(cat);
+        db->execSqlSync("UPDATE category SET slug = ?, name = ?",
+            category.slug, category.name);
         auto resp = HttpResponse::newHttpJsonResponse(
             ApiResponse::success().toJson()
         );
@@ -129,22 +107,17 @@ void CategoryController::deleteCategories(
     }
     
     auto db = app().getDbClient();
-    Mapper<Article> mpArticle(db);
-    Mapper<Category> mpCategory(db);
-    Mapper<User> mpUser(db);
 
-    auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
-    if (userInDb.getValueOfRole() <= 2) {
+    auto roleId = db->execSqlSync("SELECT role FROM user WHERE id = ?", userId)
+        [0][0].as<int>();
+    if (roleId <= 2) {
         // 只有 administrator(id=1) 和 editor(id=2) 有删除分类的权限
         if (!idList.empty()) {
+            std::string idListSql = join(idList, "(", ")", ",");
             // 将要删除的分类下面的文章的分类id改成保留分类的id（即id为1的分类）
-            mpArticle.updateBy(
-                {Article::Cols::_category},
-                Criteria(Article::Cols::_category, CompareOperator::In, idList),
-                1);
-            // 更新了文章的category后才能删除这些分类
-            mpCategory.deleteBy(
-                Criteria(Category::Cols::_id, CompareOperator::In, idList));
+            db->execSqlSync("UPDATE article SET category = 1 WHERE category IN ?", idListSql);
+            // 删除分类
+            db->execSqlSync("DELETE FROM category WHERE id IN ?", idListSql);
         }
         auto resp = HttpResponse::newHttpJsonResponse(
             ApiResponse::success().toJson()

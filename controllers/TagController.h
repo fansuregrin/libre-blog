@@ -1,23 +1,15 @@
 #pragma once
 
 #include <drogon/drogon.h>
-#include "../models/Tag.h"
-#include "../models/User.h"
-#include "../models/Article.h"
-#include "../models/ArticleTag.h"
 #include "../utils/Utils.h"
+#include "../dtos/Tag.h"
 #include "../dtos/ApiResponse.h"
+#include "../dtos/Role.h"
+#include "../mappers/TagMapper.h"
+#include "../mappers/UserMapper.h"
 #include "../exceptions/PermissionException.h"
 
 using namespace drogon;
-using orm::Mapper;
-using orm::Criteria;
-using orm::CompareOperator;
-using orm::SortOrder;
-using drogon_model::libre_blog::Article;
-using drogon_model::libre_blog::User;
-using drogon_model::libre_blog::Tag;
-using drogon_model::libre_blog::ArticleTag;
 
 class TagController : public HttpController<TagController> {
 public:
@@ -48,13 +40,14 @@ public:
 
     void addTag(
         const HttpRequestPtr& req,
-        std::function<void (const HttpResponsePtr &)> &&callback
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        Tag tag
     ) const;
 
     void updateTag(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
-        const Tag &tag
+        Tag tag
     ) const;
 
     void deleteTags(

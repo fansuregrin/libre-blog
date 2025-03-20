@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(libre_blog_test CXX)
 
-add_executable(${PROJECT_NAME} test_main.cc)
+add_executable(${PROJECT_NAME} test_main.cc ../utils/Utils.cc)
 
 # ##############################################################################
 # If you include the drogon source code locally in your project, use this method

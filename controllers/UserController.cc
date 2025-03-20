@@ -5,57 +5,32 @@ void UserController::login(
     std::function<void (const HttpResponsePtr &)> &&callback,
     const User &user
 ) const {
-    orm::Mapper<User> mapper(app().getDbClient());
-
-    mapper.findOne(
-        {User::Cols::_username, user.getValueOfUsername()},
-        [=] (const User &userInDb) {
-            Json::Value data;
-            auto passwdEnc = drogon::utils::getSha256(
-                user.getValueOfPassword() + userInDb.getValueOfSalt());
-            if (userInDb.getValueOfPassword() != passwdEnc) {
-                auto resp = HttpResponse::newHttpJsonResponse(
-                    ApiResponse::error(1, "登录失败").toJson());
-                resp->setStatusCode(HttpStatusCode::k400BadRequest);
-                callback(resp);
-            } else {
-                json_traits::integer_type uid{userInDb.getValueOfId()};
-                data = jwt::create<json_traits>()
-                    .set_type("JWT").set_issuer("drogon")
-                    .set_issued_now().set_expires_in(std::chrono::seconds{3600})
-                    .set_payload_claim("uid", uid)
-                    .sign(jwt::algorithm::es256k(es256k_pub_key, es256k_priv_key));
-                auto resp = HttpResponse::newHttpJsonResponse(
-                    ApiResponse::success(data).toJson());
-                callback(resp);
-            }
-        },
-        [=] (const orm::DrogonDbException &ex) {
-            auto resp = HttpResponse::newHttpJsonResponse(
-                ApiResponse::error(1, "登录失败").toJson()
-            );
-            resp->setStatusCode(HttpStatusCode::k400BadRequest);
-            callback(resp);
-        }
-    );
+    auto userInDb = UserMapper::selectByUsername(user.username);
+    if (verfiyPassword(user.password, userInDb->username)) {
+        json_traits::integer_type uid{userInDb->id};
+        Json::Value data = jwt::create<json_traits>()
+            .set_type("JWT").set_issuer("drogon")
+            .set_issued_now().set_expires_in(std::chrono::seconds{3600})
+            .set_payload_claim("uid", uid)
+            .sign(jwt::algorithm::es256k(es256k_pub_key, es256k_priv_key));
+        auto resp = HttpResponse::newHttpJsonResponse(
+            ApiResponse::success(data).toJson());
+        callback(resp);
+    } else {
+        auto resp = HttpResponse::newHttpJsonResponse(
+            ApiResponse::error(1, "用户名或密码错误").toJson());
+        resp->setStatusCode(HttpStatusCode::k400BadRequest);
+        callback(resp);
+    }
 }
 
 void UserController::userCenter(
     const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback
 ) const {
-    auto db = app().getDbClient();
-    orm::Mapper<User> mp(db);
     int userId = req->getAttributes()->get<int>("uid");
-    auto userInDb = mp.findOne(Criteria(User::Cols::_id, userId));
-    Json::Value data;
-    data["id"] = userInDb.getValueOfId();
-    data["username"] = userInDb.getValueOfUsername();
-    data["realname"] = userInDb.getValueOfRealname();
-    data["email"] = userInDb.getValueOfEmail();
-    data["role"] = userInDb.getRole(db).getValueOfName();
-    data["create_time"] = userInDb.getValueOfCreateTime()
-        .toDbStringLocal();
+    auto user = UserMapper::select(userId);
+    Json::Value data = user->toJson();
     auto resp = HttpResponse::newHttpJsonResponse(
         ApiResponse::success(data).toJson()
     );
@@ -68,20 +43,20 @@ void UserController::register_(
     User user
 ) const {
     ApiResponse respBody;
+    
     bool valid = true;
-
     // check username
-    if (!checkUsername(user.getValueOfUsername())) {
+    if (!checkUsername(user.username)) {
         respBody.setCodeAndMsg(1, "用户名不合法");
         valid = false;
     }
     // check password
-    else if (!checkPassword(user.getValueOfPassword())) {
+    else if (!checkPassword(user.password)) {
         respBody.setCodeAndMsg(1, "密码不合法");
         valid = false;
     }
     // check email 
-    else if (!checkEmail(user.getValueOfEmail())) {
+    else if (!checkEmail(user.email)) {
         respBody.setCodeAndMsg(1, "电子邮箱不合法");
         valid = false;
     }
@@ -92,9 +67,7 @@ void UserController::register_(
         return;
     }
 
-    auto db = app().getDbClient();
-    Mapper<User> mpUser(db);
-    auto cnt = mpUser.count({User::Cols::_username, user.getValueOfUsername()});
+    auto cnt = UserMapper::countByUsername(user.username);
     if (cnt > 0) {
         respBody.setCodeAndMsg(1, "该用户名已经被注册");
         auto resp = HttpResponse::newHttpJsonResponse(
@@ -103,12 +76,9 @@ void UserController::register_(
         resp->setStatusCode(HttpStatusCode::k409Conflict);
         callback(resp);
     } else {
-        auto uuid = utils::getUuid();
-        user.setSalt(uuid);
-        user.setPassword(
-            utils::getSha256(user.getValueOfPassword() + uuid)
-        );
-        mpUser.insert(user);
+        user.password = encodePassword(user.password);
+        user.role = Role::SUBSCRIBER;
+        UserMapper::insert(user);
         respBody.setCodeAndMsg(0, "success");
         auto resp = HttpResponse::newHttpJsonResponse(
             respBody.toJson()
@@ -122,26 +92,15 @@ void UserController::userList(
     std::function<void (const HttpResponsePtr &)> &&callback
 ) const {
     int userId = req->getAttributes()->get<int>("uid");
-    auto db = app().getDbClient();
-    Mapper<User> mpUser(db);
     Json::Value data;
     int page = req->getAttributes()->get<int>("page");
     int pageSize = req->getAttributes()->get<int>("pageSize");
-    auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
-    if (userInDb.getValueOfRole() <= 1) {
+    int roleId = UserMapper::selectRoleId(userId);
+    if (roleId <= Role::ADMINISTRATOR) {
         // 只有 administrator(id=1) 才有获取用户列表的权限
-        data["total"] = mpUser.count();
-        auto users = mpUser.paginate(page, pageSize).findAll();
-        for (const auto &user : users) {
-            Json::Value userItem;
-            userItem["id"] = user.getValueOfId();
-            userItem["username"] = user.getValueOfUsername();
-            userItem["realname"] = user.getValueOfRealname();
-            userItem["email"] = user.getValueOfEmail();
-            userItem["create_time"] = user.getValueOfCreateTime().toDbString();
-            userItem["role"] = user.getRole(db).getValueOfName();
-            data["users"].append(userItem);
-        }
+        data["total"] = UserMapper::count();
+        auto users = UserMapper::selectLimit(page, pageSize);
+        data["users"] = toJson(users);
         auto resp = HttpResponse::newHttpJsonResponse(
             ApiResponse::success(data).toJson()
         );
@@ -153,41 +112,30 @@ void UserController::userList(
 
 void UserController::updateGeneralInfo(
     const HttpRequestPtr& req,
-    std::function<void (const HttpResponsePtr &)> &&callback
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    User user
 ) const {
-    int userId = req->getAttributes()->get<int>("uid");
-
-    const auto &reqJson = *req->getJsonObject();
-    if (!reqJson.isMember("username") || 
-    reqJson["username"].type() != Json::stringValue) {
-        throw std::invalid_argument("缺少必备字段: username, 或者类型错误");
-    }
-    if (!reqJson.isMember("email") || 
-    reqJson["email"].type() != Json::stringValue) {
-        throw std::invalid_argument("缺少必备字段: email, 或者类型错误");
-    }
-
-    auto username = reqJson["username"].asString();
-    auto email = reqJson["email"].asString();
-    if (!checkUsername(username)) {
+    if (!checkUsername(user.username)) {
         auto resp = HttpResponse::newHttpJsonResponse(
             ApiResponse::error(1, "用户名不合法").toJson()
         );
         resp->setStatusCode(HttpStatusCode::k400BadRequest);
         callback(resp);
-    } else if (!checkEmail(email)) {
+    } else if (!checkEmail(user.email)) {
         auto resp = HttpResponse::newHttpJsonResponse(
             ApiResponse::error(1, "电子邮件不合法").toJson()
         );
         resp->setStatusCode(HttpStatusCode::k400BadRequest);
         callback(resp);
     } else {
-        Mapper<User> mp(app().getDbClient());
-        mp.updateBy(
-            {User::Cols::_username, User::Cols::_email, User::Cols::_realname},
-            {User::Cols::_id, userId},
-            reqJson["username"], reqJson["email"], reqJson["realname"]
-        );
+        user.id = req->getAttributes()->get<int>("uid");
+        auto oldUser = UserMapper::select(user.id);
+        if (oldUser->id != user.id) {
+            throw std::runtime_error("用户名被占用");
+        }
+        user.password.clear();
+        user.role = -1;
+        UserMapper::update(user);
         auto resp = HttpResponse::newHttpJsonResponse(
             ApiResponse::success().toJson()
         );
@@ -203,18 +151,14 @@ void UserController::updatePassword(
     int userId = req->getAttributes()->get<int>("uid");
     const std::string &oldPassword = password.oldPassword;
     const std::string &newPassword = password.newPassword;
-    Mapper<User> mp(app().getDbClient());
+    
     if (checkPassword(oldPassword) && checkPassword(newPassword)) {
-        auto userInDb = mp.findOne({User::Cols::_id, userId});
-        std::string oldPasswdEnc = utils::getSha256(oldPassword + userInDb.getValueOfSalt());
-        if (oldPasswdEnc == userInDb.getValueOfPassword()) {
-            std::string newSalt = utils::getUuid();
-            std::string newPasswdEnc = utils::getSha256(newPassword + newSalt);
-            mp.updateBy(
-                {User::Cols::_password, User::Cols::_salt},
-                {User::Cols::_id, userId},
-                newPasswdEnc, newSalt
-            );
+        auto userInDb = UserMapper::select(userId);
+        std::string oldPasswdEnc = encodePassword(oldPassword);
+        if (oldPasswdEnc == userInDb->password) {
+            User user;
+            user.password = encodePassword(newPassword);
+            UserMapper::update(user);
             auto resp = HttpResponse::newHttpJsonResponse(
                 ApiResponse::success().toJson()
             );
@@ -240,20 +184,10 @@ void UserController::getUser(
     std::function<void (const HttpResponsePtr &)> &&callback,
     int id
 ) const {
-    auto db = app().getDbClient();
-    Mapper<User> mpUser(db);
-
-    auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, id));
-    Json::Value user;
-    user["id"] = id;
-    user["username"] = userInDb.getValueOfUsername();
-    user["realname"] = userInDb.getValueOfRealname();
-    user["email"] = userInDb.getValueOfEmail();
-    auto role = userInDb.getRole(db);
-    user["role"]["id"] = role.getValueOfId();
-    user["role"]["name"] = role.getValueOfName();
+    auto user = UserMapper::select(id);
+    Json::Value data = user->toJson();
     auto resp = HttpResponse::newHttpJsonResponse(
-        ApiResponse::success(user).toJson()
+        ApiResponse::success(data).toJson()
     );
     callback(resp);
 }
@@ -267,17 +201,17 @@ void UserController::addUser(
 
     bool valid = true;
     // check password
-    if (!checkPassword(user.getValueOfPassword())) {
+    if (!checkPassword(user.password)) {
         respBody.setCodeAndMsg(1, "密码不合法");
         valid = false;
     }
     // check username
-    else if (!checkUsername(user.getValueOfUsername())) {
+    else if (!checkUsername(user.username)) {
         respBody.setCodeAndMsg(1, "用户名不合法");
         valid = false;
     }
     // check email 
-    else if (!checkEmail(user.getValueOfEmail())) {
+    else if (!checkEmail(user.email)) {
         respBody.setCodeAndMsg(1, "电子邮箱不合法");
         valid = false;
     }
@@ -291,14 +225,11 @@ void UserController::addUser(
     }
 
     int userId = req->getAttributes()->get<int>("uid");
-    auto db = app().getDbClient();
-    Mapper<User> mpUser(db);
-    auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
-    if (userInDb.getValueOfRole() == 1) {
-        // 只有 administrator(id=1) 才有添加用户的权限
-        auto cnt = mpUser.count(
-            {User::Cols::_username, user.getValueOfUsername()});
-        if (cnt > 1) {
+    int roleId = UserMapper::selectRoleId(userId);
+    // 只有 administrator(id=1) 才有添加用户的权限
+    if (roleId == Role::ADMINISTRATOR) {
+        auto cnt = UserMapper::countByUsername(user.username);
+        if (cnt > 0) {
             respBody.setCodeAndMsg(1, "用户名已被占用");
             auto resp = HttpResponse::newHttpJsonResponse(
                 respBody.toJson()
@@ -306,18 +237,13 @@ void UserController::addUser(
             resp->setStatusCode(HttpStatusCode::k400BadRequest);
             callback(resp);
         } else {
-            auto uuid = utils::getUuid();
-            user.setSalt(uuid);
-            user.setPassword(
-                utils::getSha256(user.getValueOfPassword() + uuid)
-            );
-            mpUser.insert(user);
+            user.password = encodePassword(user.password);
+            UserMapper::insert(user);
             auto resp = HttpResponse::newHttpJsonResponse(
                 ApiResponse::success().toJson()
             );
             callback(resp);
         }
-        
     } else {
         throw PermissionException();
     }
@@ -332,19 +258,13 @@ void UserController::updateUser(
 
     ApiResponse respBody;
     bool valid = true;
-    // check password
-    if (!user.getValueOfPassword().empty() && 
-    !checkPassword(user.getValueOfPassword())) {
-        respBody.setCodeAndMsg(1, "密码不合法");
-        valid = false;
-    }
     // check username
-    else if (!checkUsername(user.getValueOfUsername())) {
+    if (!checkUsername(user.username)) {
         respBody.setCodeAndMsg(1, "用户名不合法");
         valid = false;
     }
     // check email 
-    else if (!checkEmail(user.getValueOfEmail())) {
+    else if (!checkEmail(user.email)) {
         respBody.setCodeAndMsg(1, "电子邮箱不合法");
         valid = false;
     }
@@ -356,20 +276,13 @@ void UserController::updateUser(
         callback(resp);
         return;
     }
-    if (!user.getRole()) {
-        user.setRole(4);
-    }
 
     int userId = req->getAttributes()->get<int>("uid");
-
-    auto db = app().getDbClient();
-    Mapper<User> mpUser(db);
-    auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
-    if (userInDb.getValueOfRole() == 1) {
-        // 只有 administrator(id=1) 才有更新用户的权限
-        auto oldUser = mpUser.findOne(
-            {User::Cols::_username, user.getValueOfUsername()});
-        if (oldUser.getValueOfId() != user.getValueOfId()) {
+    int roleId = UserMapper::selectRoleId(userId);
+    // 只有 administrator(id=1) 才有更新用户的权限
+    if (roleId == Role::ADMINISTRATOR) {
+        auto oldUser = UserMapper::selectByUsername(user.username);
+        if (oldUser->id != user.id) {
             respBody.setCodeAndMsg(1, "用户名已被占用");
             auto resp = HttpResponse::newHttpJsonResponse(
                 respBody.toJson()
@@ -377,23 +290,7 @@ void UserController::updateUser(
             resp->setStatusCode(HttpStatusCode::k400BadRequest);
             callback(resp);
         } else {
-            if (!user.getValueOfPassword().empty()) {
-                auto uuid = utils::getUuid();
-                user.setSalt(uuid);
-                user.setPassword(
-                    utils::getSha256(user.getValueOfPassword() + uuid)
-                );
-                mpUser.update(user);
-            } else {
-                mpUser.updateBy(
-                    {User::Cols::_username, User::Cols::_realname, 
-                    User::Cols::_email, User::Cols::_role},
-                    {User::Cols::_id, user.getValueOfId()},
-                    user.getValueOfUsername(), user.getValueOfRealname(),
-                    user.getValueOfEmail(), user.getValueOfRole()
-                );
-            }
-            mpUser.insert(user);
+            UserMapper::update(user);
             auto resp = HttpResponse::newHttpJsonResponse(
                 ApiResponse::success().toJson()
             );
@@ -415,37 +312,19 @@ void UserController::deleteUsers(
         throw std::invalid_argument("缺少必备字段: ids, 或者类型错误");
     }
 
-    std::vector<int> userIds;
+    std::vector<int> ids;
     for (const auto &id : reqJson["ids"]) {
         if (id.asInt() > 1) {
-            userIds.emplace_back(id.asInt());
+            ids.emplace_back(id.asInt());
         }
     }
 
-    auto db = app().getDbClient();
-    Mapper<User> mpUser(db);
-    Mapper<ArticleTag> mpArticleTag(db);
-    Mapper<Article> mpArticle(db);
-
-    auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
-    if (userInDb.getValueOfRole() == 1) {
-        // 只有 administrator(id=1) 才有删除用户的权限
-        if (!userIds.empty()) {
-            // 在删除用户之前需要删除用户撰写的所有文章
-            auto articles = mpArticle.findBy(
-                Criteria(Article::Cols::_author, CompareOperator::In, userIds));
-            std::vector<int> artIds;
-            for (const auto &art : articles) {
-                artIds.emplace_back(art.getValueOfId());
-            }
-            if (!artIds.empty()) {
-                mpArticleTag.deleteBy(
-                    Criteria(ArticleTag::Cols::_article, CompareOperator::In, artIds));
-                mpArticle.deleteBy(
-                    Criteria(Article::Cols::_id, CompareOperator::In, artIds));
-            }
-            mpUser.deleteBy(
-                Criteria(User::Cols::_id, CompareOperator::In, userIds));
+    int roleId = UserMapper::selectRoleId(userId);
+    // 只有 administrator(id=1) 才有删除用户的权限
+    if (roleId == Role::ADMINISTRATOR) {
+        if (!ids.empty()) {
+            UserMapper::deletes(ids);
+            // todo: 删除该 user 撰写的文章以及文章与标签的关系
         }
         auto resp = HttpResponse::newHttpJsonResponse(
             ApiResponse::success().toJson()
@@ -454,23 +333,4 @@ void UserController::deleteUsers(
     } else {
         throw PermissionException();
     }
-}
-
-void UserController::getRole(
-    const HttpRequestPtr& req,
-    std::function<void (const HttpResponsePtr &)> &&callback
-) const {
-    int userId = req->getAttributes()->get<int>("uid");
-    auto db = app().getDbClient();
-    Mapper<User> mpUser(db);
-    auto userInDb = mpUser.findOne(Criteria(User::Cols::_id, userId));
-    auto roleId = userInDb.getValueOfRole();
-    auto roleName = userInDb.getRole(db).getValueOfName();
-    Json::Value role;
-    role["roleId"] = roleId;
-    role["roleName"] = roleName;
-    auto resp = HttpResponse::newHttpJsonResponse(
-        ApiResponse::success(role).toJson()
-    );
-    callback(resp);
 }

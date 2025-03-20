@@ -2,23 +2,13 @@
 
 #include <drogon/drogon.h>
 #include "TransformRequest.h"
-#include "../models/User.h"
-#include "../models/Role.h"
-#include "../models/Category.h"
-#include "../models/Article.h"
 #include "../utils/Utils.h"
+#include "../dtos/Category.h"
 #include "../dtos/ApiResponse.h"
+#include "../mappers/CategoryMapper.h"
 #include "../exceptions/PermissionException.h"
 
 using namespace drogon;
-using orm::Mapper;
-using orm::Criteria;
-using orm::CompareOperator;
-using orm::SortOrder;
-using drogon_model::libre_blog::Category;
-using drogon_model::libre_blog::User;
-using drogon_model::libre_blog::Role;
-using drogon_model::libre_blog::Article;
 
 class CategoryController : public HttpController<CategoryController> {
 public:
@@ -45,18 +35,19 @@ public:
     void getCategoryBySlug(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
-        std::string slug
+        const std::string &slug
     ) const;
 
     void addCategory(
         const HttpRequestPtr& req,
-        std::function<void (const HttpResponsePtr &)> &&callback
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        Category category
     ) const;
 
     void updateCategory(
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
-        const Category &cat
+        Category category
     ) const;
 
     void deleteCategories(
