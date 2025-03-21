@@ -92,8 +92,8 @@ public:
     static std::vector<User> selectLimit(int page, int pageSize) {
         auto db = app().getDbClient();
         auto res = db->execSqlSync(
-            "SELECT id,username,realname,email,create_time,role "
-            "ROM user LIMIT ?,?",
+            "SELECT id,username,realname,email,role,create_time,modify_time "
+            "ROM user LIMIT ?,? ORDER BY modify_time DESC",
             (page-1) * pageSize, pageSize
         );
         std::vector<User> users;

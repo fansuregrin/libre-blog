@@ -100,7 +100,7 @@ void CategoryController::deleteCategories(
     // 只有 administrator(id=1) 和 editor(id=2) 有删除分类的权限
     if (roleId <= Role::EDITOR) {
         if (!ids.empty()) {
-            CategoryMapper::deltes(ids);
+            CategoryMapper::deletes(ids);
             ArticleMapper::updateCategoryToDefault(ids);
         }
         auto resp = HttpResponse::newHttpJsonResponse(

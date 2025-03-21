@@ -7,7 +7,7 @@ c.id AS category_id, c.slug AS category_slug, c.name AS category_name,
 t.id AS tag_id, t.slug AS tag_slug, t.name AS tag_name )";
 
 const std::string ArticleMapper::selectLimitSql = ArticleMapper::commonSelectFields +
-R"(FROM (SELECT id FROM article ORDER BY create_time DESC LIMIT ?,?) sub
+R"(FROM (SELECT id FROM article ORDER BY modify_time DESC LIMIT ?,?) sub
 JOIN article a ON sub.id = a.id
 LEFT JOIN category c ON a.category_id = c.id
 LEFT JOIN user u ON a.author_id = u.id
@@ -16,7 +16,7 @@ LEFT JOIN tag t ON at.tag = t.id;)";
 
 const std::string ArticleMapper::selectLimitByUserSql = 
 ArticleMapper::commonSelectFields +
-R"(FROM (SELECT id FROM article WHERE author = ? ORDER BY create_time DESC LIMIT ?,?) sub
+R"(FROM (SELECT id FROM article WHERE author = ? ORDER BY modify_time DESC LIMIT ?,?) sub
 JOIN article a ON sub.id = a.id
 LEFT JOIN category c ON a.category_id = c.id
 JOIN user u ON a.author_id = u.id
@@ -26,7 +26,7 @@ LEFT JOIN tag t ON at.tag = t.id;)";
 const std::string ArticleMapper::selectLimitByCategorySql = 
 ArticleMapper::commonSelectFields +
 R"(FROM (SELECT a1.id FROM article a1 LEFT JOIN category c1 ON a1.category = c1.id
-    WHERE c1.slug = ? ORDER BY a1.create_time DESC LIMIT ?,?) sub
+    WHERE c1.slug = ? ORDER BY a1.modify_time DESC LIMIT ?,?) sub
 JOIN article a ON sub.id = a.id
 JOIN category c ON a.category_id = c.id
 LEFT JOIN user u ON a.author_id = u.id
@@ -38,7 +38,7 @@ ArticleMapper::commonSelectFields +
 R"(FROM (SELECT a1.id FROM article a1
     JOIN article_tag at1 ON a1.id = at1.article
     JOIN tag t1 ON at1.tag = t1.id WHERE t1.slug = ?
-    ORDER BY a1.create_time DESC LIMIT ?,?) sub
+    ORDER BY a1.modify_time DESC LIMIT ?,?) sub
 JOIN article a ON sub.id = a.id
 LEFT JOIN category c ON a.category_id = c.id
 LEFT JOIN user u ON a.author_id = u.id

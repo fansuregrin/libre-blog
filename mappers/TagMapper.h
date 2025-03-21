@@ -29,7 +29,9 @@ public:
 
     static std::vector<Tag> selectLimit(int page, int pageSize) {
         auto db = app().getDbClient();
-        auto result = db->execSqlSync("SELECT id,slug,name FROM tag LIMIT ?,?",
+        auto result = db->execSqlSync(
+            "SELECT id,slug,name,create_time,modify_time FROM tag "
+            "LIMIT ?,? ORDER BY modify_time DESC",
             (page-1)*pageSize, pageSize);
         std::vector<Tag> tags;
         for (const auto &row : result) {
@@ -37,6 +39,8 @@ public:
             tag.id = row["id"].as<int>();
             tag.slug = row["slug"].as<std::string>();
             tag.name = row["name"].as<std::string>();
+            tag.createTime = row["create_time"].as<std::string>();
+            tag.modifyTime = row["modify_time"].as<std::string>();
             tags.emplace_back(tag);
         }
         return tags;

@@ -80,7 +80,7 @@ public:
         );
     }
 
-    static void deltes(const std::vector<int> ids) {
+    static void deletes(const std::vector<int> ids) {
         if (ids.empty()) return;
         auto db = app().getDbClient();
         auto res = db->execSqlSync(
