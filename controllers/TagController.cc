@@ -36,7 +36,20 @@ void TagController::getTag(
     int id
 ) const {
     auto tag = TagMapper::selectById(id);
-    Json::Value data = tag->toJson();
+    Json::Value data = tag ? tag->toJson() : Json::nullValue;
+    auto resp = HttpResponse::newHttpJsonResponse(
+        ApiResponse::success(data).toJson()
+    );
+    callback(resp);
+}
+
+void TagController::getTagBySlug(
+    const HttpRequestPtr& req,
+    std::function<void (const HttpResponsePtr &)> &&callback,
+    const std::string &slug
+) const {
+    auto tag = TagMapper::selectBySlug(slug);
+    Json::Value data = tag ? tag->toJson() : Json::nullValue;
     auto resp = HttpResponse::newHttpJsonResponse(
         ApiResponse::success(data).toJson()
     );

@@ -17,7 +17,8 @@ public:
     METHOD_LIST_BEGIN
     ADD_METHOD_TO(TagController::getAllTags, "/tags/all", HttpMethod::Get);
     ADD_METHOD_TO(TagController::tagList, "/tags", HttpMethod::Get, "PaginationFilter");
-    ADD_METHOD_TO(TagController::getTag, "/tag/{id}", HttpMethod::Get);
+    ADD_METHOD_TO(TagController::getTag, "/tag/id/{id}", HttpMethod::Get);
+    ADD_METHOD_TO(TagController::getTagBySlug, "/tag/slug/{slug}", HttpMethod::Get);
     ADD_METHOD_TO(TagController::addTag, "/admin/tag", HttpMethod::Post, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(TagController::updateTag, "/admin/tag", HttpMethod::Put, "LoginFilter", "JsonFilter");
     ADD_METHOD_TO(TagController::deleteTags, "/admin/tag", HttpMethod::Delete, "LoginFilter", "JsonFilter");
@@ -37,6 +38,12 @@ public:
         const HttpRequestPtr& req,
         std::function<void (const HttpResponsePtr &)> &&callback,
         int id
+    ) const;
+
+    void getTagBySlug(
+        const HttpRequestPtr& req,
+        std::function<void (const HttpResponsePtr &)> &&callback,
+        const std::string &slug
     ) const;
 
     void addTag(

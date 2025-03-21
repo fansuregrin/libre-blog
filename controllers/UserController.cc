@@ -30,7 +30,7 @@ void UserController::userCenter(
 ) const {
     int userId = req->getAttributes()->get<int>("uid");
     auto user = UserMapper::select(userId);
-    Json::Value data = user->toJson();
+    Json::Value data = user ? user->toJson() : Json::nullValue;
     auto resp = HttpResponse::newHttpJsonResponse(
         ApiResponse::success(data).toJson()
     );
@@ -185,7 +185,7 @@ void UserController::getUser(
     int id
 ) const {
     auto user = UserMapper::select(id);
-    Json::Value data = user->toJson();
+    Json::Value data = user ? user->toJson() : Json::nullValue;
     auto resp = HttpResponse::newHttpJsonResponse(
         ApiResponse::success(data).toJson()
     );

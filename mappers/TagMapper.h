@@ -58,7 +58,7 @@ public:
             tag->slug  = row["slug"].as<std::string>();
             tag->name  = row["name"].as<std::string>();
             tag->createTime  = row["create_time"].as<std::string>();
-            tag->modifyTime  = row["modfiy_time"].as<std::string>();
+            tag->modifyTime  = row["modify_time"].as<std::string>();
         }
         return tag;
     }
@@ -75,7 +75,7 @@ public:
             tag->slug  = row["slug"].as<std::string>();
             tag->name  = row["name"].as<std::string>();
             tag->createTime  = row["create_time"].as<std::string>();
-            tag->modifyTime  = row["modfiy_time"].as<std::string>();
+            tag->modifyTime  = row["modify_time"].as<std::string>();
         }
         return tag;
     }
