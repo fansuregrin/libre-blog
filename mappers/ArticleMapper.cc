@@ -74,6 +74,8 @@ std::vector<Article> ArticleMapper::resultToArticles(const Result &result) {
             a.category.id = row["category_id"].as<int>();
             a.category.slug = row["category_slug"].as<std::string>();
             a.category.name = row["category_name"].as<std::string>();
+            a.authorId = a.author.id;
+            a.categoryId = a.category.id;
             articlesMap[id] = a;
         }
         if (!row["tag_id"].isNull()) {
@@ -109,6 +111,8 @@ ArticlePtr ArticleMapper::resultToArticle(const Result &result) {
             a->category.id = row["category_id"].as<int>();
             a->category.slug = row["category_slug"].as<std::string>();
             a->category.name = row["category_name"].as<std::string>();
+            a->authorId = a->author.id;
+            a->categoryId = a->category.id;
         }
         if (!row["tag_id"].isNull()) {
             Tag tag;

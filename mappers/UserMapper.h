@@ -113,10 +113,10 @@ public:
     static void update(User &user) {
         auto db = app().getDbClient();
         auto res = db->execSqlSync("UPDATE user SET modify_time = NOW() "
-            + (user.username.empty() ? "" : ",username = " + user.username)
-            + (user.password.empty() ? "" : ",password = " + user.password)
-            + (user.email.empty() ? "" : ",email = " + user.email)
-            + (user.realname.empty() ? "" : ",realname = " + user.realname)
+            + (user.username.empty() ? "" : ",username = '" + user.username + "'")
+            + (user.password.empty() ? "" : ",password = '" + user.password + "'")
+            + (user.email.empty() ? "" : ",email = '" + user.email + "'")
+            + (user.realname.empty() ? "" : ",realname = '" + user.realname + "'")
             + (user.role > 0 ? ",role = " + std::to_string(user.role) : "")
             + " WHERE id = ?",
             user.id

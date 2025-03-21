@@ -134,6 +134,7 @@ void ArticleController::addArticle(
     if (roleId == Role::ADMINISTRATOR || roleId == Role::EDITOR || 
         roleId == Role::CONTRIBUTOR) {
         // 插入文章
+        article.authorId = userId;
         if (article.categoryId < Category::UNCATEGORIED) {
             article.categoryId = Category::UNCATEGORIED;
         }
@@ -182,6 +183,7 @@ void ArticleController::updateArticle(
 
     if (hasPermission) {
         // 更新文章
+        if (roleId == Role::CONTRIBUTOR) article.authorId = -1;
         ArticleMapper::update(article);
 
         // 清除 article 对应的所有旧的 tag

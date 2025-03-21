@@ -73,8 +73,8 @@ public:
         auto db = app().getDbClient();
         auto res = db->execSqlSync(
             "UPDATE category SET modify_time = NOW() "
-            + (category.slug.empty() ? "" : ",slug = " + category.slug)
-            + (category.name.empty() ? "" : ",name = " + category.name)
+            + (category.slug.empty() ? "" : ",slug = '" + category.slug + "'")
+            + (category.name.empty() ? "" : ",name = '" + category.name + "'")
             + " WHERE id = ?",
             category.id
         );
@@ -84,8 +84,7 @@ public:
         if (ids.empty()) return;
         auto db = app().getDbClient();
         auto res = db->execSqlSync(
-            "DELTE FROM category WHERE id IN ?",
-            join(ids, "(", ")", ",")
+            "DELETE FROM category WHERE id IN " + join(ids, "(", ")", ",")
         );
     }
 };

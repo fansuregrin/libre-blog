@@ -101,12 +101,12 @@ public:
         auto db = app().getDbClient();
         auto res = db->execSqlSync(
             "UPDATE article SET modify_time = NOW() "
-            + (article.authorId > 0 ? ",author_id = " + std::to_string(article.authorId) : "")
-            + (article.categoryId > 0 ? ",category_id = " + std::to_string(article.categoryId) : "")
-            + ",title=" + article.title
-            + ",excerpt = " + article.excerpt
-            + ",content = " + article.content
-            + " WHERE id = " + std::to_string(article.id)
+            + (article.authorId > 0 ? ",author_id = '" + std::to_string(article.authorId) + "'" : "")
+            + (article.categoryId > 0 ? ",category_id = '" + std::to_string(article.categoryId) + "'" : "")
+            + ",title = '" + article.title + "'"
+            + ",excerpt = '" + article.excerpt + "'"
+            + ",content = '" + article.content + "'"
+            + " WHERE id = '" + std::to_string(article.id) + "'"
         );
     }
 

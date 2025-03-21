@@ -11,13 +11,12 @@ template <>
 inline Article fromRequest(const HttpRequest &req) {
     auto &reqData = *req.getJsonObject();
     Article article;
-    article.id = reqData.isMember("id") ? reqData["data"].asInt() : -1;
+    article.id = reqData.isMember("id") ? reqData["id"].asInt() : -1;
     article.title = reqData.isMember("title") ? reqData["title"].asString() : "";
-    article.authorId = reqData.isMember("author") ? reqData["author"].asInt() : -1;
-    article.categoryId = reqData.isMember("category") ? reqData["category"].asInt() : -1;
+    article.authorId = reqData.isMember("authorId") ? reqData["authorId"].asInt() : -1;
+    article.categoryId = reqData.isMember("categoryId") ? reqData["categoryId"].asInt() : -1;
     article.excerpt = reqData.isMember("excerpt") ? reqData["excerpt"].asString() : "";
     article.content = reqData.isMember("content") ? reqData["content"].asString() : "";
-    article.createTime = reqData.isMember("createTime") ? reqData["createTime"].asString() : "";
     
     if (reqData.isMember("tags") && reqData["tags"].type() == Json::arrayValue) {
         for (const auto &t_ : reqData["tags"]) {
