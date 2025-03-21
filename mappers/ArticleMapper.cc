@@ -16,7 +16,7 @@ LEFT JOIN tag t ON at.tag = t.id;)";
 
 const std::string ArticleMapper::selectLimitByUserSql = 
 ArticleMapper::commonSelectFields +
-R"(FROM (SELECT id FROM article WHERE author = ? ORDER BY modify_time DESC LIMIT ?,?) sub
+R"(FROM (SELECT id FROM article WHERE author_id = ? ORDER BY modify_time DESC LIMIT ?,?) sub
 JOIN article a ON sub.id = a.id
 LEFT JOIN category c ON a.category_id = c.id
 JOIN user u ON a.author_id = u.id
@@ -25,7 +25,7 @@ LEFT JOIN tag t ON at.tag = t.id;)";
 
 const std::string ArticleMapper::selectLimitByCategorySql = 
 ArticleMapper::commonSelectFields +
-R"(FROM (SELECT a1.id FROM article a1 LEFT JOIN category c1 ON a1.category = c1.id
+R"(FROM (SELECT a1.id FROM article a1 LEFT JOIN category c1 ON a1.category_id = c1.id
     WHERE c1.slug = ? ORDER BY a1.modify_time DESC LIMIT ?,?) sub
 JOIN article a ON sub.id = a.id
 JOIN category c ON a.category_id = c.id
@@ -47,7 +47,7 @@ LEFT JOIN tag t ON at.tag = t.id;)";
 
 const std::string ArticleMapper::selectSql = 
 ArticleMapper::commonSelectFields +
-R"(FROM article a
+R"(,a.content FROM article a
 LEFT JOIN user u ON a.author_id = u.id
 LEFT JOIN category c ON a.category_id = c.id
 LEFT JOIN article_tag at ON a.id = at.article
