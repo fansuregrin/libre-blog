@@ -10,15 +10,7 @@ struct Tag {
     std::string createTime;
     std::string modifyTime;
 
-    Json::Value toJson() const {
-        Json::Value r;
-        r["id"] = id;
-        r["slug"] = slug;
-        r["name"] = name;
-        r["createTime"] = createTime;
-        r["modifyTime"] = modifyTime;
-        return r;
-    }
+    Json::Value toJson() const;
 };
 
 using TagPtr = std::shared_ptr<Tag>;

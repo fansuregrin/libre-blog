@@ -55,15 +55,16 @@ CREATE TABLE `category` (
 CREATE TABLE `article` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) DEFAULT NULL,
-  `author` int(11) NOT NULL,
-  `category` int(11) NOT NULL DEFAULT 1,
-  `create_time` datetime DEFAULT current_timestamp(),
+  `author_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL DEFAULT 1,
   `content` text DEFAULT NULL,
   `excerpt` varchar(255) DEFAULT NULL,
+  `create_time` datetime DEFAULT NOW(),
+  `modify_time` datetime DEFAULT NOW(),
   PRIMARY KEY (`id`),
   KEY `idx_create_time` (`create_time`),
-  KEY `idx_author` (`author`),
-  KEY `idx_category` (`category`)
+  KEY `idx_author` (`author_id`),
+  KEY `idx_category` (`category_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `article_tag` (

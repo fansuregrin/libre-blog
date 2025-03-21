@@ -59,6 +59,40 @@ public:
         return tag;
     }
 
+    static TagPtr selectBySlug(const std::string &slug) {
+        auto db = app().getDbClient();
+        auto result = db->execSqlSync(
+            "SELECT id,slug,name,create_time,modify_time FROM tag WHERE slug = ?", slug);
+        TagPtr tag;
+        if (!result.empty()) {
+            auto row = result[0];
+            tag = std::make_shared<Tag>();
+            tag->id = row["id"].as<int>();
+            tag->slug  = row["slug"].as<std::string>();
+            tag->name  = row["name"].as<std::string>();
+            tag->createTime  = row["create_time"].as<std::string>();
+            tag->modifyTime  = row["modfiy_time"].as<std::string>();
+        }
+        return tag;
+    }
+
+    static TagPtr selectByName(const std::string &name) {
+        auto db = app().getDbClient();
+        auto result = db->execSqlSync(
+            "SELECT id,slug,name,create_time,modify_time FROM tag WHERE name = ?", name);
+        TagPtr tag;
+        if (!result.empty()) {
+            auto row = result[0];
+            tag = std::make_shared<Tag>();
+            tag->id = row["id"].as<int>();
+            tag->slug  = row["slug"].as<std::string>();
+            tag->name  = row["name"].as<std::string>();
+            tag->createTime  = row["create_time"].as<std::string>();
+            tag->modifyTime  = row["modfiy_time"].as<std::string>();
+        }
+        return tag;
+    }
+
     static void insert(Tag &tag) {
         auto db = app().getDbClient();
         auto res = db->execSqlSync("INSERT INTO tag (slug,name) VALUE (?,?)",

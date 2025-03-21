@@ -100,6 +100,7 @@ void TagController::deleteTags(
     if (roleId <= Role::EDITOR) {
         // 只有 administrator(id=1) 和 editor(id=2) 才有删除标签的权限
         TagMapper::deletes(ids);
+        ArticleTagMapper::deleteByTags(ids);
         auto resp = HttpResponse::newHttpJsonResponse(
             ApiResponse::success().toJson()
         );

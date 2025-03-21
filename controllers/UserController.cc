@@ -6,7 +6,7 @@ void UserController::login(
     const User &user
 ) const {
     auto userInDb = UserMapper::selectByUsername(user.username);
-    if (verfiyPassword(user.password, userInDb->username)) {
+    if (verfiyPassword(user.password, userInDb->password)) {
         json_traits::integer_type uid{userInDb->id};
         Json::Value data = jwt::create<json_traits>()
             .set_type("JWT").set_issuer("drogon")
@@ -325,6 +325,8 @@ void UserController::deleteUsers(
         if (!ids.empty()) {
             UserMapper::deletes(ids);
             // todo: 删除该 user 撰写的文章以及文章与标签的关系
+            ArticleMapper::deleteByUsers(ids);
+            ArticleTagMapper::deleteByUsers(ids);
         }
         auto resp = HttpResponse::newHttpJsonResponse(
             ApiResponse::success().toJson()

@@ -3,9 +3,12 @@
 #include <drogon/drogon.h>
 #include "TransformRequest.h"
 #include "../utils/Utils.h"
+#include "../dtos/Role.h"
 #include "../dtos/Category.h"
 #include "../dtos/ApiResponse.h"
 #include "../mappers/CategoryMapper.h"
+#include "../mappers/UserMapper.h"
+#include "../mappers/ArticleMapper.h"
 #include "../exceptions/PermissionException.h"
 
 using namespace drogon;

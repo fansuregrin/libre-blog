@@ -7,6 +7,7 @@
 #include "../dtos/Role.h"
 #include "../mappers/TagMapper.h"
 #include "../mappers/UserMapper.h"
+#include "../mappers/ArticleTagMapper.h"
 #include "../exceptions/PermissionException.h"
 
 using namespace drogon;

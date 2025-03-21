@@ -60,7 +60,6 @@ inline User fromRequest(const HttpRequest &req) {
     user.password = reqData.isMember("password") ? reqData["password"].asString() : "";
     user.email = reqData.isMember("email") ? reqData["email"].asString() : "";
     user.createTime = reqData.isMember("creatTime") ? reqData["createTime"].asString() : "";
-    user.salt = reqData.isMember("salt") ? reqData["salt"].asString() : "";
     user.role = reqData.isMember("role") ? reqData["role"].asInt() : -1;
     return user;
 }

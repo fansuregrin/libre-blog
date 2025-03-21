@@ -3,9 +3,14 @@
 #include <drogon/drogon.h>
 #include "TransformRequest.h"
 #include "../utils/Utils.h"
-#include "../dtos/ApiResponse.h"
-#include "../exceptions/PermissionException.h"
 #include "../dtos/Article.h"
+#include "../dtos/Role.h"
+#include "../dtos/ApiResponse.h"
+#include "../mappers/ArticleMapper.h"
+#include "../mappers/UserMapper.h"
+#include "../mappers/TagMapper.h"
+#include "../mappers/ArticleTagMapper.h"
+#include "../exceptions/PermissionException.h"
 
 using namespace drogon;
 using orm::Result;
@@ -85,7 +90,4 @@ private:
     static const std::string articleCountByTagSql;
     static const std::string articleGetSql;
     static const std::string articleInsertSql;
-
-    static Json::Value resultToArticles(const Result &result);
-    static Json::Value resultToArticle(const Result &result);
 };

@@ -30,12 +30,8 @@ void CategoryController::getCategoryBySlug(
     std::function<void (const HttpResponsePtr &)> &&callback,
     const std::string &slug
 ) const {
-    auto db = app().getDbClient();
-    auto row = db->execSqlSync("SELECT id,slug,name FROM category WHERE slug = ?", slug)[0];
-    Json::Value data;
-    data["id"] = row["id"].as<int>();
-    data["slug"] = row["slug"].as<std::string>();
-    data["name"] = row["name"].as<std::string>();
+    auto category = CategoryMapper::selectBySlug(slug);
+    Json::Value data = category ? category->toJson() : Json::nullValue;
     auto resp = HttpResponse::newHttpJsonResponse(
         ApiResponse::success(data).toJson()
     );
@@ -48,15 +44,10 @@ void CategoryController::addCategory(
     Category category
 ) const {
     int userId = req->getAttributes()->get<int>("uid");
-    auto db = app().getDbClient();
-
-    auto roleId = db->execSqlSync("SELECT role FROM user WHERE id = ?", userId)
-        [0][0].as<int>();
-    if (roleId <= 2) {
-        // 只有 administrator(id=1) 和 editor(id=2) 才有新增分类的权限
-        db->execSqlSync("INSERT INTO category (slug, name) VALUE (?, ?)",
-            category.slug, category.name);
-        
+    auto roleId = UserMapper::selectRoleId(userId);
+    // 只有 administrator(id=1) 和 editor(id=2) 才有新增分类的权限
+    if (roleId <= Role::EDITOR) {
+        CategoryMapper::insert(category);
         auto resp = HttpResponse::newHttpJsonResponse(
             ApiResponse::success().toJson()
         );
@@ -72,13 +63,10 @@ void CategoryController::updateCategory(
     Category category
 ) const {
     int userId = req->getAttributes()->get<int>("uid");
-    auto db = app().getDbClient();
-    auto roleId = db->execSqlSync("SELECT role FROM user WHERE id = ?", userId)
-        [0][0].as<int>();
-    if (roleId <= 2) {
-        // 只有 administrator(id=1) 和 editor(id=2) 有更新分类的权限
-        db->execSqlSync("UPDATE category SET slug = ?, name = ?",
-            category.slug, category.name);
+    auto roleId = UserMapper::selectRoleId(userId);
+    // 只有 administrator(id=1) 和 editor(id=2) 有更新分类的权限
+    if (roleId <= Role::EDITOR) {
+        CategoryMapper::update(category);
         auto resp = HttpResponse::newHttpJsonResponse(
             ApiResponse::success().toJson()
         );
@@ -99,25 +87,21 @@ void CategoryController::deleteCategories(
         throw std::invalid_argument("缺少必备字段: ids, 或者类型错误");
     }
 
-    std::vector<int> idList;
+    std::vector<int> ids;
     for (const auto &id : reqJson["ids"]) {
         if (id.asInt() > 1) {
-            idList.emplace_back(id.asInt());
+            ids.emplace_back(id.asInt());
         }
     }
     
     auto db = app().getDbClient();
 
-    auto roleId = db->execSqlSync("SELECT role FROM user WHERE id = ?", userId)
-        [0][0].as<int>();
-    if (roleId <= 2) {
-        // 只有 administrator(id=1) 和 editor(id=2) 有删除分类的权限
-        if (!idList.empty()) {
-            std::string idListSql = join(idList, "(", ")", ",");
-            // 将要删除的分类下面的文章的分类id改成保留分类的id（即id为1的分类）
-            db->execSqlSync("UPDATE article SET category = 1 WHERE category IN ?", idListSql);
-            // 删除分类
-            db->execSqlSync("DELETE FROM category WHERE id IN ?", idListSql);
+    auto roleId = UserMapper::selectRoleId(userId);
+    // 只有 administrator(id=1) 和 editor(id=2) 有删除分类的权限
+    if (roleId <= Role::EDITOR) {
+        if (!ids.empty()) {
+            CategoryMapper::deltes(ids);
+            ArticleMapper::updateCategoryToDefault(ids);
         }
         auto resp = HttpResponse::newHttpJsonResponse(
             ApiResponse::success().toJson()

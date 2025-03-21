@@ -21,18 +21,7 @@ struct Article {
     Category category;
     std::vector<Tag> tags;
 
-    Json::Value toJson() const {
-        Json::Value r;
-        r["id"] = id;
-        r["title"] = title;
-        r["excerpt"] = excerpt;
-        r["content"] = content;
-        r["createTime"] = createTime;
-        r["category"] = category.toJson();
-        r["author"] = author.toJson();
-        // r["tags"] = toJson(tags);
-        return r;
-    }
+    Json::Value toJson() const;
 };
 
 using ArticlePtr = std::shared_ptr<Article>;

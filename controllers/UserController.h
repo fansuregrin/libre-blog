@@ -7,6 +7,8 @@
 #include "../dtos/Role.h"
 #include "../dtos/ApiResponse.h"
 #include "../mappers/UserMapper.h"
+#include "../mappers/ArticleMapper.h"
+#include "../mappers/ArticleTagMapper.h"
 #include "../exceptions/PermissionException.h"
 
 using namespace drogon;

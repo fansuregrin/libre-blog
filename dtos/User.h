@@ -11,19 +11,9 @@ struct User {
     std::string modifyTime;
     std::string email;
     std::string realname;
-    std::string salt;
     int role = -1;
 
-    Json::Value toJson() const {
-        Json::Value r;
-        r["id"] = id;
-        r["username"] = username;
-        r["email"] = email;
-        r["realname"] = realname;
-        r["createTime"] = createTime;
-        r["modifyTime"] = modifyTime;
-        return r;
-    }
+    Json::Value toJson() const;
 };
 
 using UserPtr = std::shared_ptr<User>;

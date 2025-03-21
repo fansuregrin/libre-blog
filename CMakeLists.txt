@@ -52,6 +52,7 @@ aux_source_directory(utils UTIL_SRC)
 aux_source_directory(dtos DTO_SRC)
 aux_source_directory(handlers HDL_SRC)
 aux_source_directory(exceptions EXP_SRC)
+aux_source_directory(mappers MAPPER_SRC)
 
 drogon_create_views(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/views
                     ${CMAKE_CURRENT_BINARY_DIR})
@@ -76,7 +77,8 @@ target_sources(${PROJECT_NAME}
                ${UTIL_SRC}
                ${DTO_SRC}
                ${HDL_SRC}
-               ${EXP_SRC})
+               ${EXP_SRC}
+               ${MAPPER_SRC})
 # ##############################################################################
 # uncomment the following line for dynamically loading views 
 # set_property(TARGET ${PROJECT_NAME} PROPERTY ENABLE_EXPORTS ON)
