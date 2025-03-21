@@ -1,7 +1,7 @@
 #include "ArticleMapper.h"
 
 const std::string ArticleMapper::commonSelectFields =
-R"(SELECT a.id, a.title, a.excerpt, a.create_time,
+R"(SELECT a.id, a.title, a.excerpt, a.create_time, a.modify_time,
 u.id AS user_id, u.username AS user_username, u.realname AS user_realname,
 c.id AS category_id, c.slug AS category_slug, c.name AS category_name,
 t.id AS tag_id, t.slug AS tag_slug, t.name AS tag_name )";
@@ -67,6 +67,7 @@ std::vector<Article> ArticleMapper::resultToArticles(const Result &result) {
             a.title = row["title"].as<std::string>();
             a.excerpt = row["excerpt"].as<std::string>();
             a.createTime = row["create_time"].as<std::string>();
+            a.modifyTime = row["modify_time"].as<std::string>();
             a.author.id = row["user_id"].as<int>();
             a.author.username = row["user_username"].as<std::string>();
             a.author.realname = row["user_realname"].as<std::string>();
@@ -101,6 +102,7 @@ ArticlePtr ArticleMapper::resultToArticle(const Result &result) {
             a->excerpt = row["excerpt"].as<std::string>();
             a->content = row["content"].as<std::string>();
             a->createTime = row["create_time"].as<std::string>();
+            a->modifyTime = row["modify_time"].as<std::string>();
             a->author.id = row["user_id"].as<int>();
             a->author.username = row["user_username"].as<std::string>();
             a->author.realname = row["user_realname"].as<std::string>();

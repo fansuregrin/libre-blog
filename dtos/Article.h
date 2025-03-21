@@ -16,6 +16,7 @@ struct Article {
     std::string excerpt;
     std::string content;
     std::string createTime;
+    std::string modifyTime;
 
     User author;
     Category category;

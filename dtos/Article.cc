@@ -7,6 +7,7 @@ Json::Value Article::toJson() const {
     r["excerpt"] = excerpt;
     r["content"] = content;
     r["createTime"] = createTime;
+    r["modifyTime"] = modifyTime;
     r["category"] = category.toJson();
     r["author"] = author.toJson();
     r["tags"] = ::toJson(tags);
