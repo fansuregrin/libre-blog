@@ -32,7 +32,7 @@
     - Patch `/admin/user/general-info`
     - Patch `/admin/user/password`
     - Get `/admin/users`
-    - Get `/admin/user/{id}`
+    - Get `/user/{id}`
     - Post `/admin/user`
     - Put `/admin/user`
     - Delete `/admin/user`
@@ -87,15 +87,7 @@ cd libre-blog
 
 Please see [🛠️here](./sql/README.md)
 
-#### 2.Generate database model code
-Edit `config.json` and `models/model.json`, then change the MySQL database connection configuration (such as *host*, *port*, *user*, *passwd*, and etc) to what you need.
-
-```shell
-cd models
-dg_ctl create model .
-```
-
-#### 3.Build Executable File
+#### 2.Build Executable File
 
 ```shell
 mkdir build
