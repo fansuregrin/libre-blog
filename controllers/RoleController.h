@@ -12,7 +12,7 @@ using namespace drogon;
 class RoleController : public HttpController<RoleController> {
 public:
     METHOD_LIST_BEGIN
-    ADD_METHOD_TO(RoleController::roleList, "/roles", HttpMethod::Get, "LoginFilter");
+    ADD_METHOD_TO(RoleController::roleList, "/admin/roles", HttpMethod::Get, "LoginFilter");
     METHOD_LIST_END
 
     void roleList(

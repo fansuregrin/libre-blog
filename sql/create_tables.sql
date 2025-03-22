@@ -1,10 +1,11 @@
 CREATE TABLE `menu` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `label` varchar(100) DEFAULT NULL,
-  `key` varchar(100) DEFAULT NULL,
+  `name` varchar(100) DEFAULT NULL,
   `parent` int(11) DEFAULT NULL,
+  `ancestor` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_parent_key` (`parent`,`key`)
+  UNIQUE KEY `idx_parent_key` (`parent`,`label`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `role` (

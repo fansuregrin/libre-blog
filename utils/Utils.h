@@ -58,10 +58,49 @@ std::string join(
 }
 
 template <typename T>
+std::vector<T> split(const std::string &s, const std::string &sep) {
+    std::vector<T> r;
+    size_t start = 0;
+    size_t end = s.find(sep);
+    while (end != std::string::npos) {
+        // assume string can be converted to type T
+        r.emplace_back(s.substr(start, end - start));
+        start = end + sep.length();
+        end = s.find(sep, start);
+    }
+    r.emplace_back(s.substr(start, end - start));
+    return r;
+}
+
+template <>
+inline std::vector<int> split(const std::string &s, const std::string &sep) {
+    std::vector<int> r;
+    size_t start = 0;
+    size_t end = s.find(sep);
+    while (end != std::string::npos) {
+        // assume string can be converted to type T
+        r.emplace_back(std::stoi(s.substr(start, end - start)));
+        start = end + sep.length();
+        end = s.find(sep, start);
+    }
+    r.emplace_back(std::stoi(s.substr(start, end - start)));
+    return r;
+}
+
+template <typename T>
 Json::Value toJson(const std::vector<T> &v) {
     Json::Value r;
     for (const auto &e : v) {
         r.append(e.toJson());
+    }
+    return r;
+}
+
+template <>
+inline Json::Value toJson(const std::vector<int> &v) {
+    Json::Value r;
+    for (const auto &e : v) {
+        r.append(e);
     }
     return r;
 }

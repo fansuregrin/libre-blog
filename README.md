@@ -15,13 +15,16 @@
     - Delete `/admin/article/`
 - category
     - Get `/categories`
-    - Get `/category/{id}`
+    - Get `/category/id/{id}`
+    - Get `/category/slug/{slug}`
     - Post `/admin/category`
     - Put `/admin/category`
     - Delete `/admin/category`
 - tag
+    - Get `/tags/all`
     - Get `/tags`
-    - Get `/tag/{id}`
+    - Get `/tag/id/{id}`
+    - Get `/tag/slug/{slug}`
     - Post `/admin/tag`
     - Put `/admin/tag`
     - Delete `/admin/tag`
@@ -36,12 +39,10 @@
     - Post `/admin/user`
     - Put `/admin/user`
     - Delete `/admin/user`
-    - Get `/admin/user/role`
 - role
-    - Get `/roles`
+    - Get `/admin/roles`
 - menu
     - Get `/admin/menu`
-    - Get `/menu`
 
 **For more detailed API documentation, please see [👉here](./docs/libre-blog_api.md).**
 
