@@ -54,7 +54,7 @@ On Debian:
 apt install \
     g++ gdb libgtest-dev git cmake doxygen \
     libjsoncpp-dev uuid-dev zlib1g-dev \
-    libssl-dev openssl libmariadb-dev libhiredis-dev libc-ares-dev libbrotli-dev libyaml-cpp-dev \
+    libssl-dev openssl libmariadb-dev libhiredis-dev libc-ares-dev libbrotli-dev \
     -y
 ```
 
@@ -63,7 +63,7 @@ On Arch:
 pacman install \
     g++ gdb gtest git cmake doxygen \
     jsoncpp util-linux-libs zlib \
-    openssl mariadb-libs hiredis c-ares brotli libyaml
+    openssl mariadb-libs hiredis c-ares brotli
 ```
 
 Next, install the Drogon framework. 
