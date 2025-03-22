@@ -1,62 +1,73 @@
 # libre-blog
 
-**Libre-blog** is a blog system. This repository uses the [Drogon](https://github.com/drogonframework/drogon) framework to implement the **backend API** of libre-blog.
+**Libre-blog** is a blogging platform powered by the [Drogon](https://github.com/drogonframework/drogon) framework for its backend API.
 
-## API List
-- article
-    - Get `/articles`
-    - Get `/admin/articles`
-    - Get `/articles/category/{slug}`
-    - Get `/articles/tag/{slug}`
-    - Get `/articles/user/{id}`
-    - Get `/article/{id}`
-    - Post `/admin/article`
-    - Put `/admin/article`
-    - Delete `/admin/article/`
-- category
-    - Get `/categories`
-    - Get `/category/id/{id}`
-    - Get `/category/slug/{slug}`
-    - Post `/admin/category`
-    - Put `/admin/category`
-    - Delete `/admin/category`
-- tag
-    - Get `/tags/all`
-    - Get `/tags`
-    - Get `/tag/id/{id}`
-    - Get `/tag/slug/{slug}`
-    - Post `/admin/tag`
-    - Put `/admin/tag`
-    - Delete `/admin/tag`
-- user
-    - Post `/login`
-    - Post `/register`
-    - Get `/admin/user/center`
-    - Patch `/admin/user/general-info`
-    - Patch `/admin/user/password`
-    - Get `/admin/users`
-    - Get `/user/{id}`
-    - Post `/admin/user`
-    - Put `/admin/user`
-    - Delete `/admin/user`
-- role
-    - Get `/admin/roles`
-- menu
-    - Get `/admin/menu`
-
-**For more detailed API documentation, please see [👉here](./docs/libre-blog_api.md).**
+## API Endpoints
+- **Article**
+    - GET `/articles`
+    - GET `/admin/articles`
+    - GET `/articles/category/{slug}`
+    - GET `/articles/tag/{slug}`
+    - GET `/articles/user/{id}`
+    - GET `/article/{id}`
+    - POST `/admin/article`
+    - PUT `/admin/article`
+    - DELETE `/admin/article/`
+- **Category**
+    - GET `/categories`
+    - GET `/category/id/{id}`
+    - GET `/category/slug/{slug}`
+    - POST `/admin/category`
+    - PUT `/admin/category`
+    - DELETE `/admin/category`
+- **Tag**
+    - GET `/tags/all`
+    - GET `/tags`
+    - GET `/tag/id/{id}`
+    - GET `/tag/slug/{slug}`
+    - POST `/admin/tag`
+    - PUT `/admin/tag`
+    - DELETE `/admin/tag`
+- **User**
+    - POST `/login`
+    - POST `/register`
+    - GET `/admin/user/center`
+    - PATCH `/admin/user/general-info`
+    - PATCH `/admin/user/password`
+    - GET `/admin/users`
+    - GET `/user/{id}`
+    - POST `/admin/user`
+    - PUT `/admin/user`
+    - DELETE `/admin/user`
+- **Role**
+    - GET `/admin/roles`
+- **Menu**
+    - GET `/admin/menu`
 
 ## Setup, Build, and Run
 ### Setup Environment
-This project is developed on *Debian GNU/Linux 12 (bookworm)*. You need to install these packages to meet the development environment.
+This project is developed on *Debian GNU/Linux 12 (bookworm)* or *Arch Linux*. 
+Install the following packages to set up the development environment:
+
+On Debian:
 ```shell
-apt install g++ gdb libgtest-dev git cmake doxygen \
+apt install \
+    g++ gdb libgtest-dev git cmake doxygen \
     libjsoncpp-dev uuid-dev zlib1g-dev \
     libssl-dev openssl libmariadb-dev libhiredis-dev libc-ares-dev libbrotli-dev libyaml-cpp-dev \
     -y
 ```
 
-Then, you need to install the Drogon framework. For more detailed information about the Drogon framework, please see the [Drogon wiki page](https://github.com/drogonframework/drogon/wiki/).
+On Arch:
+```shell
+pacman install \
+    g++ gdb gtest git cmake doxygen \
+    jsoncpp util-linux-libs zlib \
+    openssl mariadb-libs hiredis c-ares brotli libyaml
+```
+
+Next, install the Drogon framework. 
+For detailed information, refer to the [Drogon wiki page](https://github.com/drogonframework/drogon/wiki/).
 ```shell
 git clone https://github.com/drogonframework/drogon
 cd drogon
@@ -67,7 +78,7 @@ cmake ..
 make && sudo make install
 ```
 
-This project uses [`jwt-cpp`](https://github.com/Thalhammer/jwt-cpp) for token issuing and verification. So, you need to install this library.
+This project also uses [`jwt-cpp`](https://github.com/Thalhammer/jwt-cpp) for token issuing and verification. Install this library as follows:
 ```shell
 git clone https://github.com/Thalhammer/jwt-cpp.git
 cd jwt-cpp
@@ -78,18 +89,16 @@ sudo make install
 ```
 
 ### Build
-#### 0.Clone this repository
+#### 0. Clone this repository
 ```bash
 git clone https://github.com/fansuregrin/libre-blog.git
 cd libre-blog
 ```
 
-#### 1.Create database and tables
+#### 1. Create database and tables
+Refer to [🛠️here](./sql/README.md) for instructions.
 
-Please see [🛠️here](./sql/README.md)
-
-#### 2.Build Executable File
-
+#### 2. Build the executable file
 ```shell
 mkdir build
 cd build
@@ -97,13 +106,14 @@ cmake .. && make
 ```
 
 ### Run
-Just run the `libre-blog` executable file in the `build` folder.
+Execute the `libre-blog` file located in the `build` folder:
 ```shell
 cd build
 ./libre-blog
 ```
 
 ## Acknowledgements
-- Drogon: Provides the possibility to build various types of web application server programs.
-- VSCode: Provide an environment for code writing and debugging.
-- ApiPost: Provide API design and debugging functions.
+- **Drogon**: Enables the creation of various types of web application server programs.
+- **VSCode**: Provides an environment for code writing and debugging.
+- **ApiPost**: Supports API design and debugging.
+- **DataGrip**: Provides a powerful database management tool that simplifies database development and administration.
