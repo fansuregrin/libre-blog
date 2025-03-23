@@ -22,16 +22,18 @@ bool checkPassword(const std::string &password) {
     return std::regex_match(password, res, passwordPattern);
 }
 
-static std::string _encode(const std::string &s, const std::string &salt) {
+static std::string hashWithSalt(const std::string &s, const std::string &salt) {
     using namespace drogon::utils;
-    return getSha256(getSha1(s + salt)) + salt;
+    std::string h1 = getSha1(s + salt);
+    std::string h2 = getSha256(s + h1 + salt);
+    return h2 + salt;
 }
 
 std::string encodePassword(const std::string &rawPassword) {
     using namespace drogon::utils;
     auto salt = getMd5(genRandomString(12));
     // string lenth: 64 + 32 = 96
-    return _encode(rawPassword, salt);
+    return hashWithSalt(rawPassword, salt);
 }
 
 bool verfiyPassword(
@@ -39,5 +41,5 @@ bool verfiyPassword(
     const std::string &encodedPassword
 ) {
     auto salt = encodedPassword.substr(64);
-    return _encode(rawPassword, salt) == encodedPassword;
+    return hashWithSalt(rawPassword, salt) == encodedPassword;
 }
